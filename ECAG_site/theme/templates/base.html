@@ -109,37 +109,72 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-200 mt-10">
-        <div class="container mx-auto px-6 py-8 grid md:grid-cols-3 gap-8">
-            <!-- About -->
-            <div>
-                <h2 class="text-lg font-bold mb-3">Escale Cuisine & Grill</h2>
-                <p>Authentic cuisine with a tropical fire in a warm, welcoming atmosphere.</p>
-            </div>
-            <!-- Quick Links -->
-            <div>
-                <h2 class="text-lg font-bold mb-3">Quick Links</h2>
-                <ul>
-                    <li><a href="{% url 'core:about' %}" class="hover:text-white">About Us</a></li>
-                    <li><a href="{% url 'core:home' %}" class="hover:text-white">Menu</a></li>
-                    <li><a href="{% url 'core:home' %}" class="hover:text-white">Reservations</a></li>
-                    <li><a href="#" class="hover:text-white">Reviews</a></li>
-                    <li><a href="{% url 'core:contact' %}" class="hover:text-white">Contact</a></li>
-                </ul>
-            </div>
-            <!-- Contact -->
-            <div>
-                <h2 class="text-lg font-bold mb-3">Contact Us</h2>
-                <p>Coastal Rd, Flic en Flac</p>
-                <p>(230) 58307677</p>
-                <p>info@escale.com</p>
-                <p>Mon-Sun: 11:00 AM - 10:00 PM</p>
-            </div>
+<footer 
+  class="w-full h-[365px] px-20"
+  style="background: linear-gradient(176.08deg, #111827 -38%, #762f15 50%, #7f1d1d 138%);"
+>
+  <div class="flex justify-between items-start max-w-[1280px] mx-auto py-12">
+    
+    <!-- Brand + Description + Socials -->
+    <div class="flex flex-col w-[40%]">
+      <h2 class="text-2xl font-bold text-amber-400 mb-4">Escale Cuisine and Grill</h2>
+      <p class="text-gray-300 mb-6">
+        Experience authentic cuisine with a tropical fire in a warm, welcoming atmosphere.
+      </p>
+      <div class="flex space-x-4">
+        <!-- Social icons -->
+        <div class="flex space-x-4">
+            <a href="#" aria-label="Facebook">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300 hover:text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M22 12.07C22 6.54 17.52 2 12 2S2 6.54 2 12.07c0 5 3.66 9.13 8.44 9.93v-7.03H8.1v-2.9h2.34V9.41c0-2.3 1.37-3.57 3.46-3.57.99 0 2.03.18 2.03.18v2.24h-1.15c-1.14 0-1.5.71-1.5 1.44v1.73h2.55l-.41 2.9h-2.14v7.03C18.34 21.2 22 17.07 22 12.07z"/>
+                </svg>
+            </a>
+
+            <a href="#" aria-label="Instagram">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300 hover:text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M7.75 2h8.5C19.1 2 22 4.9 22 8.25v8.5c0 3.35-2.9 6.25-6.25 6.25h-8.5C4.9 23 2 20.1 2 16.75v-8.5C2 4.9 4.9 2 7.75 2zm0 2C5.68 4 4 5.68 4 7.75v8.5C4 18.32 5.68 20 7.75 20h8.5c2.07 0 3.75-1.68 3.75-3.75v-8.5C20 5.68 18.32 4 16.25 4h-8.5zM12 7a5 5 0 110 10 5 5 0 010-10zm0 2.1a2.9 2.9 0 100 5.8 2.9 2.9 0 000-5.8zm4.75-.6a1.15 1.15 0 110 2.3 1.15 1.15 0 010-2.3z"/>
+                </svg>
+            </a>
+
+            <a href="#" aria-label="Twitter">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300 hover:text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M22.46 6c-.77.35-1.6.58-2.46.69a4.3 4.3 0 001.88-2.38 8.59 8.59 0 01-2.72 1.04A4.28 4.28 0 0016 4a4.28 4.28 0 00-4.28 4.28c0 .34.04.66.11.98A12.13 12.13 0 013 5.16a4.28 4.28 0 001.32 5.71 4.2 4.2 0 01-1.94-.54v.06c0 2.1 1.49 3.85 3.47 4.25a4.3 4.3 0 01-1.93.07 4.28 4.28 0 004 2.97A8.6 8.6 0 012 19.54a12.1 12.1 0 006.56 1.92c7.88 0 12.2-6.53 12.2-12.2v-.56A8.8 8.8 0 0022.46 6z"/>
+                </svg>
+            </a>
+
+            <a href="#" aria-label="YouTube">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300 hover:text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M21.8 8.001a2.75 2.75 0 00-1.94-1.94C18 5.75 12 5.75 12 5.75s-6 0-7.86.31A2.75 2.75 0 002.2 8.001 29.7 29.7 0 002 12c0 1.33.05 2.66.2 3.99a2.75 2.75 0 001.94 1.94C6 18.25 12 18.25 12 18.25s6 0 7.86-.31a2.75 2.75 0 001.94-1.94A29.7 29.7 0 0022 12c0-1.33-.05-2.66-.2-3.999zM10 14.5v-5l5 2.5-5 2.5z"/>
+                </svg>
+            </a>
         </div>
-        <div class="bg-gray-800 text-center py-4 text-sm">
-            © 2025 Escale Cuisine and Grill. All rights reserved.
-        </div>
-    </footer>
+
+        </a>
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="flex flex-col w-[25%]">
+      <h3 class="text-lg font-semibold text-amber-300 mb-4">Quick Links</h3>
+      <ul class="space-y-2 text-gray-300">
+        <li><a href="#" class="hover:text-amber-400">About Us</a></li>
+        <li><a href="#" class="hover:text-amber-400">Menu</a></li>
+        <li><a href="#" class="hover:text-amber-400">Reservations</a></li>
+        <li><a href="#" class="hover:text-amber-400">Reviews</a></li>
+      </ul>
+    </div>
+
+    <!-- Contact -->
+    <div class="flex flex-col w-[25%]">
+      <h3 class="text-lg font-semibold text-amber-300 mb-4">Contact</h3>
+      <ul class="space-y-2 text-gray-300">
+        <li>📍 Quatre Bornes, Mauritius</li>
+        <li>📞 +230 5 123 4567</li>
+        <li>✉️ info@escalecuisine.com</li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
 </body>
 </html>

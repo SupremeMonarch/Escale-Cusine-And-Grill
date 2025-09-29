@@ -2,3 +2,4 @@
 deactivate
 python manage.py tailwind start
 python manage.py runserver
+cd ECAG_site
