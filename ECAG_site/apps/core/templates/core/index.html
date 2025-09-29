@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Home | Escale{% endblock %}
+{% block content %}
+<!-- Hero -->
+<section class="relative bg-cover bg-center text-center text-white py-200" style="background-image: url('{% static "core/img/hero.png" %}');" >
+    <h1 class="text-4xl md:text-2xl font-roboto mb-6">Where tradition meets innovation</h1>
+
+    <div class="space-x-4">
+        <a href="{% url 'core:home' %}" class="bg-red-600 text-white px-6 py-3 rounded-lg">Make a Reservation</a>
+        <a href="{% url 'core:home' %}" class="bg-gray-800 text-white px-6 py-3 rounded-lg">View Menu</a>
+    </div>
+</section>
+
+<!-- Featured Dishes  -->
+<section class="container mx-auto px-6 py-16">
+    <h2 class="text-3xl font-bold mb-8 text-center">Featured Dishes</h2>
+    <div class="grid md:grid-cols-3 gap-8">
+        <div class="border rounded-lg p-4 shadow">
+            <img src="{% static 'core/img/dish1.jpg' %}" alt="Crispy Calamari" class="rounded-lg mb-4">
+            <h3 class="text-xl font-semibold">Crispy Calamari</h3>
+            <p class="text-gray-600">Rs 450</p>
+            <a href="#" class="bg-red-600 text-white px-4 py-2 mt-3 inline-block rounded">Order Now</a>
+        </div>
+        <!-- Repeat for other dishes -->
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,145 @@
+<!-- theme/templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Escale Cuisine & Grill{% endblock %}</title>
+    {% load static %}
+    <link href="{% static 'css/dist/styles.css' %}" rel="stylesheet">
+</head>
+<body class="font-sans text-gray-800">
+    <!-- Navbar -->
+    <nav class="w-full fixed z-50 bg-gradient-to-r from-[#DC5E16] to-[#EF4444] shadow-md">
+    <div class="container mx-auto px-0 py-4 flex justify-between items-center">
+
+        <!-- Logo (Left) -->
+        <a href="{% url 'core:home' %}" class="text-2xl font-bold text-white">
+        Escale
+        </a>
+
+        <!-- Links (Center) -->
+        <ul class="hidden md:flex space-x-6 font-medium text-white mx-auto">
+        <li>
+            <a href="{% url 'core:home' %}" 
+            class="px-3 py-1 border-b {% if request.resolver_match.url_name == 'home' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
+            Home
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'core:about' %}" 
+            class="px-3 py-1 border-b {% if request.resolver_match.url_name == 'about' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
+            About
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'core:home' %}" 
+            class="px-3 py-1 border-b {% if request.resolver_match.url_name == 'menu' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
+            Menu
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'core:home' %}" 
+            class="px-3 py-1 border-b {% if request.resolver_match.url_name == 'reservations' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
+            Reservations
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'core:contact' %}" 
+            class="px-3 py-1 border-b {% if request.resolver_match.url_name == 'contact' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
+            Contact
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'core:home' %}" 
+            class="px-3 py-1 border-b {% if request.resolver_match.url_name == 'reviews' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
+            Reviews
+            </a>
+        </li>
+        </ul>
+
+        <!-- Right Side (toggle + auth button) -->
+        <div class="flex items-center space-x-3">
+        
+        <!-- Language Toggle -->
+        <div class="flex items-center rounded-full border border-black overflow-hidden text-sm font-medium">
+            <a href="?lang=fr" 
+            class="px-4 py-1 transition 
+                    {% if request.LANGUAGE_CODE == 'fr' %}
+                        bg-gradient-to-r from-[#FFD692] to-[#F31414] text-white
+                    {% else %}
+                        bg-gradient-to-r from-[#FFD692] to-[#F31414] text-white
+                    {% endif %}">
+            FR
+            </a>
+            <a href="?lang=en" 
+            class="px-3 py-1 transition 
+                    {% if request.LANGUAGE_CODE == 'en' %}
+                        bg-gradient-to-r from-[#FFD692] to-[#F31414] text-white
+                    {% else %}
+                        bg-white text-black
+                    {% endif %}">
+            EN
+            </a>
+        </div>
+
+        <!-- Auth Button -->
+        {% if user.is_authenticated %}
+            <a href="{% url 'core:home' %}" 
+            class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500 
+                    bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
+            My Account
+            </a>
+        {% else %}
+            <a href="{% url 'core:home' %}" 
+            class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500 
+                    bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
+            Sign in
+            </a>
+        {% endif %}
+        </div>
+    </div>
+    </nav>
+
+
+
+
+
+    <!-- Page Content -->
+    <main class="pt-20">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-200 mt-10">
+        <div class="container mx-auto px-6 py-8 grid md:grid-cols-3 gap-8">
+            <!-- About -->
+            <div>
+                <h2 class="text-lg font-bold mb-3">Escale Cuisine & Grill</h2>
+                <p>Authentic cuisine with a tropical fire in a warm, welcoming atmosphere.</p>
+            </div>
+            <!-- Quick Links -->
+            <div>
+                <h2 class="text-lg font-bold mb-3">Quick Links</h2>
+                <ul>
+                    <li><a href="{% url 'core:about' %}" class="hover:text-white">About Us</a></li>
+                    <li><a href="{% url 'core:home' %}" class="hover:text-white">Menu</a></li>
+                    <li><a href="{% url 'core:home' %}" class="hover:text-white">Reservations</a></li>
+                    <li><a href="#" class="hover:text-white">Reviews</a></li>
+                    <li><a href="{% url 'core:contact' %}" class="hover:text-white">Contact</a></li>
+                </ul>
+            </div>
+            <!-- Contact -->
+            <div>
+                <h2 class="text-lg font-bold mb-3">Contact Us</h2>
+                <p>Coastal Rd, Flic en Flac</p>
+                <p>(230) 58307677</p>
+                <p>info@escale.com</p>
+                <p>Mon-Sun: 11:00 AM - 10:00 PM</p>
+            </div>
+        </div>
+        <div class="bg-gray-800 text-center py-4 text-sm">
+            © 2025 Escale Cuisine and Grill. All rights reserved.
+        </div>
+    </footer>
+</body>
+</html>
