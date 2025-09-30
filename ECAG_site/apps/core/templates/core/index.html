@@ -36,16 +36,270 @@
 
 
 <!-- Featured Dishes  -->
-<section class="container mx-auto bg-white px-6 py-16" >
-    <h2 class="text-3xl font-bold mb-8 text-center">Featured Dishes</h2>
-    <div class="grid md:grid-cols-3 gap-8">
-        <div class="border rounded-lg p-4 shadow">
-            <img src="{% static 'core/img/dish1.jpg' %}" alt="Crispy Calamari" class="rounded-lg mb-4">
-            <h3 class="text-xl font-semibold">Crispy Calamari</h3>
-            <p class="text-gray-600">Rs 450</p>
-            <a href="#" class="bg-red-600 text-white px-4 py-2 mt-3 inline-block rounded">Order Now</a>
-        </div>
-        <!-- Repeat for other dishes -->
+<section class="w-full bg-white py-16">
+  <div class="max-w-7xl mx-auto px-6">
+    <!-- Heading -->
+    <div class="text-center mb-12">
+      <h2 class="text-4xl font-bold text-gray-900">Featured Dishes</h2>
+      <p class="text-lg text-gray-600 mt-3">
+        Discover our chef's signature creations, crafted with the finest ingredients and traditional techniques.
+      </p>
     </div>
+
+    <!-- Grid of dishes -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Example dish card -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
+        <img src="{% static 'menu/img/Crispy/Calamari.png' %}" alt="Crispy Calamari" class="w-full h-64 object-cover">
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-xl font-bold text-gray-900">Crispy Calamari</h3>
+            <span class="text-amber-600 font-bold text-lg">Rs 450</span>
+          </div>
+          <p class="text-gray-600 mb-4">Golden fried calamari served with aioli sauce and lemon.</p>
+          <a href="#" 
+             class="block text-center px-4 py-2 rounded-lg font-medium text-white 
+                    bg-gradient-to-r from-[#E97820] to-[#EF4444] hover:opacity-90 transition">
+            Order Now
+          </a>
+        </div>
+      </div>
+
+      <!-- Repeat for now -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
+        <img src="{% static 'enu/img/Crispy/arouille.png' %}" alt="Gato Arouille" class="w-full h-64 object-cover">
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-xl font-bold text-gray-900">Gato Arouille</h3>
+            <span class="text-amber-600 font-bold text-lg">Rs 225</span>
+          </div>
+          <p class="text-gray-600 mb-4">Crispy taro fritters — a Mauritian street food favorite.</p>
+          <a href="#" class="block text-center px-4 py-2 rounded-lg font-medium text-white bg-gradient-to-r from-[#E97820] to-[#EF4444] hover:opacity-90 transition">Order Now</a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
+        <img src="{% static 'core/img/dish3.jpg' %}" alt="Marlin Salad" class="w-full h-64 object-cover">
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-xl font-bold text-gray-900">Marlin Salad</h3>
+            <span class="text-amber-600 font-bold text-lg">Rs 450</span>
+          </div>
+          <p class="text-gray-600 mb-4">Fresh smoked marlin with greens and citrus dressing.</p>
+          <a href="#" class="block text-center px-4 py-2 rounded-lg font-medium text-white bg-gradient-to-r from-[#E97820] to-[#EF4444] hover:opacity-90 transition">Order Now</a>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
+
+<!--Review section-->
+<section class="w-full bg-white py-16">
+  <div class="max-w-7xl mx-auto px-6">
+    <!-- Heading -->
+    <div class="text-center mb-10">
+      <h2 class="text-4xl font-bold text-gray-900">Our Reviews</h2>
+      <p class="text-lg text-gray-600 mt-2">
+        Don’t hear from us, look at our client reviews and see for yourself
+      </p>
+    </div>
+
+    <!-- Grid of reviews -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Review Card -->
+      <div class="flex flex-col gap-4 p-6 rounded-lg border border-gray-300 bg-gradient-to-b from-red-500/0 to-red-500/80 shadow-sm">
+        <!-- Stars -->
+        <div class="flex space-x-1 text-amber-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 1.67l2.58 5.21 5.75.84-4.16 4.05.98 5.73L10 14.8l-5.15 2.7.98-5.73-4.17-4.05 5.76-.84L10 1.67z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 1.67l2.58 5.21 5.75.84-4.16 4.05.98 5.73L10 14.8l-5.15 2.7.98-5.73-4.17-4.05 5.76-.84L10 1.67z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 1.67l2.58 5.21 5.75.84-4.16 4.05.98 5.73L10 14.8l-5.15 2.7.98-5.73-4.17-4.05 5.76-.84L10 1.67z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 1.67l2.58 5.21 5.75.84-4.16 4.05.98 5.73L10 14.8l-5.15 2.7.98-5.73-4.17-4.05 5.76-.84L10 1.67z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current text-gray-300" viewBox="0 0 20 20"><path d="M10 1.67l2.58 5.21 5.75.84-4.16 4.05.98 5.73L10 14.8l-5.15 2.7.98-5.73-4.17-4.05 5.76-.84L10 1.67z"/></svg>
+        </div>
+
+        <!-- Content -->
+        <h3 class="text-xl font-semibold text-gray-900">Amazing Food!</h3>
+        <p class="text-gray-700">The calamari was super crispy and the service was excellent. Definitely coming back!</p>
+
+        <!-- Reviewer -->
+        <div class="flex items-center gap-3 mt-4">
+          <img src="{% static 'core/img/user1.jpg' %}" alt="Reviewer" class="w-10 h-10 rounded-full object-cover">
+          <div>
+            <p class="text-black-500 font-semibold">John Doe</p>
+            <p class="text-sm text-gray-500">Feb 2025</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Repeat Review Card -->
+      <div class="flex flex-col gap-4 p-6 rounded-lg border border-gray-300 bg-gradient-to-b from-red-500/0 to-red-500/80 shadow-sm">
+        <div class="flex space-x-1 text-amber-400">
+          <!-- 5 filled stars -->
+          {% for i in "12345" %}
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 1.67l2.58 5.21 5.75.84-4.16 4.05.98 5.73L10 14.8l-5.15 2.7.98-5.73-4.17-4.05 5.76-.84L10 1.67z"/></svg>
+          {% endfor %}
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900">Lovely Atmosphere</h3>
+        <p class="text-gray-700">The ambience is cozy and the staff are friendly. Highly recommend!</p>
+        <div class="flex items-center gap-3 mt-4">
+          <img src="{% static 'core/img/user2.jpg' %}" alt="Reviewer" class="w-10 h-10 rounded-full object-cover">
+          <div>
+            <p class="text-black-500 font-semibold">Marie Dupont</p>
+            <p class="text-sm text-gray-500">Jan 2025</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-4 p-6 rounded-lg border border-gray-300 bg-gradient-to-b from-red-500/0 to-red-500/80 shadow-sm">
+        <div class="flex space-x-1 text-amber-400">
+          <!-- 4 stars -->
+          {% for i in "1234" %}
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 1.67l2.58 5.21 5.75.84-4.16 4.05.98 5.73L10 14.8l-5.15 2.7.98-5.73-4.17-4.05 5.76-.84L10 1.67z"/></svg>
+          {% endfor %}
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current text-gray-300" viewBox="0 0 20 20"><path d="M10 1.67l2.58 5.21 5.75.84-4.16 4.05.98 5.73L10 14.8l-5.15 2.7.98-5.73-4.17-4.05 5.76-.84L10 1.67z"/></svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900">Great Value</h3>
+        <p class="text-gray-700">Affordable prices for such high quality food. Totally worth it.</p>
+        <div class="flex items-center gap-3 mt-4">
+          <img src="{% static 'core/img/user3.jpg' %}" alt="Reviewer" class="w-10 h-10 rounded-full object-cover">
+          <div>
+            <p class="text-black-500 font-semibold">Akash Kumar</p>
+            <p class="text-sm text-gray-500">Dec 2024</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="mt-12 flex justify-center">
+      <a href="#" class="px-6 py-3 rounded-lg font-medium text-white bg-gradient-to-r from-[#E97820] to-[#EF4444] hover:opacity-90 transition">
+        View All Reviews
+      </a>
+    </div>
+  </div>
+</section>
+
+<!--Contact section-->
+<section class="w-full bg-gray-50 py-16">
+  <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12">
+    
+    <!-- Opening Hours -->
+    <div class="bg-white rounded-lg shadow-md p-8">
+      <!-- Title -->
+      <div class="flex items-center mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-amber-600 mr-3" fill="currentColor" viewBox="0 0 26 24">
+          <path d="M13 22C11.64 22 10.34 21.74 9.1 21.22C7.91333 20.7133 6.85667 19.9967 5.93 19.07C5.00333 18.1433 4.28667 17.0867 3.78 15.9C3.26 14.66 3 13.36 3 12C3 10.64 3.26 9.34 3.78 8.1C4.28667 6.91333 5.00333 5.85667 5.93 4.93C6.85667 4.00333 7.91333 3.28667 9.1 2.78C10.34 2.26 11.64 2 13 2C14.36 2 15.66 2.26 16.9 2.78C18.0867 3.28667 19.1433 4.00333 20.07 4.93C20.9967 5.85667 21.7133 6.91333 22.22 8.1C22.74 9.34 23 10.64 23 12C23 13.36 22.74 14.66 22.22 15.9C21.7133 17.0867 20.9967 18.1433 20.07 19.07C19.1433 19.9967 18.0867 20.7133 16.9 21.22C15.66 21.74 14.36 22 13 22Z" />
+        </svg>
+        <h2 class="text-2xl font-bold text-gray-900">Opening Hours</h2>
+      </div>
+
+      <!-- Hours List -->
+      <div class="space-y-3 text-gray-700">
+        <div class="flex justify-between">
+          <span>Monday – Thursday</span>
+          <span class="font-semibold text-black">11:00 AM – 9:00 PM</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Friday – Saturday</span>
+          <span class="font-semibold text-black">11:00 AM – 10:00 PM</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Sunday</span>
+          <span class="font-semibold text-black">12:00 PM – 9:00 PM</span>
+        </div>
+      </div>
+
+      <!-- Note -->
+      <div class="mt-6 p-4 bg-amber-50 rounded-lg text-sm text-black flex items-start">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 18 16">
+          <path d="M8.99218 14.6667C8.08608 14.6667 7.21996 14.4934 6.39381 14.1467..." />
+        </svg>
+        Kitchen closes 30 minutes before restaurant closing time.
+      </div>
+    </div>
+
+    <!-- Contact Info -->
+    <div class="bg-white rounded-lg shadow-md p-8">
+      <!-- Title -->
+      <div class="flex items-center mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-amber-600 mr-3" fill="currentColor" viewBox="0 0 26 24">
+          <path d="M10.36 10.68C10.8267 11.5067 11.3967 12.2567 12.07 12.93..." />
+        </svg>
+        <h2 class="text-2xl font-bold text-gray-900">Contact Us</h2>
+      </div>
+
+      <!-- Address -->
+      <div class="flex items-center mb-4">
+        <svg class="w-5 h-5 text-gray-500 mr-3" fill="currentColor" viewBox="0 0 18 16">
+          <path d="M8.99216 13.36L12.2834 10.0533C12.8875..." />
+        </svg>
+        <p class="text-gray-700">Coastal Rd, Flic en Flac, Mauritius</p>
+      </div>
+
+      <!-- Phone -->
+      <div class="flex items-center mb-4">
+        <svg class="w-5 h-5 text-gray-500 mr-3" fill="currentColor" viewBox="0 0 18 16">
+          <path d="M7.23326 7.12C7.54418 7.67111..." />
+        </svg>
+        <p class="text-gray-700">(230) 58307677</p>
+      </div>
+
+      <!-- Email -->
+      <div class="flex items-center mb-6">
+        <svg class="w-5 h-5 text-gray-500 mr-3" fill="currentColor" viewBox="0 0 18 16">
+          <path d="M2.99596 2H14.9885..." />
+        </svg>
+        <p class="text-gray-700">info@escale.com</p>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex gap-4">
+        <a href="#contact" class="px-6 py-3 rounded-lg text-white font-medium shadow-md bg-gradient-to-r from-[#E97820] to-[#EF4444] hover:opacity-90 transition">
+          Contact Us
+        </a>
+        <a href="#reservation" class="px-6 py-3 rounded-lg font-medium border-2 border-[#E97820] text-[#DC5E16] hover:bg-[#E97820]/10 transition">
+          Book a Table
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!--CTA section-->
+<section class="bg-amber-600 py-16">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    
+    <!-- Title -->
+    <h2 class="text-4xl font-bold text-white mb-4">
+      Ready for an Unforgettable Experience?
+    </h2>
+    
+    <!-- Subtitle -->
+    <p class="text-xl text-amber-100 mb-8 leading-relaxed">
+      Join us for an evening of exceptional food, warm hospitality,<br class="hidden md:block">
+      and authentic Italian atmosphere.
+    </p>
+    
+    <!-- Buttons -->
+    <div class="flex flex-col sm:flex-row justify-center gap-4">
+      
+      <!-- Reserve Your Table -->
+      <a href="#reservation"
+         class="w-[205.77px] h-14 flex items-center justify-center rounded-lg border-2 border-white bg-white text-[#DC5E16] text-lg font-medium shadow-sm hover:bg-gray-50 transition">
+        Reserve Your Table
+      </a>
+
+      <!-- Order for Delivery -->
+      <a href="#delivery"
+         class="w-[188.97px] h-14 flex items-center justify-center rounded-lg text-lg font-medium text-white shadow-md
+                bg-gradient-to-r from-[#16a34a] to-[#15803d] hover:opacity-90 transition">
+        Order for Delivery
+      </a>
+
+    </div>
+  </div>
+</section>
+
 {% endblock %}
