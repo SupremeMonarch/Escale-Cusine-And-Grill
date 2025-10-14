@@ -22,6 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("apps.core.urls")),  #routing the different pages
     path("reservations/", include("apps.reservations.urls")),
+    path('menu/', include('apps.menu.urls')),
 ]
 
 if settings.DEBUG:
