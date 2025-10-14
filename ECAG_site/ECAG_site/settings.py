@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'tailwind',
     'theme',
-    'apps.core'
+    'apps.core',
+    'apps.reservations'
 ]
 
 if DEBUG:

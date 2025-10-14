@@ -21,6 +21,7 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("apps.core.urls")),  #routing the different pages
+    path("reservations/", include("apps.reservations.urls")),
 ]
 
 if settings.DEBUG:

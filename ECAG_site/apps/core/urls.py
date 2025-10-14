@@ -6,5 +6,5 @@ app_name = "core"
 urlpatterns = [
     path("", views.index, name="home"),      # homepage
     path("about/", views.about, name="about"),
-    path("contact/", views.contact, name="contact"),
+    path("contact/", views.contact, name="contact")
 ]
