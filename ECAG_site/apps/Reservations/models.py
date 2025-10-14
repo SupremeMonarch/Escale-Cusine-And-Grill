@@ -5,7 +5,7 @@ class Reservation(models.Model):
 
     reservation_id = models.AutoField(max_length=10,unique=True, primary_key=True)
     user_id =  models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='reservations')
-    table_id = models.CharField(max_length=10)
+    table_id = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='reservations')
     date = models.DateField()
     time = models.TimeField()
     guest_count = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(20)])
