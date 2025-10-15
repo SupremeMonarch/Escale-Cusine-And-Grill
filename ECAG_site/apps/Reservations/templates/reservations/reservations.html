@@ -4,24 +4,157 @@
 
 {% block content %}
 
-<div class="bg-blue-500 p-4 text-white text-center">
-    🎯 Tailwind Test - If this is blue, Tailwind is working!
-</div>
+<!-- Page background wrapper -->
+<div class="w-full" style="background-color: #FFE4D3;">
+
 <!-- Responsive hero/banner -->
-<section aria-label="Reservations hero" class="w-full bg-gradient-to-r from-[#f65e00] to-[#ff3737]">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-		<div class="flex flex-col items-center md:items-start md:flex-row md:justify-between gap-6">
-			<!-- Heading and description -->
-			<div class="text-center md:text-left md:max-w-2xl">
-				<h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">Reservation Online</h1>
-				<p class="mt-4 text-sm sm:text-base md:text-lg text-white max-w-xl mx-auto md:mx-0">
+<section aria-label="Reservations hero" class="w-full -mt-[calc(5rem+1px)] bg-gradient-to-r from-[#f65e00] to-[#ff3737]" style="background: linear-gradient(90deg,#f65e00 0%,#ff3737 100%);">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(5rem+1px)] py-8 md:py-20">
+		<div class="flex flex-col items-center justify-center text-center gap-1">
+			<h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">Reservation Online</h1>
+			<p class="mt-0.5 text-sm sm:text-base md:text-lg text-white max-w-xxl mx-auto md:mx-0">
 					Reserve your table for an unforgettable dining experience at Escale Maurice &amp; Grill
 				</p>
-			</div>
 		</div>
 	</div>
 </section>
 
+<!-- Progress -->
+<div class="flex justify-center items-center w-full h-auto md:h-10 mt-6 mx-auto">
+  <div class="flex flex-col md:flex-row justify-center items-center w-full md:w-auto h-auto md:h-10 gap-2 md:gap-0">
+    <!-- Step 1 -->
+    <div class="flex flex-row justify-center items-center w-auto h-10">
+      <div data-step="1" class="flex justify-center items-center w-10 h-10 rounded-full bg-amber-600">
+        <p class="text-base font-semibold text-white">1</p>
+      </div>
+      <!-- Connector line after Step 1 -->
+      <div class="hidden md:flex items-center px-2">
+        <div class="w-8 h-1 bg-gray-400"></div>
+      </div>
+    </div>
+    
+    <!-- Step 2 -->
+    <div class="flex flex-row justify-center items-center w-auto h-10">
+      <div data-step="2" class="flex justify-center items-center w-10 h-10 rounded-full bg-gray-400">
+        <p class="text-base font-semibold text-white">2</p>
+      </div>
+      <!-- Connector line after Step 2 -->
+      <div class="hidden md:flex items-center px-2">
+        <div class="w-8 h-1 bg-gray-400"></div>
+      </div>
+    </div>
+    
+    <!-- Step 3 -->
+    <div class="flex flex-row justify-center items-center w-auto h-10">
+      <div data-step="3" class="flex justify-center items-center w-10 h-10 rounded-full bg-gray-400">
+        <p class="text-base font-semibold text-white">3</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reservation layout -->
+<section aria-label="Reservation flow" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style="background-color: #FFE4D3;">
+	<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+		<!-- Left: form -->
+		<div class="space-y-6 mt-12 mb-12">
+			<div class="bg-white rounded-lg shadow p-6">
+				<h2 class="text-lg font-semibold text-gray-800">Step 1 — Choose date &amp; time</h2>
+				<p class="text-sm text-gray-600 mt-2">Select a date, time and the number of guests for your reservation.</p>
+				<div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+					<input type="date" class="w-full rounded-lg border px-3 py-2" aria-label="Reservation date">
+					<input type="time" class="w-full rounded-lg border px-3 py-2" aria-label="Reservation time">
+					<select class="w-full rounded-lg border px-3 py-2 mt-2 sm:mt-0" aria-label="Party size">
+						<option>1 Person</option>
+						<option selected>2 Persons</option>
+						<option>3 Persons</option>
+						<option>4 Persons</option>
+					</select>
+					<button class="w-full rounded-lg bg-amber-600 text-white font-semibold px-4 py-2">Show Available Tables</button>
+				<div class="mt-3 text-gray-700">
+					<p class="font-medium">Sept 26, 2025 — 11:30 AM</p>
+					<p>2 Person · Table 2 (2-seater)</p>
+				</div>
+					<div class="mt-4">
+						<button class="w-full rounded-lg bg-amber-600 text-white font-semibold px-4 py-2">Confirm Reservation</button>
+					</div>
+				</div>
+			</div>
+
+			
+		</div>
+
+		<!-- Right: Table -->
+		<div class="space-y-6 mt-12 mb-12">
+			<div class="bg-white rounded-lg shadow p-6 flex flex-col items-center gap-4 md:h-full">
+				<div class="w-full md:w-1/2">
+					<img src="{% static 'Menu images/Beverages/nonalcoholic/coke.jpg' %}" alt="Table preview" class="w-full h-56 object-cover rounded-md">
+				</div>
+				<div class="w-full md:w-1/2">
+					<h4 class="text-lg font-semibold text-gray-800">Choose Your Table</h4>
+					<p class="text-sm text-gray-600 mt-2">Pick from available tables and see a quick preview.</p>
+				</div>
+			</div>
+
+			
+		</div>
+	</div>
+</section>
+ 
+</div>
+
+<!-- Load the main JavaScript file -->
+<script src="{% static 'reservation/js/progress.js' %}"></script>
+
+<script>
+console.log("=== DEBUG MODE ===");
+
+// Check if elements exist
+const step1 = document.querySelector('[data-step="1"]');
+const step2 = document.querySelector('[data-step="2"]');
+const step3 = document.querySelector('[data-step="3"]');
+
+console.log("Step 1 found:", !!step1);
+console.log("Step 2 found:", !!step2);
+console.log("Step 3 found:", !!step3);
+
+// Check current classes
+console.log("Step 1 classes:", step1?.className);
+console.log("Step 2 classes:", step2?.className);
+console.log("Step 3 classes:", step3?.className);
+
+// Test the function manually
+function updateProgress(currentStep) {
+    console.log(`=== updateProgress(${currentStep}) called ===`);
+    
+    // Reset all
+    [step1, step2, step3].forEach(step => {
+        if (step) {
+            step.classList.remove('bg-amber-600');
+            step.classList.add('bg-gray-600');
+        }
+    });
+    
+    // Set active
+    const activeStep = [step1, step2, step3][currentStep - 1];
+    if (activeStep) {
+        activeStep.classList.remove('bg-gray-600');
+        activeStep.classList.add('bg-amber-600');
+        console.log(`Set step ${currentStep} to amber`);
+    }
+}
+
+// Test immediately
+console.log("Testing function...");
+updateProgress(1);
+
+// Also test on DOM load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM loaded - testing again");
+    updateProgress(1);
+});
+
+window.updateProgress = updateProgress;
+</script>
 
 {% endblock %}
-

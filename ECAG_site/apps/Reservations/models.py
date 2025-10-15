@@ -12,6 +12,15 @@ class Reservation(models.Model):
     status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('confirmed', 'Confirmed'), ('cancelled', 'Cancelled')])
     created_at = models.DateTimeField(auto_now_add=True)
 
+class Table(models.Model):
+    table_id = models.AutoField(max_length=10, unique=True, primary_key=True)
+    table_number = models.IntegerField(unique=True)
+    seats = models.IntegerField(choices=[(2, '2 seats'), (4, '4 seats')])
+    qr_code = models.CharField(max_length=100, unique=True)
+    x_position = models.IntegerField()
+    y_position = models.IntegerField()
+
+
 def confirm_reservation(self):
     self.status = 'confirmed'
     self.save()
@@ -28,6 +37,34 @@ def modify_reservation(self, date=None, time=None, guest_count=None):
     if guest_count:
         self.guest_count = guest_count
     self.save()
+
+def generate_qr_code(self):
+    import qrcode
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(f'Table {self.table_number}')
+    qr.make(fit=True)
+    img = qr.make_image(fill='black', back_color='white')
+    img_path = f'media/qr_codes/table_{self.table_number}.png'
+    img.save(img_path)
+    self.qr_code = img_path
+    self.save()
+
+def is_available(self, date, time):
+    return not Reservation.objects.filter(table_id=self, date=date, time=time, status='confirmed').exists()
+
+def get_table_status(self):
+    return {
+        'table_number': self.table_number,
+        'seats': self.seats,
+        'qr_code': self.qr_code,
+        'x_position': self.x_position,
+        'y_position': self.y_position
+    }
 
 def __str__(self):
     return f"Reservation {self.reservation_id} for User {self.user_id} on {self.date} at {self.time}"
