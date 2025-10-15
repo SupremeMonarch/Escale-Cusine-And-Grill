@@ -51,60 +51,12 @@
   </div>
 </div>
 
-<!-- Reservation layout -->
-<section aria-label="Reservation flow" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style="background-color: #FFE4D3;">
-	<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-		<!-- Left: form -->
-		<div class="space-y-6 mt-12 mb-12">
-			<div class="bg-white rounded-lg shadow p-6">
-				<h2 class="text-lg font-semibold text-gray-800">Step 1 — Choose date &amp; time</h2>
-				<p class="text-sm text-gray-600 mt-2">Select a date, time and the number of guests for your reservation.</p>
-				<div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-					<input type="date" class="w-full rounded-lg border px-3 py-2" aria-label="Reservation date">
-					<input type="time" class="w-full rounded-lg border px-3 py-2" aria-label="Reservation time">
-					<select class="w-full rounded-lg border px-3 py-2 mt-2 sm:mt-0" aria-label="Party size">
-						<option>1 Person</option>
-						<option selected>2 Persons</option>
-						<option>3 Persons</option>
-						<option>4 Persons</option>
-					</select>
-					<button class="w-full rounded-lg bg-amber-600 text-white font-semibold px-4 py-2">Show Available Tables</button>
-				<div class="mt-3 text-gray-700">
-					<p class="font-medium">Sept 26, 2025 — 11:30 AM</p>
-					<p>2 Person · Table 2 (2-seater)</p>
-				</div>
-					<div class="mt-4">
-						<button class="w-full rounded-lg bg-amber-600 text-white font-semibold px-4 py-2">Confirm Reservation</button>
-					</div>
-				</div>
-			</div>
-
-			
-		</div>
-
-		<!-- Right: Table -->
-		<div class="space-y-6 mt-12 mb-12">
-			<div class="bg-white shadow p-6 flex flex-col items-center gap-4 md:h-full">
-				<div class="w-full md:w-1/2">
-					<h4 class="text-lg text-center font-semibold text-gray-800">Choose Your Table</h4>
-				</div>
-				<div class="w-full md:w-1/2">
-					<img src="{% static 'Menu images/Beverages/nonalcoholic/coke.jpg' %}" alt="Table preview" class="w-full h-56 object-cover rounded-md">
-				</div>
-				
-			</div>
-
-			
-		</div>
-	</div>
-</section>
- 
+<div class="w-full h-screen bg-[#ffe4d3] md:h-[905px]">
+    <p class="text-3xl font-bold text-center pt-10">Select Your Table</p>
 </div>
 
 <!-- Load the main JavaScript file -->
 <script>const CURRENT_STEP = "{{ step_number }}";</script>
 <script src="{% static 'reservation/js/progress.js' %}"></script>
-
-
 
 {% endblock %}

@@ -16,7 +16,7 @@
   <!-- Buttons -->
   <div class="flex justify-center space-x-6">
     <!-- Reservation Button -->
-    <a href="{% url 'core:home' %}" 
+    <a href="{% url 'reservations:reservations' %}" 
        class="px-6 py-3 rounded-lg text-lg font-medium text-white 
               shadow-md transition transform hover:scale-105"
        style="background: linear-gradient(to right, #e97820 -100%, #ef4444 141.42%);">
@@ -257,7 +257,7 @@
         <a href="#contact" class="px-6 py-3 rounded-lg text-white font-medium shadow-md bg-gradient-to-r from-[#E97820] to-[#EF4444] hover:opacity-90 transition">
           Contact Us
         </a>
-        <a href="#reservation" class="px-6 py-3 rounded-lg font-medium border-2 border-[#E97820] text-[#DC5E16] hover:bg-[#E97820]/10 transition">
+        <a href="{% url 'reservations:reservations' %}" class="px-6 py-3 rounded-lg font-medium border-2 border-[#E97820] text-[#DC5E16] hover:bg-[#E97820]/10 transition">
           Book a Table
         </a>
       </div>
@@ -286,7 +286,7 @@
     <div class="flex flex-col sm:flex-row justify-center gap-4">
       
       <!-- Reserve Your Table -->
-      <a href="#reservation"
+      <a href="{% url 'reservations:reservations' %}"
          class="w-[205.77px] h-14 flex items-center justify-center rounded-lg border-2 border-white bg-white text-[#DC5E16] text-lg font-medium shadow-sm hover:bg-gray-50 transition">
         Reserve Your Table
       </a>
