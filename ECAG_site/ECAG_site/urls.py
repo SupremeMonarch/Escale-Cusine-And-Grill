@@ -30,4 +30,5 @@ if settings.DEBUG:
         path("__reload__/", include("django_browser_reload.urls")),
         path("menu/", include("apps.menu.urls")),
         path("reservations/", include("apps.reservations.urls")),
+        path("review/", include("apps.review.urls")),
     ]

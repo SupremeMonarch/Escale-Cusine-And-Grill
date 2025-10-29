@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'tailwind',
     'theme',
     'apps.core',
-    'apps.reservations'
+    'apps.reservations',
+    'apps.review'
 ]
 
 if DEBUG:

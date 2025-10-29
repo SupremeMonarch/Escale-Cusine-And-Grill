@@ -11,3 +11,6 @@ def reservations_step2(request):
 def reservations_step3(request):
     context = {'step_number': 3}
     return render(request, "reservations/reservations_step3.html", context)
+
+def review(request):
+    return render(request, 'reservations/review.html')

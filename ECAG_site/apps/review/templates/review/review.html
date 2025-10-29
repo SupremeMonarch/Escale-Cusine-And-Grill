@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Review | Escale Cuisine{% endblock %}
+
+{% block content %}
+
+<div class="w-full" style="background-color: #FFE4D3;">
+    
+    <section aria-label="Review hero" class="w-full -mt-[calc(5rem+1px)] bg-gradient-to-r from-[#f65e00] to-[#ff3737]" style="background: linear-gradient(90deg,#f65e00 0%,#ff3737 100%);">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(5rem+1px)] py-8 md:py-20">
+            <div class="flex flex-col items-center justify-center text-center gap-1">
+                <h1 class="mt-12 sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">Review</h1>
+                <p class="mt-0.5 text-sm sm:text-base md:text-lg text-white max-w-xxl mx-auto md:mx-0">
+                        Share your experience at Escale Cuisine &amp; Grill
+                    </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="w-full pb-12 [1216px] mx-auto">
+    <div
+        class="w-3/4 m-auto mt-16 min-h-[180px] sm:min-h-[200px] md:min-h-[220px] p-4 sm:p-6 md:p-8 rounded-lg"
+        style="background: linear-gradient(to right, #d97706 -100%, #ea580c 141.42%);"
+    >
+        <!-- Main Title -->
+        <div class="flex justify-center items-center pb-3 sm:pb-4">
+        <h2 class="text-xl sm:text-2xl font-bold text-center text-white w-full">
+            Share Your Experience
+        </h2>
+        </div>
+
+        <!-- Description -->
+        <div class="flex justify-center items-center pb-4 sm:pb-6">
+        <p class="text-base sm:text-lg text-center text-white opacity-90 max-w-4xl px-2 sm:px-0">
+            Have you dined with us? We'd love to hear about your experience!
+        </p>
+        </div>
+
+        <!-- CTA Button -->
+        <div class="flex justify-center items-center">
+    <a href="{% url 'review:review_step2' %}" class="w-full sm:w-auto min-w-[170px] h-12 sm:h-14 px-6 sm:px-8 py-3 sm:py-3.5 rounded-lg bg-white border-2 border-white hover:bg-gray-50 transition-colors duration-200 inline-flex items-center justify-center text-center" role="button">
+      <span class="text-base sm:text-lg font-medium text-[#dc5e16]">Write a Review</span>
+    </a>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 items-stretch gap-4 md:gap-6 lg:gap-8 w-full max-w-7xl mx-auto px-10">
+  <!-- Average Rating Card -->
+  <div class="flex flex-col justify-between items-center w-full lg:w-full h-full overflow-hidden p-4 sm:p-6 md:p-8 rounded-lg bg-white shadow-lg min-h-[20rem]">
+    <div class="flex justify-center items-center w-full pb-2 sm:pb-4">
+      <p class="text-4xl sm:text-5xl md:text-6xl font-bold text-center text-amber-600">4.4</p>
+    </div>
+    
+    <!-- Stars -->
+    <div class="flex justify-center items-center w-full pb-2 sm:pb-4">
+      <div class="flex gap-1 sm:gap-2">
+        <!-- Star 1-4 (Full) -->
+        <svg width="24" height="24" viewBox="0 0 21 20" fill="none" class="w-5 h-5 sm:w-6 sm:h-6">
+          <path d="M10.4141 15.75L4.53221 19.05L5.84854 12.4334L0.89978 7.86671L7.59811 7.06672L10.4141 0.950048L13.23 7.06672L19.9284 7.86671L14.9796 12.4334L16.2959 19.05L10.4141 15.75Z" fill="#FACC15"></path>
+        </svg>
+        <svg width="24" height="24" viewBox="0 0 21 20" fill="none" class="w-5 h-5 sm:w-6 sm:h-6">
+          <path d="M10.4141 15.75L4.53221 19.05L5.84854 12.4334L0.89978 7.86671L7.59811 7.06672L10.4141 0.950048L13.23 7.06672L19.9284 7.86671L14.9796 12.4334L16.2959 19.05L10.4141 15.75Z" fill="#FACC15"></path>
+        </svg>
+        <svg width="24" height="24" viewBox="0 0 21 20" fill="none" class="w-5 h-5 sm:w-6 sm:h-6">
+          <path d="M10.4141 15.75L4.53221 19.05L5.84854 12.4334L0.89978 7.86671L7.59811 7.06672L10.4141 0.950048L13.23 7.06672L19.9284 7.86671L14.9796 12.4334L16.2959 19.05L10.4141 15.75Z" fill="#FACC15"></path>
+        </svg>
+        <svg width="24" height="24" viewBox="0 0 21 20" fill="none" class="w-5 h-5 sm:w-6 sm:h-6">
+          <path d="M10.4141 15.75L4.53221 19.05L5.84854 12.4334L0.89978 7.86671L7.59811 7.06672L10.4141 0.950048L13.23 7.06672L19.9284 7.86671L14.9796 12.4334L16.2959 19.05L10.4141 15.75Z" fill="#FACC15"></path>
+        </svg>
+        <!-- Star 5 (Half) -->
+        <svg width="24" height="24" viewBox="0 0 21 20" fill="none" class="w-5 h-5 sm:w-6 sm:h-6">
+          <path d="M10.4141 15.75L4.53221 19.05L5.84854 12.4334L0.89978 7.86671L7.59811 7.06672L10.4141 0.950048L13.23 7.06672L19.9284 7.86671L14.9796 12.4334L16.2959 19.05L10.4141 15.75ZM10.4141 13.85L13.9465 15.8334L13.1634 11.85L16.146 9.10005L12.1136 8.61671L10.4141 4.93338L8.71449 8.61671L4.68217 9.10005L7.66476 11.85L6.88162 15.8334L10.4141 13.85Z" fill="#FACC15"></path>
+        </svg>
+      </div>
+    </div>
+    
+    <div class="flex justify-center items-center w-full pt-2">
+      <p class="text-sm sm:text-base text-center text-gray-600">Based on 10 reviews</p>
+    </div>
+  </div>
+
+  <!-- Rating Distribution Card -->
+  <div class="flex flex-col justify-between items-start w-full lg:w-full h-full overflow-hidden p-4 sm:p-6 md:p-8 rounded-lg bg-white shadow-lg min-h-[20rem]">
+    <div class="flex justify-start items-center w-full pb-4">
+      <p class="text-lg font-semibold text-left text-gray-900">Rating Distribution</p>
+    </div>
+    
+    <div class="flex flex-col justify-start items-start w-full gap-3 sm:gap-4">
+      <!-- 5 Stars -->
+      <div class="flex justify-between items-center w-full">
+        <div class="flex items-center gap-2 w-12 sm:w-16">
+          <span class="text-sm font-medium text-gray-700">5</span>
+          <svg width="16" height="16" viewBox="0 0 15 14" fill="none" class="w-4 h-4">
+            <path d="M7.28905 11.025L3.17219 13.335L4.09352 8.70329L0.629761 5.50663L5.31809 4.94663L7.28905 0.664961L9.26001 4.94663L13.9483 5.50663L10.4846 8.70329L11.4059 13.335L7.28905 11.025Z" fill="#FACC15"></path>
+          </svg>
+        </div>
+        <div class="flex-1 mx-2 sm:mx-3">
+          <div class="w-full h-2 rounded-full bg-gray-200">
+            <div class="w-1/2 h-2 rounded-full bg-amber-500"></div>
+          </div>
+        </div>
+        <span class="text-sm text-gray-600 w-6 sm:w-8 text-right">5</span>
+      </div>
+      
+      <!-- 4 Stars -->
+      <div class="flex justify-between items-center w-full">
+        <div class="flex items-center gap-2 w-12 sm:w-16">
+          <span class="text-sm font-medium text-gray-700">4</span>
+          <svg width="16" height="16" viewBox="0 0 15 14" fill="none" class="w-4 h-4">
+            <path d="M7.28905 11.025L3.17219 13.335L4.09352 8.70329L0.629761 5.50663L5.31809 4.94663L7.28905 0.664961L9.26001 4.94663L13.9483 5.50663L10.4846 8.70329L11.4059 13.335L7.28905 11.025Z" fill="#FACC15"></path>
+          </svg>
+        </div>
+        <div class="flex-1 mx-2 sm:mx-3">
+          <div class="w-full h-2 rounded-full bg-gray-200">
+            <div class="w-2/5 h-2 rounded-full bg-amber-500"></div>
+          </div>
+        </div>
+        <span class="text-sm text-gray-600 w-6 sm:w-8 text-right">4</span>
+      </div>
+      
+      <!-- 3 Stars -->
+      <div class="flex justify-between items-center w-full">
+        <div class="flex items-center gap-2 w-12 sm:w-16">
+          <span class="text-sm font-medium text-gray-700">3</span>
+          <svg width="16" height="16" viewBox="0 0 15 14" fill="none" class="w-4 h-4">
+            <path d="M7.28905 11.025L3.17219 13.335L4.09352 8.70329L0.629761 5.50663L5.31809 4.94663L7.28905 0.664961L9.26001 4.94663L13.9483 5.50663L10.4846 8.70329L11.4059 13.335L7.28905 11.025Z" fill="#FACC15"></path>
+          </svg>
+        </div>
+        <div class="flex-1 mx-2 sm:mx-3">
+          <div class="w-full h-2 rounded-full bg-gray-200">
+            <div class="w-1/5 h-2 rounded-full bg-amber-500"></div>
+          </div>
+        </div>
+        <span class="text-sm text-gray-600 w-6 sm:w-8 text-right">1</span>
+      </div>
+      
+      <!-- 2 Stars -->
+      <div class="flex justify-between items-center w-full">
+        <div class="flex items-center gap-2 w-12 sm:w-16">
+          <span class="text-sm font-medium text-gray-700">2</span>
+          <svg width="16" height="16" viewBox="0 0 15 14" fill="none" class="w-4 h-4">
+            <path d="M7.28905 11.025L3.17219 13.335L4.09352 8.70329L0.629761 5.50663L5.31809 4.94663L7.28905 0.664961L9.26001 4.94663L13.9483 5.50663L10.4846 8.70329L11.4059 13.335L7.28905 11.025Z" fill="#FACC15"></path>
+          </svg>
+        </div>
+        <div class="flex-1 mx-2 sm:mx-3">
+          <div class="w-full h-2 rounded-full bg-gray-200">
+            <div class="w-0 h-2 rounded-full bg-amber-500"></div>
+          </div>
+        </div>
+        <span class="text-sm text-gray-600 w-6 sm:w-8 text-right">0</span>
+      </div>
+      
+      <!-- 1 Star -->
+      <div class="flex justify-between items-center w-full">
+        <div class="flex items-center gap-2 w-12 sm:w-16">
+          <span class="text-sm font-medium text-gray-700">1</span>
+          <svg width="16" height="16" viewBox="0 0 15 14" fill="none" class="w-4 h-4">
+            <path d="M7.28905 11.025L3.17219 13.335L4.09352 8.70329L0.629761 5.50663L5.31809 4.94663L7.28905 0.664961L9.26001 4.94663L13.9483 5.50663L10.4846 8.70329L11.4059 13.335L7.28905 11.025Z" fill="#FACC15"></path>
+          </svg>
+        </div>
+        <div class="flex-1 mx-2 sm:mx-3">
+          <div class="w-full h-2 rounded-full bg-gray-200">
+            <div class="w-0 h-2 rounded-full bg-amber-500"></div>
+          </div>
+        </div>
+        <span class="text-sm text-gray-600 w-6 sm:w-8 text-right">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review Highlights Card -->
+  <div class="flex flex-col justify-between items-start w-full lg:w-full h-full overflow-hidden p-4 sm:p-6 md:p-8 rounded-lg bg-white shadow-lg min-h-[20rem]">
+    <div class="flex justify-start items-center w-full pb-4">
+      <p class="text-lg font-semibold text-left text-gray-900">Review Highlights</p>
+    </div>
+    
+    <div class="flex flex-col justify-start items-start w-full gap-4 sm:gap-6">
+      <!-- Verified Reviews -->
+      <div class="flex items-center w-full">
+        <div class="flex items-center gap-3 sm:gap-4 w-full">
+          <svg width="20" height="20" viewBox="0 0 17 16" fill="none" class="w-5 h-5 flex-shrink-0">
+            <path d="M8.32816 0.666707L13.8047 1.88004C13.9558 1.9156 14.0801 1.9956 14.1778 2.12004C14.2756 2.24448 14.3244 2.38226 14.3244 2.53337V9.18671C14.3244 9.86226 14.1667 10.4934 13.8514 11.08C13.536 11.6667 13.0985 12.1467 12.5389 12.52L8.32816 15.3334L4.11746 12.52C3.55781 12.1467 3.12031 11.6667 2.80495 11.08C2.48959 10.4934 2.33191 9.86226 2.33191 9.18671V2.53337C2.33191 2.38226 2.38077 2.24448 2.47848 2.12004C2.5762 1.9956 2.70057 1.9156 2.85158 1.88004L8.32816 0.666707ZM8.32816 2.02671L3.66441 3.06671V9.18671C3.66441 9.64004 3.76879 10.0623 3.97755 10.4534C4.18631 10.8445 4.47723 11.1645 4.85033 11.4134L8.32816 13.7334L11.806 11.4134C12.1791 11.1645 12.47 10.8445 12.6788 10.4534C12.8875 10.0623 12.9919 9.64004 12.9919 9.18671V3.06671L8.32816 2.02671ZM11.2996 5.48004L12.2324 6.42671L7.99503 10.6667L5.17013 7.84004L6.11621 6.89337L7.99503 8.78671L11.2996 5.48004Z" fill="#22C55E"></path>
+          </svg>
+          <div class="flex-1 min-w-0">
+            <p class="text-base font-medium text-gray-900 truncate">8 Verified Reviews</p>
+            <p class="text-sm text-gray-600 truncate">From confirmed diners</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Helpful Votes -->
+      <div class="flex items-center w-full">
+        <div class="flex items-center gap-3 sm:gap-4 w-full">
+          <svg width="20" height="20" viewBox="0 0 17 16" fill="none" class="w-5 h-5 flex-shrink-0">
+            <path d="M10.0604 6.11995H14.3244C14.5642 6.11995 14.7863 6.17995 14.9906 6.29995C15.195 6.41995 15.3571 6.58218 15.477 6.78662C15.5969 6.99107 15.6569 7.21329 15.6569 7.45329V8.85329C15.6569 9.03107 15.6214 9.19995 15.5503 9.35995L13.4982 14.3733C13.4449 14.4977 13.3628 14.5977 13.2517 14.6733C13.1407 14.7488 13.0185 14.7866 12.8853 14.7866H1.66564C1.47909 14.7866 1.32141 14.7222 1.1926 14.5933C1.06379 14.4644 0.99939 14.3066 0.99939 14.12V7.45329C0.99939 7.26662 1.06379 7.10884 1.1926 6.97995C1.32141 6.85107 1.47909 6.78662 1.66564 6.78662H3.98419C4.09079 6.78662 4.19295 6.76218 4.29066 6.71329C4.38838 6.6644 4.46833 6.59551 4.53051 6.50662L8.16824 1.35995C8.21266 1.28884 8.27484 1.24218 8.35479 1.21995C8.43474 1.19773 8.51025 1.20884 8.58131 1.25329L9.79389 1.85329C10.1403 2.03106 10.3957 2.29773 10.5601 2.65329C10.7244 3.00884 10.7577 3.37773 10.66 3.75995L10.0604 6.11995ZM4.99689 7.83995V13.4533H12.4322L14.3244 8.85329V7.45329H10.0604C9.77612 7.45329 9.52073 7.37329 9.2942 7.21329C9.06768 7.05329 8.90556 6.8444 8.80784 6.58662C8.71012 6.32884 8.6968 6.06218 8.76786 5.78662L9.36749 3.42662C9.38526 3.34662 9.37859 3.27107 9.3475 3.19995C9.31641 3.12884 9.26533 3.07551 9.19426 3.03995L8.75454 2.82662L5.62316 7.27995C5.45438 7.51107 5.24562 7.69773 4.99689 7.83995ZM3.66439 8.11995H2.33189V13.4533H3.66439V8.11995Z" fill="#3B82F6"></path>
+          </svg>
+          <div class="flex-1 min-w-0">
+            <p class="text-base font-medium text-gray-900 truncate">80 Helpful Votes</p>
+            <p class="text-sm text-gray-600 truncate">Community engagement</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Recent Activity -->
+      <div class="flex items-center w-full">
+        <div class="flex items-center gap-3 sm:gap-4 w-full">
+          <svg width="20" height="20" viewBox="0 0 17 16" fill="none" class="w-5 h-5 flex-shrink-0">
+            <path d="M6.3294 1.33329V2.66663H10.3269V1.33329H11.6594V2.66663H14.3244C14.5109 2.66663 14.6686 2.73107 14.7974 2.85996C14.9262 2.98885 14.9906 3.14663 14.9906 3.33329V14C14.9906 14.1866 14.9262 14.3444 14.7974 14.4733C14.6686 14.6022 14.5109 14.6666 14.3244 14.6666H2.3319C2.14535 14.6666 1.98767 14.6022 1.85886 14.4733C1.73005 14.3444 1.66565 14.1866 1.66565 14V3.33329C1.66565 3.14663 1.73005 2.98885 1.85886 2.85996C1.98767 2.73107 2.14535 2.66663 2.3319 2.66663H4.9969V1.33329H6.3294ZM13.6581 7.99996H2.99815V13.3333H13.6581V7.99996ZM4.9969 3.99996H2.99815V6.66663H13.6581V3.99996H11.6594V5.33329H10.3269V3.99996H6.3294V5.33329H4.9969V3.99996Z" fill="#A855F7"></path>
+          </svg>
+          <div class="flex-1 min-w-0">
+            <p class="text-base font-medium text-gray-900 truncate">Recent Activity</p>
+            <p class="text-sm text-gray-600 truncate">Updated daily</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
+  <div class="mt-10 flex flex-col justify-start items-start w-full p-4 sm:p-6 rounded-lg bg-white border border-gray-200 shadow-sm">
+  <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center w-full gap-4 lg:gap-6">
+    <!-- Left Section - Filters -->
+    <div class="flex flex-col sm:flex-row justify-start items-start sm:items-center w-full lg:w-auto gap-4">
+      <!-- Sort Dropdown -->
+      <div class="flex justify-start items-start w-full sm:w-auto">
+        <div class="relative w-full sm:w-40">
+          <select class="w-full h-9 pl-4 pr-8 py-2 rounded-lg bg-gray-100 border border-gray-300 text-sm text-black appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option>Newest First</option>
+            <option>Oldest First</option>
+            <option>Highest Rated</option>
+            <option>Lowest Rated</option>
+          </select>
+          <svg class="absolute right-3 top-1/2 transform -translate-y-1/2 w-2.5 h-2.5 pointer-events-none" viewBox="0 0 10 10" fill="none">
+            <path d="M1 3.5L5 7.5L9 3.5H1Z" fill="black"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Rating Filters -->
+      <div class="flex flex-wrap justify-start items-center gap-2 w-full sm:w-auto">
+        <!-- All Ratings -->
+        <button class="flex items-center justify-center h-9 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-sm font-medium whitespace-nowrap transition-colors hover:bg-amber-200">
+          All Ratings
+        </button>
+        
+        <!-- Rating 5 -->
+        <button class="flex items-center justify-center h-9 px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm whitespace-nowrap transition-colors hover:bg-gray-200">
+          <span>5</span>
+          <svg class="w-4 h-4 ml-1" viewBox="0 0 15 14" fill="none">
+            <path d="M7.28905 11.025L3.17219 13.335L4.09352 8.70329L0.629761 5.50663L5.31809 4.94663L7.28905 0.664961L9.26001 4.94663L13.9483 5.50663L10.4846 8.70329L11.4059 13.335L7.28905 11.025Z" fill="#FACC15"></path>
+          </svg>
+        </button>
+
+        <!-- Rating 4 -->
+        <button class="flex items-center justify-center h-9 px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm whitespace-nowrap transition-colors hover:bg-gray-200">
+          <span>4</span>
+          <svg class="w-4 h-4 ml-1" viewBox="0 0 15 14" fill="none">
+            <path d="M7.28905 11.025L3.17219 13.335L4.09352 8.70329L0.629761 5.50663L5.31809 4.94663L7.28905 0.664961L9.26001 4.94663L13.9483 5.50663L10.4846 8.70329L11.4059 13.335L7.28905 11.025Z" fill="#FACC15"></path>
+          </svg>
+        </button>
+
+        <!-- Rating 3 -->
+        <button class="flex items-center justify-center h-9 px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm whitespace-nowrap transition-colors hover:bg-gray-200">
+          <span>3</span>
+          <svg class="w-4 h-4 ml-1" viewBox="0 0 15 14" fill="none">
+            <path d="M7.28905 11.025L3.17219 13.335L4.09352 8.70329L0.629761 5.50663L5.31809 4.94663L7.28905 0.664961L9.26001 4.94663L13.9483 5.50663L10.4846 8.70329L11.4059 13.335L7.28905 11.025Z" fill="#FACC15"></path>
+          </svg>
+        </button>
+
+        <!-- Rating 2 -->
+        <button class="flex items-center justify-center h-9 px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm whitespace-nowrap transition-colors hover:bg-gray-200">
+          <span>2</span>
+          <svg class="w-4 h-4 ml-1" viewBox="0 0 15 14" fill="none">
+            <path d="M7.28905 11.025L3.17219 13.335L4.09352 8.70329L0.629761 5.50663L5.31809 4.94663L7.28905 0.664961L9.26001 4.94663L13.9483 5.50663L10.4846 8.70329L11.4059 13.335L7.28905 11.025Z" fill="#FACC15"></path>
+          </svg>
+        </button>
+
+        <!-- Rating 1 -->
+        <button class="flex items-center justify-center h-9 px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm whitespace-nowrap transition-colors hover:bg-gray-200">
+          <span>1</span>
+          <svg class="w-4 h-4 ml-1" viewBox="0 0 15 14" fill="none">
+            <path d="M7.28905 11.025L3.17219 13.335L4.09352 8.70329L0.629761 5.50663L5.31809 4.94663L7.28905 0.664961L9.26001 4.94663L13.9483 5.50663L10.4846 8.70329L11.4059 13.335L7.28905 11.025Z" fill="#FACC15"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Section - Results Count -->
+    <div class="flex justify-start items-center w-full lg:w-auto">
+      <p class="text-sm text-left text-gray-600 whitespace-nowrap">
+        Showing 10 of 10 reviews
+      </p>
+    </div>
+  </div>
+
+  </div>
+</div>
+
+{% endblock %}

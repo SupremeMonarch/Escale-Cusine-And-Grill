@@ -50,7 +50,7 @@
             </a>
         </li>
         <li>
-            <a href="{% url 'core:home' %}" 
+            <a href="{% url 'review:review' %}" 
             class="px-3 py-1 border-b {% if request.resolver_match.url_name == 'reviews' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
             Reviews
             </a>
@@ -167,7 +167,7 @@
         <li><a href="#" class="hover:text-amber-400">About Us</a></li>
         <li><a href="#" class="hover:text-amber-400">Menu</a></li>
         <li><a href="{% url 'reservations:reservations' %}" class="hover:text-amber-400">Reservations</a></li>
-        <li><a href="#" class="hover:text-amber-400">Reviews</a></li>
+        <li><a href="{% url 'review:review' %}" class="hover:text-amber-400">Reviews</a></li>
       </ul>
     </div>
 
