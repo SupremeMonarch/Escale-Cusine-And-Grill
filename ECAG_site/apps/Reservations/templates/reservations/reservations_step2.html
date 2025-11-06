@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Reservation | Escale{% endblock %}
+
+{% block content %}
+
+<!-- Page background wrapper -->
+<div class="w-full" style="background-color: #FFE4D3;">
+
+<!-- Responsive hero/banner -->
+<section aria-label="Reservations hero" class="w-full -mt-[calc(5rem+1px)] bg-gradient-to-r from-[#f65e00] to-[#ff3737]" style="background: linear-gradient(90deg,#f65e00 0%,#ff3737 100%);">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(5rem+1px)] py-8 md:py-20">
+		<div class="flex flex-col items-center justify-center text-center gap-1">
+			<h1 class="mt-12 sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">Reservation Online</h1>
+			<p class="mt-0.5 text-sm sm:text-base md:text-lg text-white max-w-xxl mx-auto md:mx-0">
+					Reserve your table for an unforgettable dining experience at Escale Maurice &amp; Grill
+				</p>
+		</div>
+	</div>
+</section>
+
+<!-- Progress -->
+<div class="flex justify-center items-center w-full h-auto md:h-10 mt-6 mx-auto">
+  <div class="flex flex-col md:flex-row justify-center items-center w-full md:w-auto h-auto md:h-10 gap-4 md:gap-0">
+    <!-- Step 1 -->
+    <div class="flex flex-row justify-center items-center w-auto h-10">
+      <div data-step="1" class="flex justify-center items-center w-10 h-10 rounded-full bg-amber-600">
+        <p class="text-base font-semibold text-white">1</p>
+      </div>
+    </div>
+    
+    <!-- Connector line after Step 1 -->
+    <div data-connector="1" class="hidden md:block w-16 h-1 bg-gray-400 mx-2"></div>
+    
+    <!-- Step 2 -->
+    <div class="flex flex-row justify-center items-center w-auto h-10">
+      <div data-step="2" class="flex justify-center items-center w-10 h-10 rounded-full bg-gray-400">
+        <p class="text-base font-semibold text-white">2</p>
+      </div>
+    </div>
+    
+    <!-- Connector line after Step 2 -->
+    <div data-connector="2" class="hidden md:block w-16 h-1 bg-gray-400 mx-2"></div>
+    
+    <!-- Step 3 -->
+    <div class="flex flex-row justify-center items-center w-auto h-10">
+      <div data-step="3" class="flex justify-center items-center w-10 h-10 rounded-full bg-gray-400">
+        <p class="text-base font-semibold text-white">3</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="w-full h-screen bg-[#ffe4d3] md:h-[905px]">
+    <p class="text-3xl font-bold text-center pt-10">Select Your Table</p>
+</div>
+
+<!-- Load the main JavaScript file -->
+<script>const CURRENT_STEP = "{{ step_number }}";</script>
+<script src="{% static 'reservation/js/progress.js' %}"></script>
+
+{% endblock %}

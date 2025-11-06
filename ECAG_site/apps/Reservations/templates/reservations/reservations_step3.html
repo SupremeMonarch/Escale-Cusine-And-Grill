@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Reservation | Escale{% endblock %}
+
+{% block content %}
+
+<!-- Page background wrapper -->
+<div class="w-full" style="background-color: #FFE4D3;">
+
+<!-- Responsive hero/banner -->
+<section aria-label="Reservations hero" class="w-full -mt-[calc(5rem+1px)] bg-gradient-to-r from-[#f65e00] to-[#ff3737]" style="background: linear-gradient(90deg,#f65e00 0%,#ff3737 100%);">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(5rem+1px)] py-8 md:py-20">
+		<div class="flex flex-col items-center justify-center text-center gap-1">
+			<h1 class="mt-12 sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">Reservation Online</h1>
+			<p class="mt-0.5 text-sm sm:text-base md:text-lg text-white max-w-xxl mx-auto md:mx-0">
+					Reserve your table for an unforgettable dining experience at Escale Maurice &amp; Grill
+				</p>
+		</div>
+	</div>
+</section>
+
+<!-- Progress -->
+<div class="flex justify-center items-center w-full h-auto md:h-10 mt-6 mx-auto">
+  <div class="flex flex-col md:flex-row justify-center items-center w-full md:w-auto h-auto md:h-10 gap-4 md:gap-0">
+    <!-- Step 1 -->
+    <div class="flex flex-row justify-center items-center w-auto h-10">
+      <div data-step="1" class="flex justify-center items-center w-10 h-10 rounded-full bg-amber-600">
+        <p class="text-base font-semibold text-white">1</p>
+      </div>
+    </div>
+    
+    <!-- Connector line after Step 1 -->
+    <div data-connector="1" class="hidden md:block w-16 h-1 bg-gray-400 mx-2"></div>
+    
+    <!-- Step 2 -->
+    <div class="flex flex-row justify-center items-center w-auto h-10">
+      <div data-step="2" class="flex justify-center items-center w-10 h-10 rounded-full bg-gray-400">
+        <p class="text-base font-semibold text-white">2</p>
+      </div>
+    </div>
+    
+    <!-- Connector line after Step 2 -->
+    <div data-connector="2" class="hidden md:block w-16 h-1 bg-gray-400 mx-2"></div>
+    
+    <!-- Step 3 -->
+    <div class="flex flex-row justify-center items-center w-auto h-10">
+      <div data-step="3" class="flex justify-center items-center w-10 h-10 rounded-full bg-gray-400">
+        <p class="text-base font-semibold text-white">3</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Card Section -->
+<section aria-label="Reservation Confirmation" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16">
+  <div class="max-w-3xl mx-auto">
+    <!-- Confirmation Card -->
+    <div class="flex flex-col p-6 sm:p-8 rounded-lg bg-white shadow-lg">
+      <!-- Success Icon -->
+      <div class="flex justify-center pb-6">
+        <div class="flex justify-center items-center w-16 h-16 rounded-full bg-green-100">
+          <svg width="26" height="24" viewBox="0 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6">
+            <path d="M10.88 15.18L20.08 5.98L21.48 7.4L10.88 18.02L4.52002 11.64L5.92002 10.24L10.88 15.18Z" fill="#16A34A"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <div class="pb-4">
+        <h2 class="text-2xl font-bold text-center text-gray-900">Reservation Confirmed!</h2>
+      </div>
+
+      <!-- Confirmation Message -->
+      <div class="pb-6">
+        <p class="text-base text-center text-gray-600">
+          Thank you for choosing Escale Maurice &amp; Grill. We've sent a confirmation email to
+        </p>
+        <p class="text-base text-center text-gray-600 font-medium">
+          luiismiguel2007@gmail.com
+        </p>
+      </div>
+
+      <!-- Reservation Details Card -->
+      <div class="pb-6">
+        <div class="flex flex-col p-4 sm:p-6 rounded-lg bg-gray-50">
+          <div class="pb-4">
+            <p class="text-base font-semibold text-left text-gray-900">Reservation Details</p>
+          </div>
+          
+          <div class="flex flex-col space-y-2">
+            <!-- Confirmation Number -->
+            <div class="flex justify-between items-center">
+              <p class="text-sm text-gray-600">Confirmation #:</p>
+              <p class="text-sm font-medium text-black">BV-110730</p>
+            </div>
+            
+            <!-- Name -->
+            <div class="flex justify-between items-center">
+              <p class="text-sm text-gray-600">Name:</p>
+              <p class="text-sm font-medium text-black text-right">Luis Miguël Juliano Larhubarbe</p>
+            </div>
+            
+            <!-- Date & Time -->
+            <div class="flex justify-between items-center">
+              <p class="text-sm text-gray-600">Date &amp; Time:</p>
+              <p class="text-sm font-medium text-black">2025-09-26 at 11:30 AM</p>
+            </div>
+            
+            <!-- Guests -->
+            <div class="flex justify-between items-center">
+              <p class="text-sm text-gray-600">Guests:</p>
+              <p class="text-sm font-medium text-black">2</p>
+            </div>
+            
+            <!-- Table -->
+            <div class="flex justify-between items-center">
+              <p class="text-sm text-gray-600">Table:</p>
+              <p class="text-sm font-medium text-black">T2 (2-Seater)</p>
+            </div>
+            
+            <!-- Phone -->
+            <div class="flex justify-between items-center">
+              <p class="text-sm text-gray-600">Phone:</p>
+              <p class="text-sm font-medium text-black">58307677</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Important Notice -->
+      <div class="pb-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 p-4 rounded-lg bg-amber-50">
+          <svg width="16" height="14" viewBox="0 0 16 14" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0 mt-0.5 sm:mt-0">
+            <path d="M8.0001 12.8333C7.2062 12.8333 6.44732 12.6816 5.72347 12.3783C5.03076 12.0828 4.41393 11.6647 3.87299 11.1241C3.33204 10.5836 2.91369 9.9672 2.61792 9.27498C2.31437 8.55165 2.1626 7.79331 2.1626 6.99998C2.1626 6.20665 2.31437 5.44831 2.61792 4.72498C2.91369 4.03276 3.33204 3.41637 3.87299 2.87581C4.41393 2.33526 5.03076 1.9172 5.72347 1.62165C6.44732 1.31831 7.2062 1.16665 8.0001 1.16665C8.794 1.16665 9.55287 1.31831 10.2767 1.62165C10.9694 1.9172 11.5863 2.33526 12.1272 2.87581C12.6682 3.41637 13.0865 4.03276 13.3823 4.72498C13.6858 5.44831 13.8376 6.20665 13.8376 6.99998C13.8376 7.79331 13.6858 8.55165 13.3823 9.27498C13.0865 9.9672 12.6682 10.5836 12.1272 11.1241C11.5863 11.6647 10.9694 12.0828 10.2767 12.3783C9.55287 12.6816 8.794 12.8333 8.0001 12.8333ZM8.0001 11.6666C8.84848 11.6666 9.6346 11.4528 10.3584 11.025C11.0589 10.6128 11.6155 10.0566 12.028 9.35665C12.4561 8.63331 12.6701 7.84776 12.6701 6.99998C12.6701 6.1522 12.4561 5.36665 12.028 4.64331C11.6155 3.94331 11.0589 3.3872 10.3584 2.97498C9.6346 2.5472 8.84848 2.33331 8.0001 2.33331C7.15171 2.33331 6.3656 2.5472 5.64175 2.97498C4.94125 3.3872 4.38474 3.94331 3.97222 4.64331C3.54414 5.36665 3.3301 6.1522 3.3301 6.99998C3.3301 7.84776 3.54414 8.63331 3.97222 9.35665C4.38474 10.0566 4.94125 10.6128 5.64175 11.025C6.3656 11.4528 7.15171 11.6666 8.0001 11.6666ZM7.41635 4.08331H8.58385V5.24998H7.41635V4.08331ZM7.41635 6.41665H8.58385V9.91665H7.41635V6.41665Z" fill="#92400E"></path>
+          </svg>
+          <div class="text-sm text-amber-800">
+            <p>Please arrive 10 minutes before your reservation time. If you need to cancel or modify your reservation, please call us at (555) 123-4567 at least 2 hours in advance.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 w-full">
+        <a href="{% url 'core:home' %}" class="flex-1 flex justify-center items-center px-4 py-2.5 rounded-lg border-2 border-[#e97820] hover:bg-orange-50 transition-colors">
+          <span class="text-base font-medium text-center text-[#dc5e16]">Back to Home</span>
+        </a>
+        <a href="{% url 'menu:list' %}" class="flex-1 flex justify-center items-center px-4 py-2 rounded-lg text-white font-medium hover:opacity-90 transition-opacity" style="background: linear-gradient(to right, #e97820 -100%, #ef4444 141.42%); box-shadow: 0px 2px 4px -2px rgba(0,0,0,0.1), 0px 4px 6px -1px rgba(0,0,0,0.1);">
+          <span class="text-base font-medium text-center">View Menu</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- Load the main JavaScript file -->
+<script>const CURRENT_STEP = "{{ step_number }}";</script>
+<script src="{% static 'reservation/js/progress.js' %}"></script>
+
+{% endblock %}

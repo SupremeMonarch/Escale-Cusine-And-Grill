@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>customer my orders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f4f4f5;
+        min-height: 100vh;
+        overflow-y: scroll;
+      }
+      .card-shadow {
+        box-shadow: 0px 2px 4px -2px rgba(0, 0, 0, 0.1),
+          0px 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+      .order-card-inner {
+        flex-shrink: 0;
+      }
+      .subtle-scrollbar::-webkit-scrollbar {
+        width: 6px; /* Make it thin */
+      }
+      .subtle-scrollbar::-webkit-scrollbar-thumb {
+        background-color: transparent;
+        border-radius: 3px;
+      }
+      .subtle-scrollbar:hover::-webkit-scrollbar-thumb {
+        background-color: rgba(
+          107,
+          114,
+          128,
+          0.6
+        ); /* Subtle gray color on hover */
+      }
+      .subtle-scrollbar:active::-webkit-scrollbar-thumb {
+        background-color: rgba(75, 85, 99, 0.8);
+      }
+      .subtle-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(107, 114, 128, 0.6) transparent;
+      }
+      .filter-active {
+        background-color: #2563eb;
+        color: #ffffff;
+      }
+      .filter-inactive {
+        background-color: #f3f4f6;
+        color: #4b5563;
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "primary-orange": "#f3703c",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body onload="filterOrders('All')">
+    <!-- START: Sidebar Container -->
+    <aside
+      class="hidden md:flex flex-col w-64 bg-white h-screen fixed shadow-sm border-r border-gray-200 z-10"
+    >
+      <div class="p-6 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-800">User Panel</h2>
+      </div>
+      <nav class="flex flex-col p-6 gap-2 text-gray-600">
+        <a
+          href="#"
+          class="flex items-center gap-2 hover:bg-gray-100 rounded-md px-3 py-2"
+          >Overview</a
+        >
+        <a
+          href="#"
+          class="flex items-center gap-2 text-primary-orange bg-orange-50 rounded-md px-3 py-2 font-medium"
+          ><span>My Orders</span></a
+        >
+        <a
+          href="#"
+          class="flex items-center gap-2 hover:bg-gray-100 rounded-md px-3 py-2"
+          ><span>My Reservations</span></a
+        >
+        <a
+          href="#"
+          class="flex items-center gap-2 hover:bg-gray-100 rounded-md px-3 py-2"
+          ><span>Profile</span></a
+        >
+      </nav>
+    </aside>
+    <!-- END: Sidebar Container -->
+
+    <!-- START: Main Content Wrapper -->
+    <div class="md:ml-64">
+      <div class="p-4 sm:p-6 lg:p-8 w-full max-w-[875px] mx-auto">
+        <header
+          class="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full mb-8 space-y-4 sm:space-y-0"
+        >
+          <div
+            class="flex flex-col justify-start items-start h-auto w-full sm:w-auto pl-2"
+          >
+            <h1 class="text-xl font-bold text-gray-900">My Orders</h1>
+            <p class="text-xs text-gray-600">
+              Track and manage your food orders
+            </p>
+          </div>
+
+          <!-- Filter Buttons -->
+          <div class="flex flex-wrap gap-2 justify-start sm:justify-end">
+            <button
+              id="filter-All"
+              onclick="filterOrders('All')"
+              class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium transition duration-150 ease-in-out bg-blue-600 text-white hover:bg-blue-700"
+            >
+              All
+            </button>
+
+            <button
+              id="filter-Pending"
+              onclick="filterOrders('Pending')"
+              class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200"
+            >
+              Pending
+            </button>
+
+            <button
+              id="filter-Preparing"
+              onclick="filterOrders('Preparing')"
+              class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200"
+            >
+              Preparing
+            </button>
+
+            <button
+              id="filter-Completed"
+              onclick="filterOrders('Completed')"
+              class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200"
+            >
+              Completed
+            </button>
+          </div>
+        </header>
+
+        <!-- Orders List Container -->
+        <div class="space-y-6" id="orders-list">
+          <!-- ORDER CARD 1: Pending -->
+          <div
+            class="order-card flex flex-col w-full max-w-full p-6 rounded-xl bg-white card-shadow"
+            data-status="Pending"
+          >
+            <div
+              class="flex justify-between items-center pb-4 border-b border-gray-200"
+            >
+              <div class="flex flex-col justify-start items-start">
+                <p class="text-base font-semibold text-gray-900">#ORD-004</p>
+                <p class="text-sm text-gray-500">2024-01-16 at 6:00 PM</p>
+              </div>
+              <div
+                class="flex flex-wrap gap-2 justify-start items-center ml-4 mr-auto"
+              >
+                <div
+                  class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-yellow-100"
+                >
+                  <p class="text-sm font-medium text-yellow-800">Pending</p>
+                </div>
+                <div
+                  class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-gray-100"
+                >
+                  <p class="text-sm text-gray-700">Delivery</p>
+                </div>
+              </div>
+
+              <div class="flex flex-col justify-start items-end">
+                <p class="text-lg font-bold text-gray-900">RS 0.00</p>
+                <p class="text-sm text-gray-500">Est. 25-30 mins</p>
+              </div>
+            </div>
+
+            <div class="flex flex-col pt-4">
+              <h3 class="text-base font-medium text-gray-900 mb-2">
+                Order Items:
+              </h3>
+
+              <div
+                class="flex flex-col space-y-2 max-h-40 overflow-y-auto subtle-scrollbar"
+              >
+                <div
+                  class="flex justify-between items-center w-full h-12 pr-5 py-2 rounded-lg border border-gray-200"
+                >
+                  <div class="flex items-center space-x-3 pl-2">
+                    <div
+                      class="flex justify-center items-center w-8 h-8 rounded-full bg-blue-100 flex-shrink-0"
+                    >
+                      <p class="text-sm font-medium text-blue-600">1</p>
+                    </div>
+                    <p class="text-base text-gray-900">Margherita Pizza</p>
+                  </div>
+                  <p class="text-base font-medium text-gray-900">Rs 0.00</p>
+                </div>
+
+                <div
+                  class="flex justify-between items-center w-full h-12 pr-5 py-2 rounded-lg border border-gray-200"
+                >
+                  <div class="flex items-center space-x-3 pl-2">
+                    <div
+                      class="flex justify-center items-center w-8 h-8 rounded-full bg-blue-100 flex-shrink-0"
+                    >
+                      <p class="text-sm font-medium text-blue-600">2</p>
+                    </div>
+                    <p class="text-base text-gray-900">Buffalo Wings</p>
+                  </div>
+                  <p class="text-base font-medium text-gray-900">Rs 0.00</p>
+                </div>
+
+                <div
+                  class="flex justify-between items-center w-full h-12 pr-5 py-2 rounded-lg border border-gray-200"
+                >
+                  <div class="flex items-center space-x-3 pl-2">
+                    <div
+                      class="flex justify-center items-center w-8 h-8 rounded-full bg-blue-100 flex-shrink-0"
+                    >
+                      <p class="text-sm font-medium text-blue-600">3</p>
+                    </div>
+                    <p class="text-base text-gray-900">Soda</p>
+                  </div>
+                  <p class="text-base font-medium text-gray-900">Rs 0.00</p>
+                </div>
+
+                <div
+                  class="flex justify-between items-center w-full h-12 pr-5 py-2 rounded-lg border border-gray-200"
+                >
+                  <div class="flex items-center space-x-3 pl-2">
+                    <div
+                      class="flex justify-center items-center w-8 h-8 rounded-full bg-blue-100 flex-shrink-0"
+                    >
+                      <p class="text-sm font-medium text-blue-600">4</p>
+                    </div>
+                    <p class="text-base text-gray-900">Fries (Large)</p>
+                  </div>
+                  <p class="text-base font-medium text-gray-900">Rs 0.00</p>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center pt-4 border-t border-gray-200 mt-4 space-y-3 sm:space-y-0"
+            >
+              <div class="flex gap-3 w-full sm:w-auto">
+                <button
+                  class="flex justify-center items-center h-10 px-4 py-2 rounded-lg bg-green-600 text-base text-white hover:bg-green-700 transition duration-150 ease-in-out w-1/2 sm:w-auto"
+                >
+                  Track Order
+                </button>
+                <button
+                  class="flex justify-center items-center h-10 px-4 py-2 rounded-lg bg-red-600 text-base text-white hover:bg-red-700 transition duration-150 ease-in-out w-1/2 sm:w-auto"
+                >
+                  Cancel Order
+                </button>
+              </div>
+              <button
+                class="flex justify-center sm:justify-end items-center h-10 px-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition duration-150 ease-in-out"
+              >
+                View Receipt
+              </button>
+            </div>
+          </div>
+
+          <!-- ORDER CARD 2: Preparing -->
+          <div
+            class="order-card flex flex-col w-full max-w-full p-6 rounded-xl bg-white card-shadow"
+            data-status="Preparing"
+          >
+            <div
+              class="flex justify-between items-center pb-4 border-b border-gray-200"
+            >
+              <div class="flex flex-col justify-start items-start">
+                <p class="text-base font-semibold text-gray-900">#ORD-003</p>
+                <p class="text-sm text-gray-500">2024-01-16 at 6:00 PM</p>
+              </div>
+
+              <div
+                class="flex flex-wrap gap-2 justify-start items-center ml-4 mr-auto"
+              >
+                <div
+                  class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-blue-100"
+                >
+                  <p class="text-sm font-medium text-blue-800">Preparing</p>
+                </div>
+                <div
+                  class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-gray-100"
+                >
+                  <p class="text-sm text-gray-700">Delivery</p>
+                </div>
+              </div>
+
+              <div class="flex flex-col justify-start items-end">
+                <p class="text-lg font-bold text-gray-900">RS 0.00</p>
+                <p class="text-sm text-gray-500">Est. 25-30 mins</p>
+              </div>
+            </div>
+
+            <div class="flex flex-col pt-4">
+              <h3 class="text-base font-medium text-gray-900 mb-2">
+                Order Items:
+              </h3>
+
+              <div
+                class="flex flex-col space-y-2 max-h-40 overflow-y-auto subtle-scrollbar"
+              >
+                <div
+                  class="flex justify-between items-center w-full h-12 pr-5 py-2 rounded-lg border border-gray-200"
+                >
+                  <div class="flex items-center space-x-3 pl-2">
+                    <div
+                      class="flex justify-center items-center w-8 h-8 rounded-full bg-blue-100 flex-shrink-0"
+                    >
+                      <p class="text-sm font-medium text-blue-600">1</p>
+                    </div>
+                    <p class="text-base text-gray-900">Margherita Pizza</p>
+                  </div>
+                  <p class="text-base font-medium text-gray-900">Rs 0.00</p>
+                </div>
+
+                <div
+                  class="flex justify-between items-center w-full h-12 pr-5 py-2 rounded-lg border border-gray-200"
+                >
+                  <div class="flex items-center space-x-3 pl-2">
+                    <div
+                      class="flex justify-center items-center w-8 h-8 rounded-full bg-blue-100 flex-shrink-0"
+                    >
+                      <p class="text-sm font-medium text-blue-600">2</p>
+                    </div>
+                    <p class="text-base text-gray-900">Buffalo Wings</p>
+                  </div>
+                  <p class="text-base font-medium text-gray-900">Rs 0.00</p>
+                </div>
+
+                <div
+                  class="flex justify-between items-center w-full h-12 pr-5 py-2 rounded-lg border border-gray-200"
+                >
+                  <div class="flex items-center space-x-3 pl-2">
+                    <div
+                      class="flex justify-center items-center w-8 h-8 rounded-full bg-blue-100 flex-shrink-0"
+                    >
+                      <p class="text-sm font-medium text-blue-600">3</p>
+                    </div>
+                    <p class="text-base text-gray-900">Fries (Small)</p>
+                  </div>
+                  <p class="text-base font-medium text-gray-900">Rs 0.00</p>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center pt-4 border-t border-gray-200 mt-4 space-y-3 sm:space-y-0"
+            >
+              <div class="flex gap-3 w-full sm:w-auto">
+                <button
+                  class="flex justify-center items-center h-10 px-4 py-2 rounded-lg bg-green-600 text-base text-white hover:bg-green-700 transition duration-150 ease-in-out w-full sm:w-auto"
+                >
+                  Track Order
+                </button>
+              </div>
+              <button
+                class="flex justify-center sm:justify-end items-center h-10 px-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition duration-150 ease-in-out"
+              >
+                View Receipt
+              </button>
+            </div>
+          </div>
+
+          <!-- ORDER CARD 3: Completed -->
+          <div
+            class="order-card flex flex-col w-full max-w-full p-6 rounded-xl bg-white card-shadow"
+            data-status="Completed"
+          >
+            <div
+              class="flex justify-between items-center pb-4 border-b border-gray-200"
+            >
+              <div class="flex flex-col justify-start items-start">
+                <p class="text-base font-semibold text-gray-900">#ORD-003</p>
+                <p class="text-sm text-gray-500">2024-01-16 at 6:00 PM</p>
+              </div>
+
+              <div
+                class="flex flex-wrap gap-2 justify-start items-center ml-4 mr-auto"
+              >
+                <div
+                  class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-green-100"
+                >
+                  <p class="text-sm font-medium text-green-800">Completed</p>
+                </div>
+                <div
+                  class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-gray-100"
+                >
+                  <p class="text-sm text-gray-700">Delivery</p>
+                </div>
+              </div>
+
+              <div class="flex flex-col justify-start items-end">
+                <p class="text-lg font-bold text-gray-900">RS 0.00</p>
+                <p class="text-sm text-gray-500">Est. 25-30 mins</p>
+              </div>
+            </div>
+
+            <div class="flex flex-col pt-4">
+              <h3 class="text-base font-medium text-gray-900 mb-2">
+                Order Items:
+              </h3>
+
+              <div
+                class="flex flex-col space-y-2 max-h-40 overflow-y-auto subtle-scrollbar"
+              >
+                <div
+                  class="flex justify-between items-center w-full h-12 pr-5 py-2 rounded-lg border border-gray-200"
+                >
+                  <div class="flex items-center space-x-3 pl-2">
+                    <div
+                      class="flex justify-center items-center w-8 h-8 rounded-full bg-blue-100 flex-shrink-0"
+                    >
+                      <p class="text-sm font-medium text-blue-600">1</p>
+                    </div>
+                    <p class="text-base text-gray-900">Margherita Pizza</p>
+                  </div>
+                  <p class="text-base font-medium text-gray-900">Rs 0.00</p>
+                </div>
+
+                <div
+                  class="flex justify-between items-center w-full h-12 pr-5 py-2 rounded-lg border border-gray-200"
+                >
+                  <div class="flex items-center space-x-3 pl-2">
+                    <div
+                      class="flex justify-center items-center w-8 h-8 rounded-full bg-blue-100 flex-shrink-0"
+                    >
+                      <p class="text-sm font-medium text-blue-600">2</p>
+                    </div>
+                    <p class="text-base text-gray-900">Buffalo Wings</p>
+                  </div>
+                  <p class="text-base font-medium text-gray-900">Rs 0.00</p>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="flex justify-end items-center pt-4 border-t border-gray-200 mt-4"
+            >
+              <button
+                class="flex justify-center items-center h-10 px-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition duration-150 ease-in-out"
+              >
+                View Receipt
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END: Main Content Wrapper -->
+
+    <!-- JavaScript for Filtering -->
+    <script>
+      // Filters the order cards displayed based on the selected status.
+      function filterOrders(status) {
+        // 1. Get all order cards and filter buttons
+        const cards = document.querySelectorAll(".order-card");
+        const buttons = document.querySelectorAll(".filter-button");
+
+        // 2. Update button styles (active/inactive)
+        buttons.forEach((button) => {
+          // Clean up all dynamic styles first
+          button.classList.remove(
+            "bg-blue-600",
+            "text-white",
+            "hover:bg-blue-700",
+            "bg-gray-100",
+            "text-gray-600",
+            "hover:bg-gray-200"
+          );
+
+          // Check if this button matches the selected status
+          const buttonIdStatus = button.id.replace("filter-", "");
+          if (buttonIdStatus === status) {
+            // Apply active styles
+            button.classList.add(
+              "bg-blue-600",
+              "text-white",
+              "hover:bg-blue-700"
+            );
+          } else {
+            // Apply inactive styles
+            button.classList.add(
+              "bg-gray-100",
+              "text-gray-600",
+              "hover:bg-gray-200"
+            );
+          }
+        });
+
+        // 3. Filter the order cards
+        cards.forEach((card) => {
+          const cardStatus = card.getAttribute("data-status");
+
+          if (status === "All" || cardStatus === status) {
+            // Show the card (make it visible)
+            card.style.display = "flex";
+          } else {
+            // Hide the card
+            card.style.display = "none";
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

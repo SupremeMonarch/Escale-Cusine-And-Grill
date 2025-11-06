@@ -4,24 +4,268 @@
 
 {% block content %}
 
-<div class="bg-blue-500 p-4 text-white text-center">
-    🎯 Tailwind Test - If this is blue, Tailwind is working!
-</div>
+<!-- Page background wrapper -->
+<div class="w-full" style="background-color: #FFE4D3;">
+
 <!-- Responsive hero/banner -->
-<section aria-label="Reservations hero" class="w-full bg-gradient-to-r from-[#f65e00] to-[#ff3737]">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-		<div class="flex flex-col items-center md:items-start md:flex-row md:justify-between gap-6">
-			<!-- Heading and description -->
-			<div class="text-center md:text-left md:max-w-2xl">
-				<h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">Reservation Online</h1>
-				<p class="mt-4 text-sm sm:text-base md:text-lg text-white max-w-xl mx-auto md:mx-0">
-					Reserve your table for an unforgettable dining experience at Escale Maurice &amp; Grill
+<section aria-label="Reservations hero" class="w-full -mt-[calc(5rem+1px)] bg-gradient-to-r from-[#f65e00] to-[#ff3737]" style="background: linear-gradient(90deg,#f65e00 0%,#ff3737 100%);">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(5rem+1px)] py-8 md:py-20">
+		<div class="flex flex-col items-center justify-center text-center gap-1">
+			<h1 class="mt-12 sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">Reservation Online</h1>
+			<p class="mt-0.5 text-sm sm:text-base md:text-lg text-white max-w-xxl mx-auto md:mx-0">
+					Reserve your table for an unforgettable dining experience at Escale Cuisine &amp; Grill
 				</p>
-			</div>
 		</div>
 	</div>
 </section>
 
+<!-- Progress -->
+<div class="flex justify-center items-center w-full h-auto md:h-10 mt-6 mx-auto">
+  <div class="flex flex-col md:flex-row justify-center items-center w-full md:w-auto h-auto md:h-10 gap-4 md:gap-0">
+    <!-- Step 1 -->
+    <div class="flex flex-row justify-center items-center w-auto h-10">
+      <div data-step="1" class="flex justify-center items-center w-10 h-10 rounded-full bg-amber-600">
+        <p class="text-base font-semibold text-white">1</p>
+      </div>
+    </div>
+    
+    <!-- Connector line after Step 1 -->
+    <div data-connector="1" class="hidden md:block w-16 h-1 bg-gray-400 mx-2"></div>
+    
+    <!-- Step 2 -->
+    <div class="flex flex-row justify-center items-center w-auto h-10">
+      <div data-step="2" class="flex justify-center items-center w-10 h-10 rounded-full bg-gray-400">
+        <p class="text-base font-semibold text-white">2</p>
+      </div>
+    </div>
+    
+    <!-- Connector line after Step 2 -->
+    <div data-connector="2" class="hidden md:block w-16 h-1 bg-gray-400 mx-2"></div>
+    
+    <!-- Step 3 -->
+    <div class="flex flex-row justify-center items-center w-auto h-10">
+      <div data-step="3" class="flex justify-center items-center w-10 h-10 rounded-full bg-gray-400">
+        <p class="text-base font-semibold text-white">3</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reservation layout -->
+<section aria-label="Reservation flow" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style="background-color: #FFE4D3;">
+
+	<style>
+		svg .table-group { cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent; }
+		svg .table-group:focus { outline: none; }
+
+		svg .table-group:not(.disabled) .table-rect,
+		svg .table-group:not(.disabled) .chair {
+			fill: #4CAF50 !important;
+			stroke: #388E3C !important;
+		}
+
+		svg .table-group:not(.disabled):hover .table-rect,
+		svg .table-group:not(.disabled):hover .chair {
+			fill: #43A047 !important;
+			stroke: #2E7D32 !important;
+		}
+
+		svg .table-group.disabled .table-rect,
+		svg .table-group.disabled .chair {
+			fill: #DC3545 !important;
+			stroke: #9B1C1C !important;
+			cursor: not-allowed;
+		}
+
+		svg .table-group.selected .table-rect { fill: #FFC107 !important; stroke: #c67500 !important; stroke-width: 1.6; }
+		svg .table-group.selected .chair { fill: #FFB74D !important; }
+	</style>
+	<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+		<!-- Left: form -->
+		<div class="space-y-6 mt-12 mb-12">
+			<div class="bg-white rounded-lg shadow p-6">
+				<h2 class="text-lg font-semibold text-gray-800">Step 1 — Choose date &amp; time</h2>
+				<p class="text-sm text-gray-600 mt-2">Select a date, time and the number of guests for your reservation.</p>
+				<div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+					<input type="date" class="w-full rounded-lg border px-3 py-2" aria-label="Reservation date">
+					<input type="time" class="w-full rounded-lg border px-3 py-2" aria-label="Reservation time">
+					<select id="party_size_select" class="w-full rounded-lg border px-3 py-2 mt-2 sm:mt-0" aria-label="Party size">
+						<option value="1">1 Person</option>
+						<option value="2" selected>2 Persons</option>
+						<option value="3">3 Persons</option>
+						<option value="4">4 Persons</option>
+					</select>
+					<button class="w-full rounded-lg bg-amber-600 text-white font-semibold px-4 py-2">Show Available Tables</button>
+
+                    
+					<div class="col-span-1 sm:col-span-2 mt-2">
+						<p class="text-sm text-gray-700">Selected table: <span id="selected-table-display" class="font-medium">None</span></p>
+						<input type="hidden" name="selected_table" id="selected_table_input" value="">
+					</div>
+				<div class="mt-3 text-gray-700">
+					<p class="font-medium">Sept 26, 2025 — 11:30 AM</p>
+					<p>2 Person · Table 2 (2-seater)</p>
+				</div>
+					<div class="mt-4">
+						<button class="w-full rounded-lg bg-amber-600 text-white font-semibold px-4 py-2">Confirm Reservation</button>
+					</div>
+				</div>
+			</div>
+
+			
+		</div>
+
+		<!-- Right: Table -->
+		<div class="space-y-6 mt-12 mb-12">
+			<div class="bg-white shadow p-6 flex flex-col items-center gap-4 md:h-full">
+				<div class="w-full">
+					<h4 class="text-lg text-center font-semibold text-gray-800">Choose Your Table</h4>
+				</div>
+				<div class="w-full flex justify-center">
+					<div class="w-full max-w-[880px] md:max-w-[1100px]">
+                        
+						<svg class="mx-auto block w-full h-auto" xmlns="http://www.w3.org/2000/svg" viewBox="25.954 -39.695 477.099 585.497" role="img" aria-label="Table layout">
+						<path style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;" d="M 55.117 -23.433 L 55.199 432.662"></path>
+						<path style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;" d="M 55.399 432.662 L 232.47 433.865"></path>
+						<path style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;" d="M 231.868 433.865 L 232.269 510.669"></path>
+						<path style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;" d="M 429.949 -12.845 L 429.949 509.915"></path>
+
+                        
+						<g class="table-group" id="T1" data-table="T1" data-seats="4" role="button" tabindex="0" aria-label="Table T1">
+							<rect class="table-rect" x="97.931" y="87.43" width="32.372" height="64.213" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;"></rect>
+							<ellipse cx="83.331" cy="103.441" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="145.761" cy="103.143" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="145.961" cy="135.454" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="83.031" cy="134.858" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+						</g>
+
+						<g class="table-group" id="T2" data-table="T2" data-seats="4" role="button" tabindex="0" aria-label="Table T2">
+							<rect class="table-rect" x="97.801" y="170.615" width="32.372" height="64.213" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;"></rect>
+							<ellipse cx="83.031" cy="186.257" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="83.331" cy="218.867" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="146.061" cy="186.058" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="145.671" cy="218.867" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+						</g>
+
+						<g class="table-group" id="T3" data-table="T3" data-seats="4" role="button" tabindex="0" aria-label="Table T3">
+							<rect class="table-rect" x="97.931" y="254.402" width="32.372" height="64.213" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;"></rect>
+							<ellipse cx="145.471" cy="270.564" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="82.931" cy="270.167" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="82.931" cy="302.478" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="145.371" cy="301.782" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+						</g>
+
+						<g class="table-group" id="T4" data-table="T4" data-seats="4" role="button" tabindex="0" aria-label="Table T4">
+							<rect class="table-rect" x="97.931" y="337.914" width="32.372" height="64.213" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;"></rect>
+							<ellipse cx="145.371" cy="353.48" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="82.731" cy="353.679" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="82.731" cy="385.99" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="145.761" cy="385.592" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+						</g>
+
+                        
+						<g class="table-group" id="T5" data-table="T5" data-seats="2" role="button" tabindex="0" aria-label="Table T5">
+							<rect class="table-rect" x="215.541" y="114.846" width="33.494" height="36.662" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;"></rect>
+							<ellipse cx="263.321" cy="132.782" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="200.931" cy="132.98" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+						</g>
+
+						<g class="table-group" id="T6" data-table="T6" data-seats="2" role="button" tabindex="0" aria-label="Table T6">
+							<rect class="table-rect" x="215.691" y="175.968" width="33.494" height="36.662" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;"></rect>
+							<ellipse cx="201.031" cy="193.583" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="263.121" cy="193.682" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+						</g>
+
+						<g class="table-group" id="T7" data-table="T7" data-seats="2" role="button" tabindex="0" aria-label="Table T7">
+							<rect class="table-rect" x="215.691" y="235.921" width="33.494" height="36.662" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1; transform-origin: 232.589px 256.364px;"></rect>
+							<ellipse cx="263.121" cy="253.989" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="200.731" cy="254.088" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+						</g>
+
+						<g class="table-group" id="T8" data-table="T8" data-seats="2" role="button" tabindex="0" aria-label="Table T8">
+							<rect class="table-rect" x="215.691" y="296.364" width="33.494" height="36.662" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;"></rect>
+							<ellipse cx="201.131" cy="314.79" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="263.321" cy="314.493" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+						</g>
+
+						<g class="table-group" id="T9" data-table="T9" data-seats="2" role="button" tabindex="0" aria-label="Table T9">
+							<rect class="table-rect" x="215.691" y="356.768" width="33.494" height="36.662" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;"></rect>
+							<ellipse cx="201.131" cy="375.493" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="262.921" cy="375.195" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+						</g>
+
+                        
+						<g class="table-group" id="T10" data-table="T10" data-seats="4" role="button" tabindex="0" aria-label="Table T10">
+							<rect class="table-rect" x="348.241" y="0.505" width="32.372" height="64.213" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;"></rect>
+							<ellipse cx="332.901" cy="47.223" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="332.901" cy="15.15" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="395.646" cy="14.766" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="395.646" cy="47.862" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+						</g>
+
+						<g class="table-group" id="T11" data-table="T11" data-seats="4" role="button" tabindex="0" aria-label="Table T11">
+							<rect class="table-rect" x="348.021" y="85.015" width="32.372" height="64.213" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;"></rect>
+							<ellipse cx="395.773" cy="99.742" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="332.901" cy="99.998" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="333.161" cy="132.072" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="395.518" cy="132.072" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+						</g>
+
+						<g class="table-group" id="T12" data-table="T12" data-seats="4" role="button" tabindex="0" aria-label="Table T12">
+							<rect class="table-rect" x="348.021" y="169.735" width="32.372" height="64.213" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;"></rect>
+							<ellipse cx="332.901" cy="184.696" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="395.773" cy="184.591" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="395.646" cy="217.431" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="332.901" cy="216.92" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+						</g>
+
+						<g class="table-group" id="T13" data-table="T13" data-seats="4" role="button" tabindex="0" aria-label="Table T13">
+							<rect class="table-rect" x="348.021" y="254.456" width="32.372" height="64.213" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;"></rect>
+							<ellipse cx="333.161" cy="269.184" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="395.773" cy="269.439" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="395.901" cy="301.257" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="333.161" cy="301.385" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+						</g>
+
+						<g class="table-group" id="T14" data-table="T14" data-seats="4" role="button" tabindex="0" aria-label="Table T14">
+							<rect class="table-rect" x="348.021" y="337.515" width="32.372" height="64.213" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;"></rect>
+							<ellipse cx="332.901" cy="353.393" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="395.773" cy="353.393" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="395.773" cy="385.339" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="333.161" cy="385.211" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+						</g>
+
+						<g class="table-group" id="T15" data-table="T15" data-seats="4" role="button" tabindex="0" aria-label="Table T15">
+							<rect class="table-rect" x="348.021" y="421.342" width="32.372" height="64.213" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1; transform-origin: 364.335px 451.404px;"></rect>
+							<ellipse cx="333.161" cy="437.73" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="395.773" cy="437.452" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="395.901" cy="469.548" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+							<ellipse cx="333.221" cy="469.804" rx="9.265" ry="9.456" style="fill: rgb(216,216,216); stroke: #000; stroke-width:1" class="chair"></ellipse>
+						</g>
+
+						<!-- Counter (non-interactive) -->
+						<rect x="119.801" y="-14.829" width="164.995" height="70.098" style="fill: rgb(216, 216, 216); stroke: rgb(0, 0, 0); stroke-width: 1;"></rect>
+
+						<text x="202.298" y="20.27" text-anchor="middle" dominant-baseline="middle" style="white-space: pre; fill: rgb(51, 51, 51); font-family: Arial, sans-serif; font-size: 28px; stroke-width: 1;">Counter</text>
+
+					</svg>
+				</div>
+				
+			</div>
+
+			
+		</div>
+	</div>
+</section>
+ 
+</div>
+
+<!-- Load the main JavaScript file -->
+<script>const CURRENT_STEP = "{{ step_number }}";</script>
+<script src="{% static 'reservation/js/progress.js' %}"></script>
+
+<script src="{% static 'reservation/js/table-select.js' %}"></script>
+
+
 
 {% endblock %}
-
