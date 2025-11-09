@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'apps.core',
     'apps.reservations',
     'apps.menu',
+    'apps.review',
 ]
 
 if DEBUG:

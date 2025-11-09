@@ -1,22 +1,193 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Review | Escale Cuisine{% endblock %}
+{% block title %}Write a Review | Escale Cuisine{% endblock %}
 
 {% block content %}
-
-<div class="w-full" style="background-color: #FFE4D3;">
-    
+<div class="min-h-screen bg-[#FFE4D3]">
     <section aria-label="Review hero" class="w-full -mt-[calc(5rem+1px)] bg-gradient-to-r from-[#f65e00] to-[#ff3737]" style="background: linear-gradient(90deg,#f65e00 0%,#ff3737 100%);">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(5rem+1px)] py-8 md:py-20">
             <div class="flex flex-col items-center justify-center text-center gap-1">
                 <h1 class="mt-12 sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">Review</h1>
-                <p class="mt-0.5 text-sm sm:text-base md:text-lg text-white max-w-xxl mx-auto md:mx-0">
-                        Share your experience at Escale Cuisine &amp; Grill
-                    </p>
+                <p class="mt-0.5 text-sm sm:text-base md:text-lg text-white max-w-xxl mx-auto md:mx-0">Share your experience at Escale Cuisine &amp; Grill</p>
             </div>
         </div>
     </section>
 
-    <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-3xl mx-auto p-4 sm:p-6">
+        <div class="bg-white rounded-lg shadow-md p-6 mt-8">
+            <style>
+                /* default un-highlighted star (light gray) */
+                .star-input svg { color: #d1d5db; transition: transform .12s ease, color .12s ease; }
+                /* when a label has .active the star(s) up to that rating are highlighted */
+                .star-input.active svg { color: #f59e0b; transform: scale(1.05); }
+                /* hover state for pointer feedback */
+                .star-input:hover svg { color: #f59e0b; }
+            </style>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold">Write a Review</h2>
+            <a href="{% url 'review:review' %}" class="text-sm text-gray-500">×</a>
+        </div>
 
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <!-- Rating: render custom star radios -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Overall Rating {% if form.rating.field.required %}<span class="text-red-600">*</span>{% endif %}</label>
+                                        <div class="flex items-center gap-2" id="star-rating">
+                                            <label class="inline-flex items-center cursor-pointer star-input" data-value="1">
+                                                <input type="radio" name="rating" value="1" class="sr-only" {% if form.rating.value == "1" %}checked{% endif %} />
+                                                <svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.95a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.45a1 1 0 00-.364 1.118l1.287 3.95c.3.92-.755 1.688-1.538 1.118l-3.37-2.45a1 1 0 00-1.175 0l-3.37 2.45c-.783.57-1.838-.198-1.538-1.118l1.287-3.95a1 1 0 00-.364-1.118L2.063 9.377c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.05 2.927z" /></svg>
+                                            </label>
+                                            <label class="inline-flex items-center cursor-pointer star-input" data-value="2">
+                                                <input type="radio" name="rating" value="2" class="sr-only" {% if form.rating.value == "2" %}checked{% endif %} />
+                                                <svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.95a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.45a1 1 0 00-.364 1.118l1.287 3.95c.3.92-.755 1.688-1.538 1.118l-3.37-2.45a1 1 0 00-1.175 0l-3.37 2.45c-.783.57-1.838-.198-1.538-1.118l1.287-3.95a1 1 0 00-.364-1.118L2.063 9.377c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.05 2.927z" /></svg>
+                                            </label>
+                                            <label class="inline-flex items-center cursor-pointer star-input" data-value="3">
+                                                <input type="radio" name="rating" value="3" class="sr-only" {% if form.rating.value == "3" %}checked{% endif %} />
+                                                <svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.95a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.45a1 1 0 00-.364 1.118l1.287 3.95c.3.92-.755 1.688-1.538 1.118l-3.37-2.45a1 1 0 00-1.175 0l-3.37 2.45c-.783.57-1.838-.198-1.538-1.118l1.287-3.95a1 1 0 00-.364-1.118L2.063 9.377c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.05 2.927z" /></svg>
+                                            </label>
+                                            <label class="inline-flex items-center cursor-pointer star-input" data-value="4">
+                                                <input type="radio" name="rating" value="4" class="sr-only" {% if form.rating.value == "4" %}checked{% endif %} />
+                                                <svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.95a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.45a1 1 0 00-.364 1.118l1.287 3.95c.3.92-.755 1.688-1.538 1.118l-3.37-2.45a1 1 0 00-1.175 0l-3.37 2.45c-.783.57-1.838-.198-1.538-1.118l1.287-3.95a1 1 0 00-.364-1.118L2.063 9.377c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.05 2.927z" /></svg>
+                                            </label>
+                                            <label class="inline-flex items-center cursor-pointer star-input" data-value="5">
+                                                <input type="radio" name="rating" value="5" class="sr-only" {% if form.rating.value == "5" %}checked{% endif %} />
+                                                <svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.95a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.45a1 1 0 00-.364 1.118l1.287 3.95c.3.92-.755 1.688-1.538 1.118l-3.37-2.45a1 1 0 00-1.175 0l-3.37 2.45c-.783.57-1.838-.198-1.538-1.118l1.287-3.95a1 1 0 00-.364-1.118L2.063 9.377c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.05 2.927z" /></svg>
+                                            </label>
+                                        </div>
+                        {% for err in form.rating.errors %}
+                            {% if err != "This field is required." %}
+                                <p class="text-sm text-red-600 mt-1">{{ err }}</p>
+                            {% endif %}
+                        {% endfor %}
+                        <p class="text-xs text-gray-500 mt-2">Click to rate your experience</p>
+                    </div>
+
+            <!-- Render the rest of the fields using the widgets defined in the form -->
+                    <div class="mb-4">
+                        <h3 class="text-sm font-medium text-gray-700 mb-1">Your Name {% if form.user_name.field.required %}<span class="text-red-600">*</span>{% endif %}</h3>
+                        {% for err in form.user_name.errors %}
+                            {% if err != "This field is required." %}
+                                <p class="text-sm text-red-600 mt-1">{{ err }}</p>
+                            {% endif %}
+                        {% endfor %}
+                        {{ form.user_name }}
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="text-sm font-medium text-gray-700 mb-1">Email Address {% if form.email.field.required %}<span class="text-red-600">*</span>{% endif %}</h3>
+                        {% for err in form.email.errors %}
+                            {% if err != "This field is required." %}
+                                <p class="text-sm text-red-600 mt-1">{{ err }}</p>
+                            {% endif %}
+                        {% endfor %}
+                        {{ form.email }}
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="text-sm font-medium text-gray-700 mb-1">Review Title {% if form.review_title.field.required %}<span class="text-red-600">*</span>{% endif %}</h3>
+                        {% for err in form.review_title.errors %}
+                            {% if err != "This field is required." %}
+                                <p class="text-sm text-red-600 mt-1">{{ err }}</p>
+                            {% endif %}
+                        {% endfor %}
+                        {{ form.review_title }}
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="text-sm font-medium text-gray-700 mb-1">Your Review {% if form.review_text.field.required %}<span class="text-red-600">*</span>{% endif %}</h3>
+                        {% for err in form.review_text.errors %}
+                            {% if err != "This field is required." %}
+                                <p class="text-sm text-red-600 mt-1">{{ err }}</p>
+                            {% endif %}
+                        {% endfor %}
+                        {{ form.review_text }}
+                        {% if form.review_text.help_text %}
+                            <p class="text-xs text-gray-500 mt-1">{{ form.review_text.help_text }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="text-sm font-medium text-gray-700 mb-1">Dishes You Ordered {% if form.dishes_ordered.field.required %}<span class="text-red-600">*</span>{% endif %}</h3>
+                        {% for err in form.dishes_ordered.errors %}
+                            {% if err != "This field is required." %}
+                                <p class="text-sm text-red-600 mt-1">{{ err }}</p>
+                            {% endif %}
+                        {% endfor %}
+                        {{ form.dishes_ordered }}
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="text-sm font-medium text-gray-700 mb-1">Date of Visit {% if form.date_of_visit.field.required %}<span class="text-red-600">*</span>{% endif %}</h3>
+                        {% for err in form.date_of_visit.errors %}
+                            {% if err != "This field is required." %}
+                                <p class="text-sm text-red-600 mt-1">{{ err }}</p>
+                            {% endif %}
+                        {% endfor %}
+                        {{ form.date_of_visit }}
+                    </div>
+
+                    <div class="mb-4">
+                        <h3 class="text-sm font-medium text-gray-700 mb-1">Would you recommend us to friends? {% if form.would_you_recommend.field.required %}<span class="text-red-600">*</span>{% endif %}</h3>
+                        {% for err in form.would_you_recommend.errors %}
+                            {% if err != "This field is required." %}
+                                <p class="text-sm text-red-600 mt-1">{{ err }}</p>
+                            {% endif %}
+                        {% endfor %}
+                        {{ form.would_you_recommend }}
+                    </div>
+
+            <div class="flex justify-end gap-3">
+                <a href="{% url 'review:review' %}" class="px-4 py-2 border rounded-md text-sm">Cancel</a>
+                <button type="submit" class="px-4 py-2 bg-amber-500 text-white rounded-md">Submit Review</button>
+            </div>
+        </form>
+                <script>
+                    // Progressive star-fill behavior: highlight 1..n stars when hovered/selected
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const starLabels = Array.from(document.querySelectorAll('.star-input'));
+
+                        function setVisual(value) {
+                            const v = Number(value) || 0;
+                            starLabels.forEach(label => {
+                                const lv = Number(label.getAttribute('data-value')) || 0;
+                                if (lv <= v) label.classList.add('active'); else label.classList.remove('active');
+                            });
+                        }
+
+                        // initialize from any pre-checked radio
+                        const checked = document.querySelector('.star-input input:checked');
+                        setVisual(checked ? checked.value : 0);
+
+                        starLabels.forEach(label => {
+                            const input = label.querySelector('input[type="radio"]');
+                            label.addEventListener('mouseenter', () => setVisual(input.value));
+                            label.addEventListener('click', (e) => {
+                                input.checked = true;
+                                // ensure change event for form libraries
+                                input.dispatchEvent(new Event('change', { bubbles: true }));
+                                setVisual(input.value);
+                            });
+                            label.addEventListener('mouseleave', () => {
+                                const cur = document.querySelector('.star-input input:checked');
+                                setVisual(cur ? cur.value : 0);
+                            });
+                            // keyboard support for radio inputs
+                            input.addEventListener('keydown', (ev) => {
+                                const curVal = Number(input.value);
+                                if (ev.key === 'ArrowLeft' && curVal > 1) {
+                                    const prev = document.querySelector('.star-input[data-value="' + (curVal - 1) + '"] input');
+                                    if (prev) { prev.checked = true; prev.dispatchEvent(new Event('change', { bubbles: true })); setVisual(prev.value); prev.focus(); }
+                                }
+                                if (ev.key === 'ArrowRight' && curVal < 5) {
+                                    const next = document.querySelector('.star-input[data-value="' + (curVal + 1) + '"] input');
+                                    if (next) { next.checked = true; next.dispatchEvent(new Event('change', { bubbles: true })); setVisual(next.value); next.focus(); }
+                                }
+                            });
+                        });
+                    });
+                </script>
+    </div>
 {% endblock %}
