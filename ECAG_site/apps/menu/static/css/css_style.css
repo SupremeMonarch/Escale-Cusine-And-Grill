@@ -13,12 +13,18 @@ button a:hover {
 h2 {
     color: rgb(255, 102, 46);
     font-family: sans-serif;
-    margin-left: 70px;
+    margin-left: 80px;
+}
+p{
+    font-size: 24px;
+    font-family: sans-serif;
+    text-align: center;
+    font-weight: bold;
 }
 
 
-
-/*ORDER*/
+/*
+ORDER
 #title {
     color: white;
     text-align: center;
@@ -78,13 +84,13 @@ h2 {
     float: right;
     margin-right: 15px;
 }
-
+*/
 
 
 /*MENU*/
 img{
     width: 384px;
-    height: 256px;
+    height: 280px;
     object-fit: cover;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
@@ -119,7 +125,7 @@ img{
     box-shadow: 0px 2px 5px grey;
     border-radius: 10px;
     margin-top: 50px;
-    margin-left: 71px;
+    margin-left: 73px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -144,10 +150,11 @@ img{
     color: white;
     background: linear-gradient(to right, orange, orangered);
     width: 350px;
-    height: 30px;
+    height: 40px;
     border:none;
     border-radius: 20px;
     cursor: pointer;
+    font-weight: bolder;
 }
 #ordernow:hover {
     background: rgb(255, 0, 76);
