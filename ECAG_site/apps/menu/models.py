@@ -58,7 +58,9 @@ class Promotion(models.Model):
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     order_date = models.DateTimeField(auto_now_add=True, editable=False)
+    order_id_str = models.CharField(max_length=20, unique=True, blank=True) #This a unique, human-readable ID
     #table_id = models.ForeignKey(Table, on_delete=models.PROTECT) not yet created models.py for Table
+
     class Ordertype(models.TextChoices): #enum data type
         DELIVERY =  "delivery", "Delivery"
         CARRY_OUT   =   "carry out", "Carry Out"
@@ -78,6 +80,14 @@ class Order(models.Model):
         default=Status.IN_PROGRESS,
     )
     total = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), validators=[MinValueValidator(Decimal("0.00"))])
+
+    # Auto-generate the human-readable order_id_str on save
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs) # Save first to get a primary key (self.id)
+        if not self.order_id_str:
+            self.order_id_str = f"ORD-{self.id:03d}"
+            super(Order, self).save(update_fields=['order_id_str'])
+
 
     def __str__(self): #this is so only the user's name appears on the admin page when an order is added
         return f"{self.user}'s Order"
