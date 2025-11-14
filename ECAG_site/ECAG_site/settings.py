@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'apps.reservations',
     'apps.menu',
     'apps.review',
+    'apps.customer',
+    'apps.staff',
 ]
 
 if DEBUG:
