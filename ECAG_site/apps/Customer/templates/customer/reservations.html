@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>customer my reservations</title>
+    <title>My Reservations</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -18,25 +18,75 @@
             box-shadow: 0px 2px 4px -2px rgba(0, 0, 0, 0.1),
                 0px 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-
-        /* Icon styling for the reservation card details */
-        .icon-style {
-            width: 1.125rem;
-            /* 18px */
-            height: 1.125rem;
-            /* 18px */
-            color: #9ca3af;
-            /* Gray-400 */
-            margin-right: 0.5rem;
-        }
-
-        .main-icon-style {
-            width: 1.25rem;
-            /* 20px */
-            height: 1.25rem;
-            /* 20px */
-        }
     </style>
+</head>
+
+<!-- Initial load calls the new filterReservations function -->
+
+<body>
+
+    {% include 'customer/includes/sidebar.html' %}
+
+    <!-- START: Main Content Wrapper -->
+    <main class="md:ml-64 py-6 sm:py-10 flex justify-center px-4">
+        <div class="p-4 sm:p-6 lg:p-8 w-full max-w-[850px] mx-auto">
+            <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full mb-8 space-y-4 sm:space-y-0">
+                <div class="flex flex-col justify-start items-start h-auto w-full sm:w-auto pl-2">
+                    <h1 class="text-xl font-bold text-gray-900">My Reservations</h1>
+                    <p class="text-xs text-gray-600">Track and manage your reservations</p>
+                </div>
+                <!-- Filter Buttons -->
+                <div class="flex flex-wrap gap-2 justify-start sm:justify-end">
+                    <button id="filter-All" onclick="filterReservations('All')" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium transition duration-150 ease-in-out bg-blue-600 text-white hover:bg-blue-700">All</button>
+                    <button id="filter-pending" onclick="filterReservations('pending')" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200">Pending</button>
+                    <button id="filter-confirmed" onclick="filterReservations('confirmed')" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200">Confirmed</button>
+                    <button id="filter-completed" onclick="filterReservations('completed')" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200">Completed</button>
+                    <button id="filter-cancelled" onclick="filterReservations('cancelled')" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200">Cancelled</button>
+                </div>
+            </header>
+
+            <!-- Reservations List Container  -->
+            <div class="space-y-6" id="reservations-list">
+                {% for res in reservations %}
+                <div class="reservation-card flex flex-col w-full max-w-full p-6 rounded-xl bg-white card-shadow" data-status="{{ res.status }}">
+                    <div class="flex justify-between items-center pb-4 pl-4 pr-4">
+                        <div class="flex items-center">
+                            <div class="flex flex-col justify-start items-start">
+                                <p class="text-base font-semibold text-gray-900">#RES-{{ res.reservation_id }}</p>
+                                <div class="flex items-center text-sm text-gray-600">{{ res.date|date:"F d, Y" }} at {{ res.time|time:"g:i A" }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge -->
+                        {% if res.status == 'confirmed' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-green-100 text-green-800 ml-4 flex-shrink-0"><p class="text-sm font-medium">Confirmed</p></div>
+                        {% elif res.status == 'pending' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 ml-4 flex-shrink-0"><p class="text-sm font-medium">Pending</p></div>
+                        {% elif res.status == 'completed' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-blue-100 text-blue-800 ml-4 flex-shrink-0"><p class="text-sm font-medium">Completed</p></div>
+                        {% elif res.status == 'cancelled' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-red-100 text-red-800 ml-4 flex-shrink-0"><p class="text-sm font-medium">Cancelled</p></div>
+                        {% else %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-gray-100 text-gray-800 ml-4 flex-shrink-0"><p class="text-sm font-medium">{{ res.status|title }}</p></div>
+                        {% endif %}
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 py-4 border-y border-gray-200 w-full">
+                        <div class="flex flex-col items-center"><span class="text-xs font-medium text-gray-600 mb-1">Guests</span><p class="text-ms font-semibold text-gray-900 w-full flex justify-center">{{ res.guest_count }} people</p></div>
+                        <div class="flex flex-col items-center"><span class="text-xs font-medium text-gray-600 mb-1">Table</span><p class="text-ms font-semibold text-gray-900 w-full flex justify-center">{{ res.table_id.table_number|default:"N/A" }}</p></div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center pt-4 pr-4 pl-4 w-full">
+                        {% if res.status == 'pending' or res.status == 'confirmed' %}
+                        <div class="flex gap-3 w-full sm:w-auto mt-4 sm:mt-0">
+                            <button class="flex justify-center items-center h-10 px-4 py-2 rounded-lg bg-blue-600 text-base text-white hover:bg-blue-700 transition w-full sm:w-auto font-medium">Modify</button>
+                            <button class="flex justify-center items-center h-10 px-4 py-2 rounded-lg bg-red-600 text-base text-white hover:bg-red-700 transition w-full sm:w-auto font-medium">Cancel</button>
+                        </div>
+                        {% endif %}
+                        <button class="flex justify-center sm:justify-end items-center h-10 px-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition sm:ml-auto">View Details</button>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-center text-gray-500 py-10">You have no reservations.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+    <!-- END: Main Content Wrapper -->
+
     <script>
         function filterReservations(status) {
             // 1. Get all filter buttons and reservation cards
@@ -45,413 +95,30 @@
 
             // 2. Update button styles (active/inactive)
             buttons.forEach((button) => {
-                button.classList.remove(
-                    "bg-blue-600",
-                    "text-white",
-                    "hover:bg-blue-700",
-                    "bg-gray-100",
-                    "text-gray-600",
-                    "hover:bg-gray-200"
-                );
+            button.classList.remove("bg-blue-600", "text-white", "hover:bg-blue-700");
+            button.classList.add("bg-gray-100", "text-gray-600", "hover:bg-gray-200");
 
-                const buttonIdStatus = button.id.replace("filter-", "");
-                if (buttonIdStatus === status) {
-                    button.classList.add(
-                        "bg-blue-600",
-                        "text-white",
-                        "hover:bg-blue-700"
-                    );
-                } else {
-                    button.classList.add(
-                        "bg-gray-100",
-                        "text-gray-600",
-                        "hover:bg-gray-200"
-                    );
-                }
+            // Use the 'id' (filter-pending) to get the status value
+            const buttonStatus = button.id.replace("filter-", "");
+            if (buttonStatus === status) {
+                button.classList.add("bg-blue-600", "text-white", "hover:bg-blue-700");
+                button.classList.remove("bg-gray-100", "text-gray-600", "hover:bg-gray-200");
+            }
             });
 
             // 3. Filter the cards based on their data-status attribute
             cards.forEach((card) => {
-                const cardStatus = card.getAttribute("data-status");
-                if (status === "All" || cardStatus === status) {
-                    // Show the card
-                    card.classList.remove("hidden");
-                    card.classList.add("flex");
-                } else {
-                    // Hide the card
-                    card.classList.remove("flex");
-                    card.classList.add("hidden");
-                }
+            const cardStatus = card.getAttribute("data-status");
+            if (status === "All" || cardStatus === status) {
+                card.style.display = "flex";
+            } else {
+                card.style.display = "none";
+            }
             });
         }
+        // Initialize filter on load
+        document.addEventListener('DOMContentLoaded', () => filterReservations('All'));
     </script>
-</head>
-
-<!-- Initial load calls the new filterReservations function -->
-
-<body onload="filterReservations('All')">
-
-    {% include 'customer/includes/sidebar.html' %}
-
-    <!-- START: Main Content Wrapper -->
-    <main class="md:ml-64 py-6 sm:py-10 flex justify-center px-4">
-        <div class="p-4 sm:p-6 lg:p-8 w-full max-w-[850px] mx-auto">
-            <header
-                class="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full mb-8 space-y-4 sm:space-y-0">
-                <div class="flex flex-col justify-start items-start h-auto w-full sm:w-auto pl-2">
-                    <!-- Updated Main Title -->
-                    <h1 class="text-xl font-bold text-gray-900">My Reservations</h1>
-                    <p class="text-xs text-gray-600">
-                        Track and manage your reservations
-                    </p>
-                </div>
-
-                <!-- Filter Buttons -->
-                <div class="flex flex-wrap gap-2 justify-start sm:justify-end">
-                    <button id="filter-All" onclick="filterReservations('All')"
-                        class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium transition duration-150 ease-in-out bg-blue-600 text-white hover:bg-blue-700">
-                        All
-                    </button>
-
-                    <button id="filter-Pending" onclick="filterReservations('Pending')"
-                        class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200">
-                        Pending
-                    </button>
-
-                    <button id="filter-Confirmed" onclick="filterReservations('Confirmed')"
-                        class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200">
-                        Confirmed
-                    </button>
-
-                    <button id="filter-Completed" onclick="filterReservations('Completed')"
-                        class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200">
-                        Completed
-                    </button>
-
-                    <button id="filter-Cancelled" onclick="filterReservations('Cancelled')"
-                        class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200">
-                        Cancelled
-                    </button>
-                </div>
-            </header>
-
-            <!-- Reservations List Container  -->
-            <div class="space-y-6" id="reservations-list">
-                <!-- CARD 1: Confirmed Reservation -->
-                <div class="reservation-card flex flex-col w-full max-w-full p-6 rounded-xl bg-white card-shadow"
-                    data-status="Confirmed">
-                    <!-- Header: ID, Date/Time, and Status Badge -->
-                    <div class="flex justify-between items-center pb-4 pl-4 pr-4">
-                        <div class="flex items-center">
-
-                            <div class="flex flex-col justify-start items-start">
-                                <p class="text-base font-semibold text-gray-900">#RES-001</p>
-                                <div class="flex items-center text-sm text-gray-600">
-                                    2024-01-20 at 6:30 PM
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Status Badge -->
-                        <div
-                            class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-green-100 text-green-800 ml-4 flex-shrink-0">
-                            <p class="text-sm font-medium">Confirmed</p>
-                        </div>
-                    </div>
-
-                    <!-- Details Grid: Guests and Table -->
-                    <div
-                        class="flex flex-wrap justify-center items-center gap-x-36 gap-y-4 self-stretch py-4 border-t border-b border-gray-200">
-                        <!-- Guests -->
-                        <div class="flex flex-col items-center">
-                            <div class="flex items-center text-gray-600 mb-1">
-                                <!-- Users Icon -->
-                                <svg width="18" height="17" viewBox="0 0 18 17" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg" class="icon-style"
-                                    preserveAspectRatio="xMidYMid meet">
-                                    <path
-                                        d="M1.83252 15.5C1.83252 14.5311 2.07681 13.6333 2.56539 12.8067C3.03621 12.0067 3.67137 11.3711 4.47087 10.9C5.29702 10.4111 6.19424 10.1667 7.16252 10.1667C8.1308 10.1667 9.02802 10.4111 9.85417 10.9C10.6537 11.3711 11.2888 12.0067 11.7596 12.8067C12.2482 13.6333 12.4925 14.5311 12.4925 15.5H11.16C11.16 14.78 10.9779 14.1089 10.6137 13.4867C10.2584 12.8822 9.77866 12.4022 9.17459 12.0467C8.55276 11.6822 7.88207 11.5 7.16252 11.5C6.44297 11.5 5.77228 11.6822 5.15044 12.0467C4.54638 12.4022 4.06668 12.8822 3.71134 13.4867C3.34713 14.1089 3.16502 14.78 3.16502 15.5H1.83252ZM7.16252 9.5C6.43409 9.5 5.76339 9.31778 5.15044 8.95333C4.54638 8.59778 4.06668 8.11778 3.71134 7.51333C3.34713 6.9 3.16502 6.22889 3.16502 5.5C3.16502 4.77111 3.34713 4.1 3.71134 3.48667C4.06668 2.88222 4.54638 2.40222 5.15044 2.04667C5.76339 1.68222 6.43409 1.5 7.16252 1.5C7.89095 1.5 8.56164 1.68222 9.17459 2.04667C9.77866 2.40222 10.2584 2.88222 10.6137 3.48667C10.9779 4.1 11.16 4.77111 11.16 5.5C11.16 6.22889 10.9779 6.9 10.6137 7.51333C10.2584 8.11778 9.77866 8.59778 9.17459 8.95333C8.56164 9.31778 7.89095 9.5 7.16252 9.5ZM7.16252 8.16667C7.64222 8.16667 8.08639 8.04667 8.49502 7.80667C8.90365 7.56667 9.22789 7.24222 9.46774 6.83333C9.70759 6.42444 9.82752 5.98 9.82752 5.5C9.82752 5.02 9.70759 4.57555 9.46774 4.16667C9.22789 3.75778 8.90365 3.43333 8.49502 3.19333C8.08639 2.95333 7.64222 2.83333 7.16252 2.83333C6.68282 2.83333 6.23865 2.95333 5.83002 3.19333C5.42139 3.43333 5.09714 3.75778 4.85729 4.16667C4.61744 4.57555 4.49752 5.02 4.49752 5.5C4.49752 5.98 4.61744 6.42444 4.85729 6.83333C5.09714 7.24222 5.42139 7.56667 5.83002 7.80667C6.23865 8.04667 6.68282 8.16667 7.16252 8.16667ZM12.6791 10.6333C13.3009 10.9089 13.8494 11.2933 14.3247 11.7867C14.8 12.28 15.1664 12.8378 15.424 13.46C15.6905 14.1089 15.8238 14.7889 15.8238 15.5H14.4913C14.4913 14.7 14.2736 13.9667 13.8383 13.3C13.4119 12.6511 12.8434 12.1667 12.1327 11.8467L12.6791 10.6333ZM12.226 3.11333C12.9012 3.38889 13.4475 3.83333 13.865 4.44667C14.2825 5.06 14.4913 5.74444 14.4913 6.5C14.4913 7.13111 14.3447 7.71556 14.0515 8.25333C13.7584 8.79111 13.3564 9.22889 12.8456 9.56667C12.3348 9.90444 11.773 10.1 11.16 10.1533V8.80667C11.5331 8.75333 11.8729 8.61778 12.1794 8.4C12.4859 8.18222 12.7257 7.90667 12.8989 7.57333C13.0722 7.24 13.1588 6.88222 13.1588 6.5C13.1588 6.04667 13.0388 5.63333 12.799 5.26C12.5591 4.88667 12.2438 4.60222 11.8529 4.40667L12.226 3.11333Z"
-                                        fill="currentColor"></path>
-                                </svg>
-                                <span class="text-xs font-medium">Guests</span>
-                            </div>
-
-                            <p class="text-ms font-semibold text-gray-900 w-full flex justify-center">
-                                4 people
-                            </p>
-                        </div>
-
-                        <!-- Table -->
-                        <div class="flex flex-col items-center">
-                            <div class="flex items-center text-gray-600 mb-1">
-                                <!-- Table Icon -->
-                                <svg width="18" height="17" viewBox="0 0 18 17" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg" class="icon-style"
-                                    preserveAspectRatio="xMidYMid meet">
-                                    <path
-                                        d="M3.49803 5.83333H14.158V3.83333H3.49803V5.83333ZM10.1605 13.1667V7.16667H7.49553V13.1667H10.1605ZM11.493 13.1667H14.158V7.16667H11.493V13.1667ZM6.16303 13.1667V7.16667H3.49803V13.1667H6.16303ZM2.83178 2.5H14.8243C15.0108 2.5 15.1685 2.56444 15.2973 2.69333C15.4261 2.82222 15.4905 2.98 15.4905 3.16667V13.8333C15.4905 14.02 15.4261 14.1778 15.2973 14.3067C15.1685 14.4356 15.0108 14.5 14.8243 14.5H2.83178C2.64523 14.5 2.48755 14.4356 2.35874 14.3067C2.22993 14.1778 2.16553 14.02 2.16553 13.8333V3.16667C2.16553 2.98 2.22993 2.82222 2.35874 2.69333C2.48755 2.56444 2.64523 2.5 2.83178 2.5Z"
-                                        fill="currentColor"></path>
-                                </svg>
-                                <span class="text-xs font-medium">Table</span>
-                            </div>
-
-                            <p class="text-ms font-semibold text-gray-900 w-full flex justify-center">
-                                Table 12
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Footer: Modify/Cancel/View Details -->
-                    <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center pt-4 pr-4 pl-4">
-                        <!-- Show Modify/Cancel buttons for Confirmed -->
-                        <div class="flex gap-3 w-full sm:w-auto mt-4 sm:mt-0">
-                            <button
-                                class="flex justify-center items-center h-10 px-4 py-2 rounded-lg bg-blue-600 text-base text-white hover:bg-blue-700 transition duration-150 ease-in-out w-full sm:w-auto font-medium">
-                                Modify
-                            </button>
-                            <button
-                                class="flex justify-center items-center h-10 px-4 py-2 rounded-lg bg-red-600 text-base text-white hover:bg-red-700 transition duration-150 ease-in-out w-full sm:w-auto font-medium">
-                                Cancel
-                            </button>
-                        </div>
-                        <button
-                            class="flex justify-center sm:justify-end items-center h-10 px-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition duration-150 ease-in-out sm:ml-auto">
-                            View Details
-                        </button>
-                    </div>
-                </div>
-
-                <!-- CARD 2: Completed Reservation -->
-                <div class="reservation-card flex flex-col w-full max-w-full p-6 rounded-xl bg-white card-shadow"
-                    data-status="Completed">
-                    <!-- Header: ID, Date/Time, and Status Badge -->
-                    <div class="flex justify-between items-center pb-4 pl-4 pr-4">
-                        <div class="flex items-center">
-
-                            <div class="flex flex-col justify-start items-start">
-                                <p class="text-base font-semibold text-gray-900">#RES-002</p>
-                                <div class="flex items-center text-sm text-gray-600">
-                                    2024-01-20 at 6:30 PM
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Status Badge -->
-                        <div
-                            class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-blue-100 text-blue-800 ml-4 flex-shrink-0">
-                            <p class="text-sm font-medium">Completed</p>
-                        </div>
-                    </div>
-
-                    <!-- Details Grid: Guests and Table -->
-                    <div class="grid grid-cols-2 gap-4 py-4 border-y border-gray-200">
-                        <!-- Guests -->
-                        <div class="flex flex-col items-center">
-                            <div class="flex items-center text-gray-600 mb-1">
-                                <!-- Users Icon -->
-                                <svg width="18" height="17" viewBox="0 0 18 17" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg" class="icon-style"
-                                    preserveAspectRatio="xMidYMid meet">
-                                    <path
-                                        d="M1.83252 15.5C1.83252 14.5311 2.07681 13.6333 2.56539 12.8067C3.03621 12.0067 3.67137 11.3711 4.47087 10.9C5.29702 10.4111 6.19424 10.1667 7.16252 10.1667C8.1308 10.1667 9.02802 10.4111 9.85417 10.9C10.6537 11.3711 11.2888 12.0067 11.7596 12.8067C12.2482 13.6333 12.4925 14.5311 12.4925 15.5H11.16C11.16 14.78 10.9779 14.1089 10.6137 13.4867C10.2584 12.8822 9.77866 12.4022 9.17459 12.0467C8.55276 11.6822 7.88207 11.5 7.16252 11.5C6.44297 11.5 5.77228 11.6822 5.15044 12.0467C4.54638 12.4022 4.06668 12.8822 3.71134 13.4867C3.34713 14.1089 3.16502 14.78 3.16502 15.5H1.83252ZM7.16252 9.5C6.43409 9.5 5.76339 9.31778 5.15044 8.95333C4.54638 8.59778 4.06668 8.11778 3.71134 7.51333C3.34713 6.9 3.16502 6.22889 3.16502 5.5C3.16502 4.77111 3.34713 4.1 3.71134 3.48667C4.06668 2.88222 4.54638 2.40222 5.15044 2.04667C5.76339 1.68222 6.43409 1.5 7.16252 1.5C7.89095 1.5 8.56164 1.68222 9.17459 2.04667C9.77866 2.40222 10.2584 2.88222 10.6137 3.48667C10.9779 4.1 11.16 4.77111 11.16 5.5C11.16 6.22889 10.9779 6.9 10.6137 7.51333C10.2584 8.11778 9.77866 8.59778 9.17459 8.95333C8.56164 9.31778 7.89095 9.5 7.16252 9.5ZM7.16252 8.16667C7.64222 8.16667 8.08639 8.04667 8.49502 7.80667C8.90365 7.56667 9.22789 7.24222 9.46774 6.83333C9.70759 6.42444 9.82752 5.98 9.82752 5.5C9.82752 5.02 9.70759 4.57555 9.46774 4.16667C9.22789 3.75778 8.90365 3.43333 8.49502 3.19333C8.08639 2.95333 7.64222 2.83333 7.16252 2.83333C6.68282 2.83333 6.23865 2.95333 5.83002 3.19333C5.42139 3.43333 5.09714 3.75778 4.85729 4.16667C4.61744 4.57555 4.49752 5.02 4.49752 5.5C4.49752 5.98 4.61744 6.42444 4.85729 6.83333C5.09714 7.24222 5.42139 7.56667 5.83002 7.80667C6.23865 8.04667 6.68282 8.16667 7.16252 8.16667ZM12.6791 10.6333C13.3009 10.9089 13.8494 11.2933 14.3247 11.7867C14.8 12.28 15.1664 12.8378 15.424 13.46C15.6905 14.1089 15.8238 14.7889 15.8238 15.5H14.4913C14.4913 14.7 14.2736 13.9667 13.8383 13.3C13.4119 12.6511 12.8434 12.1667 12.1327 11.8467L12.6791 10.6333ZM12.226 3.11333C12.9012 3.38889 13.4475 3.83333 13.865 4.44667C14.2825 5.06 14.4913 5.74444 14.4913 6.5C14.4913 7.13111 14.3447 7.71556 14.0515 8.25333C13.7584 8.79111 13.3564 9.22889 12.8456 9.56667C12.3348 9.90444 11.773 10.1 11.16 10.1533V8.80667C11.5331 8.75333 11.8729 8.61778 12.1794 8.4C12.4859 8.18222 12.7257 7.90667 12.8989 7.57333C13.0722 7.24 13.1588 6.88222 13.1588 6.5C13.1588 6.04667 13.0388 5.63333 12.799 5.26C12.5591 4.88667 12.2438 4.60222 11.8529 4.40667L12.226 3.11333Z"
-                                        fill="currentColor"></path>
-                                </svg>
-                                <span class="text-xs font-medium">Guests</span>
-                            </div>
-                            <!-- Detail Text (UPDATED CLASS) -->
-                            <p class="text-ms font-semibold text-gray-900 w-full flex justify-center">
-                                4 people
-                            </p>
-                        </div>
-
-                        <!-- Table -->
-                        <div class="flex flex-col items-center">
-                            <div class="flex items-center text-gray-600 mb-1">
-                                <!-- Table Icon -->
-                                <svg width="18" height="17" viewBox="0 0 18 17" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg" class="icon-style"
-                                    preserveAspectRatio="xMidYMid meet">
-                                    <path
-                                        d="M3.49803 5.83333H14.158V3.83333H3.49803V5.83333ZM10.1605 13.1667V7.16667H7.49553V13.1667H10.1605ZM11.493 13.1667H14.158V7.16667H11.493V13.1667ZM6.16303 13.1667V7.16667H3.49803V13.1667H6.16303ZM2.83178 2.5H14.8243C15.0108 2.5 15.1685 2.56444 15.2973 2.69333C15.4261 2.82222 15.4905 2.98 15.4905 3.16667V13.8333C15.4905 14.02 15.4261 14.1778 15.2973 14.3067C15.1685 14.4356 15.0108 14.5 14.8243 14.5H2.83178C2.64523 14.5 2.48755 14.4356 2.35874 14.3067C2.22993 14.1778 2.16553 14.02 2.16553 13.8333V3.16667C2.16553 2.98 2.22993 2.82222 2.35874 2.69333C2.48755 2.56444 2.64523 2.5 2.83178 2.5Z"
-                                        fill="currentColor"></path>
-                                </svg>
-                                <span class="text-xs font-medium">Table</span>
-                            </div>
-                            <!-- Detail Text (UPDATED CLASS) -->
-                            <p class="text-ms font-semibold text-gray-900 w-full flex justify-center">
-                                Table 12
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Footer: Modify/Cancel/View Details -->
-                    <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center pt-4 pr-4 pl-4">
-                        <button
-                            class="flex justify-center sm:justify-end items-center h-10 px-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition duration-150 ease-in-out sm:ml-auto">
-                            View Receipt
-                        </button>
-                    </div>
-                </div>
-
-                <!-- CARD 3: Pending Reservation -->
-                <div class="reservation-card flex flex-col w-full max-w-full p-6 rounded-xl bg-white card-shadow"
-                    data-status="Pending">
-                    <!-- Header: ID, Date/Time, and Status Badge -->
-                    <div class="flex justify-between items-center pb-4 pl-4 pr-4">
-                        <div class="flex items-center">
-
-                            <div class="flex flex-col justify-start items-start">
-                                <p class="text-base font-semibold text-gray-900">#RES-003</p>
-                                <div class="flex items-center text-sm text-gray-600">
-                                    2024-01-20 at 6:30 PM
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Status Badge -->
-                        <div
-                            class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 ml-4 flex-shrink-0">
-                            <p class="text-sm font-medium">Pending</p>
-                        </div>
-                    </div>
-
-                    <!-- Details Grid: Guests and Table -->
-                    <div class="grid grid-cols-2 gap-4 py-4 border-y border-gray-200">
-                        <!-- Guests -->
-                        <div class="flex flex-col items-center">
-                            <div class="flex items-center text-gray-600 mb-1">
-                                <!-- Users Icon -->
-                                <svg width="18" height="17" viewBox="0 0 18 17" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg" class="icon-style"
-                                    preserveAspectRatio="xMidYMid meet">
-                                    <path
-                                        d="M1.83252 15.5C1.83252 14.5311 2.07681 13.6333 2.56539 12.8067C3.03621 12.0067 3.67137 11.3711 4.47087 10.9C5.29702 10.4111 6.19424 10.1667 7.16252 10.1667C8.1308 10.1667 9.02802 10.4111 9.85417 10.9C10.6537 11.3711 11.2888 12.0067 11.7596 12.8067C12.2482 13.6333 12.4925 14.5311 12.4925 15.5H11.16C11.16 14.78 10.9779 14.1089 10.6137 13.4867C10.2584 12.8822 9.77866 12.4022 9.17459 12.0467C8.55276 11.6822 7.88207 11.5 7.16252 11.5C6.44297 11.5 5.77228 11.6822 5.15044 12.0467C4.54638 12.4022 4.06668 12.8822 3.71134 13.4867C3.34713 14.1089 3.16502 14.78 3.16502 15.5H1.83252ZM7.16252 9.5C6.43409 9.5 5.76339 9.31778 5.15044 8.95333C4.54638 8.59778 4.06668 8.11778 3.71134 7.51333C3.34713 6.9 3.16502 6.22889 3.16502 5.5C3.16502 4.77111 3.34713 4.1 3.71134 3.48667C4.06668 2.88222 4.54638 2.40222 5.15044 2.04667C5.76339 1.68222 6.43409 1.5 7.16252 1.5C7.89095 1.5 8.56164 1.68222 9.17459 2.04667C9.77866 2.40222 10.2584 2.88222 10.6137 3.48667C10.9779 4.1 11.16 4.77111 11.16 5.5C11.16 6.22889 10.9779 6.9 10.6137 7.51333C10.2584 8.11778 9.77866 8.59778 9.17459 8.95333C8.56164 9.31778 7.89095 9.5 7.16252 9.5ZM7.16252 8.16667C7.64222 8.16667 8.08639 8.04667 8.49502 7.80667C8.90365 7.56667 9.22789 7.24222 9.46774 6.83333C9.70759 6.42444 9.82752 5.98 9.82752 5.5C9.82752 5.02 9.70759 4.57555 9.46774 4.16667C9.22789 3.75778 8.90365 3.43333 8.49502 3.19333C8.08639 2.95333 7.64222 2.83333 7.16252 2.83333C6.68282 2.83333 6.23865 2.95333 5.83002 3.19333C5.42139 3.43333 5.09714 3.75778 4.85729 4.16667C4.61744 4.57555 4.49752 5.02 4.49752 5.5C4.49752 5.98 4.61744 6.42444 4.85729 6.83333C5.09714 7.24222 5.42139 7.56667 5.83002 7.80667C6.23865 8.04667 6.68282 8.16667 7.16252 8.16667ZM12.6791 10.6333C13.3009 10.9089 13.8494 11.2933 14.3247 11.7867C14.8 12.28 15.1664 12.8378 15.424 13.46C15.6905 14.1089 15.8238 14.7889 15.8238 15.5H14.4913C14.4913 14.7 14.2736 13.9667 13.8383 13.3C13.4119 12.6511 12.8434 12.1667 12.1327 11.8467L12.6791 10.6333ZM12.226 3.11333C12.9012 3.38889 13.4475 3.83333 13.865 4.44667C14.2825 5.06 14.4913 5.74444 14.4913 6.5C14.4913 7.13111 14.3447 7.71556 14.0515 8.25333C13.7584 8.79111 13.3564 9.22889 12.8456 9.56667C12.3348 9.90444 11.773 10.1 11.16 10.1533V8.80667C11.5331 8.75333 11.8729 8.61778 12.1794 8.4C12.4859 8.18222 12.7257 7.90667 12.8989 7.57333C13.0722 7.24 13.1588 6.88222 13.1588 6.5C13.1588 6.04667 13.0388 5.63333 12.799 5.26C12.5591 4.88667 12.2438 4.60222 11.8529 4.40667L12.226 3.11333Z"
-                                        fill="currentColor"></path>
-                                </svg>
-                                <span class="text-xs font-medium">Guests</span>
-                            </div>
-                            <!-- Detail Text (UPDATED CLASS) -->
-                            <p class="text-ms font-semibold text-gray-900 w-full flex justify-center">
-                                4 people
-                            </p>
-                        </div>
-
-                        <!-- Table -->
-                        <div class="flex flex-col items-center">
-                            <div class="flex items-center text-gray-600 mb-1">
-                                <!-- Table Icon -->
-                                <svg width="18" height="17" viewBox="0 0 18 17" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg" class="icon-style"
-                                    preserveAspectRatio="xMidYMid meet">
-                                    <path
-                                        d="M3.49803 5.83333H14.158V3.83333H3.49803V5.83333ZM10.1605 13.1667V7.16667H7.49553V13.1667H10.1605ZM11.493 13.1667H14.158V7.16667H11.493V13.1667ZM6.16303 13.1667V7.16667H3.49803V13.1667H6.16303ZM2.83178 2.5H14.8243C15.0108 2.5 15.1685 2.56444 15.2973 2.69333C15.4261 2.82222 15.4905 2.98 15.4905 3.16667V13.8333C15.4905 14.02 15.4261 14.1778 15.2973 14.3067C15.1685 14.4356 15.0108 14.5 14.8243 14.5H2.83178C2.64523 14.5 2.48755 14.4356 2.35874 14.3067C2.22993 14.1778 2.16553 14.02 2.16553 13.8333V3.16667C2.16553 2.98 2.22993 2.82222 2.35874 2.69333C2.48755 2.56444 2.64523 2.5 2.83178 2.5Z"
-                                        fill="currentColor"></path>
-                                </svg>
-                                <span class="text-xs font-medium">Table</span>
-                            </div>
-                            <!-- Detail Text (UPDATED CLASS) -->
-                            <p class="text-ms font-semibold text-gray-900 w-full flex justify-center">
-                                Table 12
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Footer: Modify/Cancel/View Details -->
-                    <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center pt-4 pr-4 pl-4">
-                        <!-- Show Modify/Cancel buttons for Confirmed -->
-                        <div class="flex gap-3 w-full sm:w-auto mt-4 sm:mt-0">
-                            <button
-                                class="flex justify-center items-center h-10 px-4 py-2 rounded-lg bg-blue-600 text-base text-white hover:bg-blue-700 transition duration-150 ease-in-out w-full sm:w-auto font-medium">
-                                Modify
-                            </button>
-                            <button
-                                class="flex justify-center items-center h-10 px-4 py-2 rounded-lg bg-red-600 text-base text-white hover:bg-red-700 transition duration-150 ease-in-out w-full sm:w-auto font-medium">
-                                Cancel
-                            </button>
-                        </div>
-                        <button
-                            class="flex justify-center sm:justify-end items-center h-10 px-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition duration-150 ease-in-out sm:ml-auto">
-                            View Details
-                        </button>
-                    </div>
-                </div>
-
-                <!-- CARD 4: Cancelled Reservation -->
-                <div class="reservation-card flex flex-col w-full max-w-full p-6 rounded-xl bg-white card-shadow"
-                    data-status="Cancelled">
-                    <!-- Header: ID, Date/Time, and Status Badge -->
-                    <div class="flex justify-between items-center pb-4 pl-4 pr-4">
-                        <div class="flex items-center">
-
-                            <div class="flex flex-col justify-start items-start">
-                                <p class="text-base font-semibold text-gray-900">#RES-004</p>
-                                <div class="flex items-center text-sm text-gray-600">
-                                    2024-01-20 at 6:30 PM
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Status Badge -->
-                        <div
-                            class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-red-100 text-red-800 ml-4 flex-shrink-0">
-                            <p class="text-sm font-medium">Cancelled</p>
-                        </div>
-                    </div>
-
-                    <!-- Details Grid: Guests and Table -->
-                    <div class="grid grid-cols-2 gap-4 py-4 border-y border-gray-200">
-                        <!-- Guests -->
-                        <div class="flex flex-col items-center">
-                            <div class="flex items-center text-gray-600 mb-1">
-                                <!-- Users Icon -->
-                                <svg width="18" height="17" viewBox="0 0 18 17" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg" class="icon-style"
-                                    preserveAspectRatio="xMidYMid meet">
-                                    <path
-                                        d="M1.83252 15.5C1.83252 14.5311 2.07681 13.6333 2.56539 12.8067C3.03621 12.0067 3.67137 11.3711 4.47087 10.9C5.29702 10.4111 6.19424 10.1667 7.16252 10.1667C8.1308 10.1667 9.02802 10.4111 9.85417 10.9C10.6537 11.3711 11.2888 12.0067 11.7596 12.8067C12.2482 13.6333 12.4925 14.5311 12.4925 15.5H11.16C11.16 14.78 10.9779 14.1089 10.6137 13.4867C10.2584 12.8822 9.77866 12.4022 9.17459 12.0467C8.55276 11.6822 7.88207 11.5 7.16252 11.5C6.44297 11.5 5.77228 11.6822 5.15044 12.0467C4.54638 12.4022 4.06668 12.8822 3.71134 13.4867C3.34713 14.1089 3.16502 14.78 3.16502 15.5H1.83252ZM7.16252 9.5C6.43409 9.5 5.76339 9.31778 5.15044 8.95333C4.54638 8.59778 4.06668 8.11778 3.71134 7.51333C3.34713 6.9 3.16502 6.22889 3.16502 5.5C3.16502 4.77111 3.34713 4.1 3.71134 3.48667C4.06668 2.88222 4.54638 2.40222 5.15044 2.04667C5.76339 1.68222 6.43409 1.5 7.16252 1.5C7.89095 1.5 8.56164 1.68222 9.17459 2.04667C9.77866 2.40222 10.2584 2.88222 10.6137 3.48667C10.9779 4.1 11.16 4.77111 11.16 5.5C11.16 6.22889 10.9779 6.9 10.6137 7.51333C10.2584 8.11778 9.77866 8.59778 9.17459 8.95333C8.56164 9.31778 7.89095 9.5 7.16252 9.5ZM7.16252 8.16667C7.64222 8.16667 8.08639 8.04667 8.49502 7.80667C8.90365 7.56667 9.22789 7.24222 9.46774 6.83333C9.70759 6.42444 9.82752 5.98 9.82752 5.5C9.82752 5.02 9.70759 4.57555 9.46774 4.16667C9.22789 3.75778 8.90365 3.43333 8.49502 3.19333C8.08639 2.95333 7.64222 2.83333 7.16252 2.83333C6.68282 2.83333 6.23865 2.95333 5.83002 3.19333C5.42139 3.43333 5.09714 3.75778 4.85729 4.16667C4.61744 4.57555 4.49752 5.02 4.49752 5.5C4.49752 5.98 4.61744 6.42444 4.85729 6.83333C5.09714 7.24222 5.42139 7.56667 5.83002 7.80667C6.23865 8.04667 6.68282 8.16667 7.16252 8.16667ZM12.6791 10.6333C13.3009 10.9089 13.8494 11.2933 14.3247 11.7867C14.8 12.28 15.1664 12.8378 15.424 13.46C15.6905 14.1089 15.8238 14.7889 15.8238 15.5H14.4913C14.4913 14.7 14.2736 13.9667 13.8383 13.3C13.4119 12.6511 12.8434 12.1667 12.1327 11.8467L12.6791 10.6333ZM12.226 3.11333C12.9012 3.38889 13.4475 3.83333 13.865 4.44667C14.2825 5.06 14.4913 5.74444 14.4913 6.5C14.4913 7.13111 14.3447 7.71556 14.0515 8.25333C13.7584 8.79111 13.3564 9.22889 12.8456 9.56667C12.3348 9.90444 11.773 10.1 11.16 10.1533V8.80667C11.5331 8.75333 11.8729 8.61778 12.1794 8.4C12.4859 8.18222 12.7257 7.90667 12.8989 7.57333C13.0722 7.24 13.1588 6.88222 13.1588 6.5C13.1588 6.04667 13.0388 5.63333 12.799 5.26C12.5591 4.88667 12.2438 4.60222 11.8529 4.40667L12.226 3.11333Z"
-                                        fill="currentColor"></path>
-                                </svg>
-                                <span class="text-xs font-medium">Guests</span>
-                            </div>
-                            <!-- Detail Text (UPDATED CLASS) -->
-                            <p class="text-ms font-semibold text-gray-900 w-full flex justify-center">
-                                4 people
-                            </p>
-                        </div>
-
-                        <!-- Table -->
-                        <div class="flex flex-col items-center">
-                            <div class="flex items-center text-gray-600 mb-1">
-                                <!-- Table Icon -->
-                                <svg width="18" height="17" viewBox="0 0 18 17" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg" class="icon-style"
-                                    preserveAspectRatio="xMidYMid meet">
-                                    <path
-                                        d="M3.49803 5.83333H14.158V3.83333H3.49803V5.83333ZM10.1605 13.1667V7.16667H7.49553V13.1667H10.1605ZM11.493 13.1667H14.158V7.16667H11.493V13.1667ZM6.16303 13.1667V7.16667H3.49803V13.1667H6.16303ZM2.83178 2.5H14.8243C15.0108 2.5 15.1685 2.56444 15.2973 2.69333C15.4261 2.82222 15.4905 2.98 15.4905 3.16667V13.8333C15.4905 14.02 15.4261 14.1778 15.2973 14.3067C15.1685 14.4356 15.0108 14.5 14.8243 14.5H2.83178C2.64523 14.5 2.48755 14.4356 2.35874 14.3067C2.22993 14.1778 2.16553 14.02 2.16553 13.8333V3.16667C2.16553 2.98 2.22993 2.82222 2.35874 2.69333C2.48755 2.56444 2.64523 2.5 2.83178 2.5Z"
-                                        fill="currentColor"></path>
-                                </svg>
-                                <span class="text-xs font-medium">Table</span>
-                            </div>
-                            <!-- Detail Text (UPDATED CLASS) -->
-                            <p class="text-ms font-semibold text-gray-900 w-full flex justify-center">
-                                Table 12
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Footer: Modify/Cancel/View Details -->
-                    <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center pt-4 pr-4 pl-4">
-                        <button
-                            class="flex justify-center sm:justify-end items-center h-10 px-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition duration-150 ease-in-out sm:ml-auto">
-                            View Details
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </main>
-    <!-- END: Main Content Wrapper -->
 </body>
 
 </html>
