@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,9 +10,11 @@
     <!-- Use Inter font family -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f7f9fb; /* Light background for the page */
+            background-color: #f7f9fb;
+            /* Light background for the page */
             /* Using flex on body to hold the fixed sidebar and scrollable content area */
             display: flex;
             min-height: 100vh;
@@ -20,21 +23,25 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- START: Sidebar Section -->
     <!-- hidden md:flex ensures it only appears on medium screens and up -->
     <aside class="hidden md:flex flex-col w-64 bg-white h-screen fixed shadow-sm border-r border-gray-200 z-10">
-      <div class="p-6 border-b border-gray-200">
-        <h2 class="text-xl font-semibold text-gray-800">User Panel</h2>
-      </div>
-      <nav class="flex flex-col p-6 gap-2 text-gray-600">
-        <a href="#" class="flex items-center gap-2 hover:bg-gray-100 rounded-md px-3 py-2" >Overview</a>
-        <a href="#" class="flex items-center gap-2 hover:bg-gray-100 rounded-md px-3 py-2" ><span>My Orders</span></a>
-        <!-- Applied specific hex color to match the Edit Profile button's orange -->
-        <a href="#" class="flex items-center gap-2 hover:bg-gray-100 rounded-md px-3 py-2" ><span>My Reservations</span></a>
-        <a href="#" class="flex items-center gap-2 text-[#f3703c] bg-orange-50 rounded-md px-3 py-2 font-medium"  ><span>Profile</span></a>
-      </nav>
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-800">User Panel</h2>
+        </div>
+        <nav class="flex flex-col p-6 gap-2 text-gray-600">
+            <a href="#" class="flex items-center gap-2 hover:bg-gray-100 rounded-md px-3 py-2">Overview</a>
+            <a href="#" class="flex items-center gap-2 hover:bg-gray-100 rounded-md px-3 py-2"><span>My
+                    Orders</span></a>
+            <!-- Applied specific hex color to match the Edit Profile button's orange -->
+            <a href="#" class="flex items-center gap-2 hover:bg-gray-100 rounded-md px-3 py-2"><span>My
+                    Reservations</span></a>
+            <a href="#"
+                class="flex items-center gap-2 text-[#f3703c] bg-orange-50 rounded-md px-3 py-2 font-medium"><span>Profile</span></a>
+        </nav>
     </aside>
     <!-- END: Sidebar Section -->
 
@@ -46,9 +53,7 @@
         <!-- mx-auto centers the fixed-width header within the remaining space -->
         <div class="flex justify-between items-center w-full max-w-[875px] h-14 mx-auto mb-6 pl-4 pr-4 pt-4">
             <!-- Title and Subtitle -->
-            <div
-                class="flex flex-col justify-start items-start flex-grow-0 flex-shrink-0 h-14 relative pt-1"
-            >
+            <div class="flex flex-col justify-start items-start flex-grow-0 flex-shrink-0 h-14 relative pt-1">
                 <p class="flex-grow-0 flex-shrink-0 text-xl font-bold text-left text-gray-900">My Profile</p>
                 <p class="flex-grow-0 flex-shrink-0 text-xs text-left text-gray-600">
                     Manage your personal information and preferences
@@ -57,25 +62,16 @@
             <!-- Edit Profile Button -->
             <div class="flex justify-start items-center flex-grow-0 flex-shrink-0">
                 <button
-                  class="flex justify-between items-center w-32 h-12 relative px-4 rounded-full bg-[#f3703c] hover:bg-orange-600 transition duration-150"
-                >
-                  <svg
-                    width="17"
-                    height="16"
-                    viewBox="0 0 17 16"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="flex-grow-0 flex-shrink-0 w-[16.67px] h-4 relative"
-                    preserveAspectRatio="none"
-                  >
-                    <path
-                      d="M4.6147 10.6533L11.3768 3.89334L10.4298 2.94667L3.66773 9.72V10.6533H4.6147ZM5.16153 11.9867H2.33398V9.16L9.96303 1.53334C10.0875 1.40889 10.2431 1.34667 10.4298 1.34667C10.6166 1.34667 10.7722 1.40889 10.8967 1.53334L12.7906 3.42667C12.924 3.55111 12.9906 3.70667 12.9906 3.89334C12.9906 4.08 12.924 4.24 12.7906 4.37334L5.16153 11.9867ZM2.33398 13.32H14.3377V14.6533H2.33398V13.32Z"
-                      fill="white"
-                    ></path>
-                  </svg>
-                  <p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-center text-white">
-                    Edit Profile
-                  </p>
+                    class="flex justify-between items-center w-32 h-12 relative px-4 rounded-full bg-[#f3703c] hover:bg-orange-600 transition duration-150">
+                    <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        class="flex-grow-0 flex-shrink-0 w-[16.67px] h-4 relative" preserveAspectRatio="none">
+                        <path
+                            d="M4.6147 10.6533L11.3768 3.89334L10.4298 2.94667L3.66773 9.72V10.6533H4.6147ZM5.16153 11.9867H2.33398V9.16L9.96303 1.53334C10.0875 1.40889 10.2431 1.34667 10.4298 1.34667C10.6166 1.34667 10.7722 1.40889 10.8967 1.53334L12.7906 3.42667C12.924 3.55111 12.9906 3.70667 12.9906 3.89334C12.9906 4.08 12.924 4.24 12.7906 4.37334L5.16153 11.9867ZM2.33398 13.32H14.3377V14.6533H2.33398V13.32Z"
+                            fill="white"></path>
+                    </svg>
+                    <p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-center text-white">
+                        Edit Profile
+                    </p>
                 </button>
             </div>
         </div>
@@ -84,7 +80,8 @@
 
         <!-- Main Card Container -->
         <!-- mx-auto centers the fixed-width card within the available space -->
-        <div class="w-full max-w-[875px] bg-white mx-auto rounded-xl shadow-lg border border-gray-100 px-4 py-8 md:p-10">
+        <div
+            class="w-full max-w-[875px] bg-white mx-auto rounded-xl shadow-lg border border-gray-100 px-4 py-8 md:p-10">
 
             <!-- Function to create a form field group -->
             <script>
@@ -179,4 +176,5 @@
     <!-- END: Main Content Area -->
 
 </body>
+
 </html>
