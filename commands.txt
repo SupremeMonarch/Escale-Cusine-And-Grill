@@ -1,5 +1,5 @@
 .\myenv\Scripts\activate
-deactivate
+cd ECAG_site
 python manage.py tailwind start
 python manage.py runserver
-cd ECAG_site
+deactivate

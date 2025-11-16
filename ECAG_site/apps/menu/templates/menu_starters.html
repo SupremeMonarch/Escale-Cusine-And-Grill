@@ -8,7 +8,7 @@
 <html>
     <head>
         <title>Menu - Starters</title>
-        <link rel="stylesheet" href="{% static 'menu/css/css_style.css' %}">
+        <link rel="stylesheet" href="{% static 'css/css_style.css' %}">
         <script src="https://kit.fontawesome.com/17c6375e36.js" crossorigin="anonymous"></script>
     </head>
     <body>
@@ -18,10 +18,10 @@
                 Starters
             </button>
             <button class="select">
-                <a href="menu_main_course.html">Main Course</a>
+                <a href="{% url 'menu:menu_main_course' %}">Main Course</a>
             </button>
             <button class="select">
-                <a href="menu_beverages.html">Beverages</a>
+                <a href="{% url 'menu:menu_beverages' %}">Beverages</a>
             </button>
         </div>
         
