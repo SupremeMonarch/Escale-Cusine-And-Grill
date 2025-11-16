@@ -3,200 +3,464 @@
 {% block title %}Beverages | Escale{% endblock %}
 {% block content %}
 
-<!DOCTYPE html>
 
-<html>
-    <head>
-        <title>Menu - Beverages</title>
-        <link rel="stylesheet" href="{% static 'css/css_style.css' %}">
-        <script src="https://kit.fontawesome.com/17c6375e36.js" crossorigin="anonymous"></script>
-    </head>
-    <body>
-        <!--menu selection-->
-        <div class="selectiontype">
-            <button class="select">
-                <a href="{% url 'menu:menu_starters' %}">Starters</a>
+<!--Sidebar Button-->
+<div id="sidebar-button" class="group fixed top-1/2 -translate-y-1/2 right-0 cursor-pointer z-50">
+    <!-- Default SVG (gray) - hidden on hover -->
+    <svg
+        class="w-[25px] h-[172px] group-hover:hidden"
+        width="25"
+        height="172"
+        viewBox="0 0 25 172"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        preserveAspectRatio="none"
+    >
+        <path
+            opacity="0.88"
+            d="M0 25C0 18.4864 0 15.2295 0.833095 12.5873C2.59907 6.98634 6.98634 2.59907 12.5873 0.833095C15.2295 0 18.4864 0 25 0V0V172V172C18.4864 172 15.2295 172 12.5873 171.167C6.98634 169.401 2.59907 165.014 0.833095 159.413C0 156.77 0 153.514 0 147V25Z"
+            fill="#D9D9D9"
+        ></path>
+        <path
+            d="M7.825 87L13.425 92.6L12 94L4 86L12 78L13.425 79.4L7.825 85H20V87H7.825Z"
+            fill="#1D1B20"
+        ></path>
+    </svg>
+
+    <!-- Hover SVG (red) - shown on hover -->
+    <svg
+        class="w-[25px] h-[172px] hidden group-hover:block"
+        width="25"
+        height="172"
+        viewBox="0 0 25 172"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        preserveAspectRatio="none"
+    >
+        <path
+            opacity="0.88"
+            d="M0 25C0 18.4864 0 15.2295 0.833095 12.5873C2.59907 6.98634 6.98634 2.59907 12.5873 0.833095C15.2295 0 18.4864 0 25 0V0V172V172C18.4864 172 15.2295 172 12.5873 171.167C6.98634 169.401 2.59907 165.014 0.833095 159.413C0 156.77 0 153.514 0 147V25Z"
+            fill="#FF3B3B"
+        ></path>
+        <path
+            d="M7.825 87L13.425 92.6L12 94L4 86L12 78L13.425 79.4L7.825 85H20V87H7.825Z"
+            fill="white"
+        ></path>
+    </svg>
+</div>
+
+<!--Order Sidebar-->
+<div id="order-sidebar" class="fixed right-0 w-[400px] translate-x-full transition-transform duration-300 ease-in-out z-40 bg-white rounded-l-[10px] shadow-lg" style="top: 64px; height: calc(100vh - 64px); filter: drop-shadow(-4px 4px 4px rgba(0,0,0,0.25));">
+  <div class="flex flex-col h-full p-5">
+    <!-- Header -->
+    <div class="flex-shrink-0">
+      <p class="text-2xl font-bold text-black mb-3">Your Order</p>
+      
+      <svg width="100%" height="2" viewBox="0 0 443 2" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-4">
+        <line y1="1" x2="443" y2="1" stroke="#E97820" stroke-width="2"></line>
+      </svg>
+
+      <!-- Order type selection -->
+      <div class="mb-4">
+        <div class="flex w-full rounded-full bg-white border border-[#969696] p-1">
+          <button class="flex-1 flex justify-center items-center px-3 py-2 bg-gradient-to-r from-[#ff8e47] to-[#ff4747] rounded-full">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0">
+              <path d="M9 22V12H15V22M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            <p class="text-sm font-medium text-white ml-1">Dine In</p>
+          </button>
+          <button class="flex-1 flex justify-center items-center px-3 py-2 rounded-full hover:bg-gray-100">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0">
+              <path d="M3 6L6 2H18L21 6M3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6M3 6H21M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10" stroke="#1E1E1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            <p class="text-sm font-medium text-[#4a4459] ml-1">Pick Up</p>
+          </button>
+          <button class="flex-1 flex justify-center items-center px-3 py-2 rounded-full hover:bg-gray-100">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0">
+              <path d="M16 16V3H1V16H16ZM16 16H23V11L20 8H16V16ZM8 18.5C8 19.8807 6.88071 21 5.5 21C4.11929 21 3 19.8807 3 18.5C3 17.1193 4.11929 16 5.5 16C6.88071 16 8 17.1193 8 18.5ZM21 18.5C21 19.8807 19.8807 21 18.5 21C17.1193 21 16 19.8807 16 18.5C16 17.1193 17.1193 16 18.5 16C19.8807 16 21 17.1193 21 18.5Z" stroke="#1E1E1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            <p class="text-sm font-medium text-[#4a4459] ml-1">Delivery</p>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty order state - takes remaining space -->
+    <div class="flex-1 flex flex-col justify-center items-center overflow-y-auto">
+      <p class="text-gray-400 text-base">Your order is empty</p>
+    </div>
+
+    <!-- Footer - Order summary -->
+    <div class="flex-shrink-0 mt-auto pt-4">
+      <svg width="100%" height="1" viewBox="0 0 443 1" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-3">
+        <line y1="0.5" x2="443" y2="0.5" stroke="#969696"></line>
+      </svg>
+      
+      <div class="space-y-1.5 mb-3">
+        <p class="text-lg font-bold text-black">No. of items: 0</p>
+        <p class="text-lg font-bold text-black">Delivery Fee: Rs 0</p>
+        <p class="text-xl font-bold text-black">Total Price: Rs 0</p>
+      </div>
+      
+      <button class="w-full py-2.5 rounded-full text-white text-lg font-medium" style="background: linear-gradient(to right, #f65e00, #ff3737); box-shadow: 0px 4px 4px 0 rgba(0,0,0,0.25);">
+        Proceed to Checkout
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- White Background Container -->
+<div class="w-full bg-white min-h-screen">
+  <!-- Main Content Container -->
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    
+    <!-- Category Tabs -->
+    <div class="flex justify-center items-center w-full max-w-2xl mx-auto mb-8">
+      <div class="flex w-full rounded-full bg-white border border-[#969696] overflow-hidden shadow-md">
+        <a href="{% url 'menu:menu_starters' %}" class="flex-1 flex justify-center items-center px-8 py-4 hover:bg-gray-50">
+          <p class="text-lg font-medium text-black">Starters</p>
+        </a>
+        <a href="{% url 'menu:menu_main_course' %}" class="flex-1 flex justify-center items-center px-8 py-4 hover:bg-gray-50">
+          <p class="text-lg font-medium text-black">Main Course</p>
+        </a>
+        <a href="{% url 'menu:menu_beverages' %}" class="flex-1 flex justify-center items-center px-8 py-4 bg-gradient-to-r from-[#ff8e47] to-[#ff4747]">
+          <p class="text-lg font-medium text-white">Beverages</p>
+        </a>
+      </div>
+    </div>
+
+    <!-- SOFT DRINKS Section -->
+    <div class="mb-12">
+      <div class="flex items-center gap-4 mb-6">
+        <h2 class="text-2xl font-semibold text-[#ff4704]">SOFT DRINKS</h2>
+        <div class="flex-1 h-1 bg-[#E8DEF8] rounded"></div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Coca Cola" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Coca Cola</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 80</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Classic Coca Cola</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
             </button>
-            <button class="select">
-                <a href="{% url 'menu:menu_main_course' %}">Main Course</a>
-            </button>
-            <button id="selected" class="select">
-                Beverages
-            </button>
+          </div>
         </div>
 
-        <!--Menu Item-->
-        <br>
-        <br>
-        <br>
-        <br>
-        <!--Alcoholic-->
-        <h2>ALCOHOLIC</h2>
-        <div class="line"></div>
-        <div class="container">
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\alcoholic\largebeer.jpg>
-                    <p style="color: rgb(255, 102, 46);">Large Beer</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Sprite" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Sprite</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 80</p>
             </div>
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\alcoholic\mojito.jpg>
-                    <p style="color: rgb(255, 102, 46);">Mojito</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
-            </div>
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\alcoholic\planteur.jpg>
-                    <p style="color: rgb(255, 102, 46);">Planteur</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
-            </div>
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\alcoholic\rhum.jpg>
-                    <p style="color: rgb(255, 102, 46);">Rhum</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
-            </div>
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\alcoholic\shandy.jpg>
-                    <p style="color: rgb(255, 102, 46);">Shandy</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
-            </div>
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\alcoholic\smolbeer.jpg>
-                    <p style="color: rgb(255, 102, 46);">Small Beer</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
-            </div>
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\alcoholic\ti_punch.jpg>
-                    <p style="color: rgb(255, 102, 46);">Ti' Punch</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
-            </div>
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\alcoholic\whiskey_redlabel.jpg>
-                    <p style="color: rgb(255, 102, 46);">Red Label</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
-            </div>
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\alcoholic\wine.jpg>
-                    <p style="color: rgb(255, 102, 46);">Wine</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
-            </div>
+            <p class="text-sm text-gray-600 mb-4">Refreshing lemon-lime soda</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
         </div>
-        <br>
-        <br>
-        <br>
-        <br>
-        <!--Non-Alcoholic-->
-        <h2>NON-ALCOHOLIC</h2>
-        <div class="line"></div>
-        <div class="container">
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\nonalcoholic\appletiser.jpg>
-                    <p style="color: rgb(255, 102, 46);">Appletiser</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
+
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Fanta" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Fanta</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 80</p>
             </div>
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\nonalcoholic\coke.jpg>
-                    <p style="color: rgb(255, 102, 46);">Coke</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
-            </div>
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\nonalcoholic\fanta.jpg>
-                    <p style="color: rgb(255, 102, 46);">Fanta</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
-            </div>
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\nonalcoholic\fuzetea.jpg>
-                    <p style="color: rgb(255, 102, 46);">Fuze Tea</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
-            </div>
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\nonalcoholic\grapetiser.jpg>
-                    <p style="color: rgb(255, 102, 46);">Grapetiser</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
-            </div>
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\nonalcoholic\pearona.jpg>
-                    <p style="color: rgb(255, 102, 46);">Pearona</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
-            </div>
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\nonalcoholic\sparkwater.jpg>
-                    <p style="color: rgb(255, 102, 46);">Sparkling Water</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
-            </div>
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\nonalcoholic\sprite.jpg>
-                    <p style="color: rgb(255, 102, 46);">Sprite</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
-            </div>
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\nonalcoholic\gingerale.jpg>
-                    <p style="color: rgb(255, 102, 46);">Ginger Ale</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
-            </div>
-            <div class="menuitem">
-                <div class="content">
-                    <img src=Menu\Beverages\nonalcoholic\water.jpg>
-                    <p style="color: rgb(255, 102, 46);">Water</p>
-                    <p style="color: grey;">Rs 120</p>
-                </div>
-                <button id="ordernow">Order Now</button>
-            </div>
+            <p class="text-sm text-gray-600 mb-4">Orange flavored soda</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
         </div>
-    </body>
-</html>
+
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Iced Tea" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Iced Tea</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 90</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Chilled iced tea</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FRESH JUICES Section -->
+    <div class="mb-12">
+      <div class="flex items-center gap-4 mb-6">
+        <h2 class="text-2xl font-semibold text-[#ff4704]">FRESH JUICES</h2>
+        <div class="flex-1 h-1 bg-[#E8DEF8] rounded"></div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Orange Juice" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Orange Juice</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 120</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Freshly squeezed oranges</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Pineapple Juice" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Pineapple Juice</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 120</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Fresh pineapple juice</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Watermelon Juice" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Watermelon Juice</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 100</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Refreshing watermelon juice</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Mango Juice" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Mango Juice</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 130</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Tropical mango juice</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Passion Fruit Juice" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Passion Fruit Juice</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 140</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Exotic passion fruit</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SMOOTHIES Section -->
+    <div class="mb-12">
+      <div class="flex items-center gap-4 mb-6">
+        <h2 class="text-2xl font-semibold text-[#ff4704]">SMOOTHIES</h2>
+        <div class="flex-1 h-1 bg-[#E8DEF8] rounded"></div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Strawberry Smoothie" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Strawberry Smoothie</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 180</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Creamy strawberry blend</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Banana Smoothie" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Banana Smoothie</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 160</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Rich banana smoothie</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Mixed Berry Smoothie" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Mixed Berry Smoothie</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 200</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Blend of mixed berries</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOT BEVERAGES Section -->
+    <div class="mb-12">
+      <div class="flex items-center gap-4 mb-6">
+        <h2 class="text-2xl font-semibold text-[#ff4704]">HOT BEVERAGES</h2>
+        <div class="flex-1 h-1 bg-[#E8DEF8] rounded"></div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Coffee" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Coffee</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 70</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Fresh brewed coffee</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Tea" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Tea</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 50</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Classic hot tea</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Hot Chocolate" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Hot Chocolate</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 90</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Rich hot chocolate</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Cappuccino" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Cappuccino</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 100</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Creamy cappuccino</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Espresso" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Espresso</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 80</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Strong espresso shot</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COCKTAILS & MOCKTAILS Section -->
+    <div class="mb-12">
+      <div class="flex items-center gap-4 mb-6">
+        <h2 class="text-2xl font-semibold text-[#ff4704]">COCKTAILS &amp; MOCKTAILS</h2>
+        <div class="flex-1 h-1 bg-[#E8DEF8] rounded"></div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Mojito" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Mojito (Non-Alcoholic)</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 150</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Fresh mint mocktail</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Pina Colada" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Pina Colada (Mocktail)</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 170</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Coconut pineapple blend</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="Virgin Margarita" class="w-full h-64 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-xl font-bold text-gray-900">Virgin Margarita</p>
+              <p class="text-2xl font-bold text-amber-600">Rs 160</p>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Tangy citrus mocktail</p>
+            <button class="w-full py-2 px-4 rounded-lg text-white text-base font-medium bg-gradient-to-r from-[#e97820] to-[#ef4444] shadow-md hover:shadow-lg transition-shadow">
+              Order Now
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script src="{% static 'js/sidebar.js' %}"></script>
 
 {% endblock %}
