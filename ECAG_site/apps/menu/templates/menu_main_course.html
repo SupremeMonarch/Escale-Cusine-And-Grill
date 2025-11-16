@@ -8,20 +8,20 @@
 <html>
     <head>
         <title>Menu - Main Course</title>
-        <link rel="stylesheet" href="css_style.css">
+        <link rel="stylesheet" href="{% static 'css/css_style.css' %}">
         <script src="https://kit.fontawesome.com/17c6375e36.js" crossorigin="anonymous"></script>
     </head>
     <body>
         <!--menu selection-->
         <div class="selectiontype">
             <button class="select">
-                <a href="menu_starters.html">Starters</a>
+                <a href="{% url 'menu:menu_starters' %}">Starters</a>
             </button>
             <button id="selected" class="select">
                 Main Course
             </button>
             <button class="select">
-                <a href="menu_beverages.html">Beverages</a>
+                <a href="{% url 'menu:menu_beverages' %}">Beverages</a>
             </button>
         </div>
 
