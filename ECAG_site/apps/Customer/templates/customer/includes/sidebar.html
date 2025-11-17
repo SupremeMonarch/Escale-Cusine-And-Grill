@@ -5,7 +5,7 @@
     </div>
     <nav class="flex flex-col p-6 gap-2 text-gray-600">
         <a href="{% url 'overview' %}" class="flex items-center gap-2 px-3 py-2 rounded-md
-            {% if request.resolver_match.url_name == 'overview' %}
+            {% if active_page == 'overview' %}
                 text-orange-500 bg-orange-50 font-medium
             {% else %}
                 hover:bg-gray-100
@@ -13,7 +13,7 @@
             Overview
         </a>
         <a href="{% url 'my_orders' %}" class="flex items-center gap-2 px-3 py-2 rounded-md
-            {% if request.resolver_match.url_name == 'my_orders' %}
+            {% if active_page == 'my_orders' %}
                 text-orange-500 bg-orange-50 font-medium
             {% else %}
                 hover:bg-gray-100
@@ -21,7 +21,7 @@
             <span>My Orders</span>
         </a>
         <a href="{% url 'my_reservations' %}" class="flex items-center gap-2 px-3 py-2 rounded-md
-            {% if request.resolver_match.url_name == 'my_reservations' %}
+            {% if active_page == 'my_reservations' %}
                 text-orange-500 bg-orange-50 font-medium
             {% else %}
                 hover:bg-gray-100
@@ -29,7 +29,7 @@
             <span>My Reservations</span>
         </a>
         <a href="{% url 'profile' %}" class="flex items-center gap-2 px-3 py-2 rounded-md
-            {% if request.resolver_match.url_name == 'profile' %}
+            {% if active_page == 'profile' %}
                 text-orange-500 bg-orange-50 font-medium
             {% else %}
                 hover:bg-gray-100
