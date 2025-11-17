@@ -1,163 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "customer/customer_base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>customer profile</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Use Inter font family -->
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+{% block title %}My Profile{% endblock %}
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f7f9fb;
-            /* Light background for the page */
-            /* Using flex on body to hold the fixed sidebar and scrollable content area */
-            display: flex;
-            min-height: 100vh;
-            width: 100%;
-            margin: 0;
-        }
-    </style>
-</head>
-
-<body>
-
-    {% include 'customer/includes/sidebar.html' %}
-
-    <!-- START: Main Content Area (Pushed right by the sidebar on desktop) -->
-    <!-- md:ml-64 shifts the content to the right. p-4 provides general page padding. -->
-    <div class="flex flex-col w-full md:ml-64 p-4">
-
-        <!-- START: Header Section -->
-        <!-- mx-auto centers the fixed-width header within the remaining space -->
-        <div class="flex justify-between items-center w-full max-w-[875px] h-14 mx-auto mb-6 pl-4 pr-4 pt-4">
-            <!-- Title and Subtitle -->
-            <div class="flex flex-col justify-start items-start flex-grow-0 flex-shrink-0 h-14 relative pt-1">
-                <p class="flex-grow-0 flex-shrink-0 text-xl font-bold text-left text-gray-900">My Profile</p>
-                <p class="flex-grow-0 flex-shrink-0 text-xs text-left text-gray-600">
-                    Manage your personal information and preferences
-                </p>
+{% block dashboard_content %}
+    <div class="p-4 sm:p-6 lg:p-8 w-full max-w-[850px] mx-auto space-y-6">
+        <!-- Header Section -->
+        <div class="flex justify-between items-center w-full w-full h-14 mx-auto mb-6 pl-4 pr-4 pt-4">
+            <div class="flex flex-col justify-start items-start h-auto w-full sm:w-auto pl-2">
+                <h1 class="text-xl font-bold text-gray-900">My Profile</h1>
+                <p class="text-xs text-gray-600">Manage personal information</p>
             </div>
-            <!-- Edit Profile Button -->
-            <div class="flex justify-start items-center flex-grow-0 flex-shrink-0">
-                <button
-                    class="flex justify-between items-center w-32 h-12 relative px-4 rounded-full bg-[#f3703c] hover:bg-orange-600 transition duration-150">
-                    <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg"
-                        class="flex-grow-0 flex-shrink-0 w-[16.67px] h-4 relative" preserveAspectRatio="none">
-                        <path
-                            d="M4.6147 10.6533L11.3768 3.89334L10.4298 2.94667L3.66773 9.72V10.6533H4.6147ZM5.16153 11.9867H2.33398V9.16L9.96303 1.53334C10.0875 1.40889 10.2431 1.34667 10.4298 1.34667C10.6166 1.34667 10.7722 1.40889 10.8967 1.53334L12.7906 3.42667C12.924 3.55111 12.9906 3.70667 12.9906 3.89334C12.9906 4.08 12.924 4.24 12.7906 4.37334L5.16153 11.9867ZM2.33398 13.32H14.3377V14.6533H2.33398V13.32Z"
-                            fill="white"></path>
-                    </svg>
-                    <p class="flex-grow-0 flex-shrink-0 text-sm font-medium text-center text-white">
-                        Edit Profile
-                    </p>
-                </button>
-            </div>
+            <button class="flex items-center justify-center gap-2 w-32 h-12 px-4 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition">
+                <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" preserveAspectRatio="none"><path d="M4.6147 10.6533L11.3768 3.89334L10.4298 2.94667L3.66773 9.72V10.6533H4.6147ZM5.16153 11.9867H2.33398V9.16L9.96303 1.53334C10.0875 1.40889 10.2431 1.34667 10.4298 1.34667C10.6166 1.34667 10.7722 1.40889 10.8967 1.53334L12.7906 3.42667C12.924 3.55111 12.9906 3.70667 12.9906 3.89334C12.9906 4.08 12.924 4.24 12.7906 4.37334L5.16153 11.9867ZM2.33398 13.32H14.3377V14.6533H2.33398V13.32Z" fill="white"></path></svg>
+                <span class="text-sm font-medium">Edit Profile</span>
+            </button>
         </div>
-        <!-- END: Header Section -->
-
 
         <!-- Main Card Container -->
-        <!-- mx-auto centers the fixed-width card within the available space -->
-        <div
-            class="w-full max-w-[875px] bg-white mx-auto rounded-xl shadow-lg border border-gray-100 px-4 py-8 md:p-10">
+        <div class="w-full w-full bg-white mx-auto rounded-xl card-shadow border border-gray-100 px-4 py-8 md:p-10">
 
-            <!-- Function to create a form field group -->
-            <script>
-                /**
-                 * Helper function to generate the visual HTML structure for a field group
-                 * @param {string} labelText - The text above the light gray box (e.g., 'First Name').
-                 * @param {string} valueText - The text inside the light gray box (e.g., 'John').
-                 * @returns {string} The HTML string for the field group.
-                 */
-                function createFieldGroup(labelText, valueText) {
-                    return `
-                        <div class="space-y-1">
-                            <!-- Label Text -->
-                            <label class="text-gray-700 text-sm font-medium">
-                                ${labelText}
-                            </label>
-                            <!-- Value Display (simulates a read-only input or display field) -->
-                            <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">
-                                ${valueText}
-                            </div>
-                        </div>
-                    `;
-                }
+            <!-- Basic Information -->
+            <h2 class="text-xl font-semibold mt-0 mb-6 border-b pb-2 text-gray-800">Basic Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                <div class="space-y-1">
+                    <label class="text-gray-700 text-sm font-medium">First Name</label>
+                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ user.first_name|default:"..." }}</div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-gray-700 text-sm font-medium">Last Name</label>
+                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ user.last_name|default:"..." }}</div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-gray-700 text-sm font-medium">Email</label>
+                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ user.email|default:"..." }}</div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-gray-700 text-sm font-medium">Phone</label>
+                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ profile.phone|default:"..." }}</div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-gray-700 text-sm font-medium">Birthday</label>
+                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ profile.birthday|date:"F d, Y"|default:"..." }}</div>
+                </div>
+            </div>
 
-                // Data for the form sections
-                const sections = [
-                    {
-                        title: "Basic Information",
-                        fields: [
-                            { label: "First Name", value: "John" },
-                            { label: "Last Name", value: "Doe" },
-                            { label: "Email", value: "john.doe@example.com" },
-                            { label: "Phone", value: "(230) 123-4567" },
-                            { label: "Birthday", value: "5/15/1990" },
-                            { label: "Placeholder", value: "..." }, // Added a placeholder to maintain structure
-                        ]
-                    },
-                    {
-                        title: "Address Information",
-                        fields: [
-                            { label: "Street Address", value: "123 Main Street" },
-                            { label: "City", value: "Rose Hill" },
-                            { label: "District", value: "Moka" },
-                            { label: "ZIP Code", value: "10001" },
-                        ]
-                    },
-                    {
-                        title: "Dining Preferences",
-                        fields: [
-                            { label: "Dietary Restrictions", value: "No nuts, lactose intolerant" },
-                            { label: "Favorite Table Preference", value: "Window seat" },
-                        ]
-                    }
-                ];
-
-                // Render the form sections
-                document.addEventListener('DOMContentLoaded', () => {
-                    const formContainer = document.getElementById('form-container');
-                    let htmlContent = '';
-
-                    sections.forEach((section, index) => {
-                        // Adjusting the top margin for section titles: mt-0 for the first section, mt-8 for subsequent ones.
-                        htmlContent += `
-                            <h2 class="text-xl font-semibold ${index === 0 ? 'mt-0' : 'mt-8'} mb-6 border-b pb-2 text-gray-800">
-                                ${section.title}
-                            </h2>
-                            <!-- Grid for two columns (stacks on mobile) -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                        `;
-
-                        // Render Fields
-                        section.fields.forEach(field => {
-                            htmlContent += createFieldGroup(field.label, field.value);
-                        });
-
-                        // Close Grid
-                        htmlContent += `</div>`;
-                    });
-
-                    formContainer.innerHTML = htmlContent;
-                });
-            </script>
-
-            <!-- Dynamic Form Content Insertion Point -->
-            <div id="form-container">
-                <!-- Content will be injected here by the script -->
+            <!-- Address Information -->
+            <h2 class="text-xl font-semibold mt-8 mb-6 border-b pb-2 text-gray-800">Address Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                <div class="space-y-1">
+                    <label class="text-gray-700 text-sm font-medium">Street Address</label>
+                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ profile.street_address|default:"..." }}</div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-gray-700 text-sm font-medium">City</label>
+                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ profile.city|default:"..." }}</div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-gray-700 text-sm font-medium">District</label>
+                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ profile.district|default:"..." }}</div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-gray-700 text-sm font-medium">ZIP Code</label>
+                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ profile.zip_code|default:"..." }}</div>
+                </div>
             </div>
 
         </div>
-
     </div>
-    <!-- END: Main Content Area -->
-
-</body>
-
-</html>
+{% endblock dashboard_content %}
