@@ -6,6 +6,11 @@
     <title>{% block title %}Escale Cuisine & Grill{% endblock %}</title>
     {% load static %}
     <link href="{% static 'css/dist/styles.css' %}" rel="stylesheet">
+
+    <!-- Child templates will add their own <style> tags here. -->
+    {% block styles %}
+    {% endblock styles %}
+
 </head>
 <body class="font-sans text-gray-800" style="--nav-h: 64px;">
   <!-- Navbar -->
@@ -182,6 +187,11 @@
     </div>
   </div>
 </footer>
+
+<!-- Child templates will add their own <script> tags here. -->
+{% block scripts %}
+{% endblock scripts %}
+
 
 </body>
 </html>
