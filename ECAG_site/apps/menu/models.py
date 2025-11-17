@@ -5,7 +5,7 @@ from django.db.models import Sum
 from decimal import Decimal, ROUND_HALF_UP
 from django.utils import timezone
 from datetime import timedelta
-    
+
 def default_arrival_time():
     return (timezone.now() + timedelta(minutes=15)).time() #adds 15 min to current time when entering a default arrival time for delivery
 
@@ -36,8 +36,8 @@ class MenuItem(models.Model):
     subcategory_id = models.ForeignKey(MenuSubCategory, on_delete=models.CASCADE)
 
     def __str__(self): #this is so only the item name appears on the admin page when an item is added
-        return self.name 
-    
+        return self.name
+
 
 class Promotion(models.Model):
     item = models.ForeignKey(MenuItem, on_delete=models.CASCADE, related_name="promotions")
@@ -51,33 +51,37 @@ class Promotion(models.Model):
         if self.end_date and self.start_date and self.end_date < self.start_date:
             raise ValueError("end date cannot be before start date")
         super().save(*args, **kwargs)
-    
+
     def __str__(self): #this is so only the user's name appears on the admin page when an order is added
         return self.title
-    
+
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     order_date = models.DateTimeField(auto_now_add=True, editable=False)
     order_id_str = models.CharField(max_length=20, unique=True, blank=True) #This a unique, human-readable ID
     #table_id = models.ForeignKey(Table, on_delete=models.PROTECT) not yet created models.py for Table
 
-    class Ordertype(models.TextChoices): #enum data type
-        DELIVERY =  "delivery", "Delivery"
-        CARRY_OUT   =   "carry out", "Carry Out"
-        DINE_IN =  "dine in", "Dine In",
+    class Ordertype(models.TextChoices):
+        DELIVERY = "Delivery", "Delivery"
+        TAKEOUT = "Takeout", "Takeout"
+        DINE_IN = "Dine-in", "Dine-in"
 
     order_type = models.CharField(
         max_length=20,
         choices=Ordertype.choices,
+        default=Ordertype.DINE_IN,
     )
-    class Status(models.TextChoices): #enum data type
-        IN_PROGRESS = "in_progress", "In Progress"
-        COMPLETED   = "completed",   "Completed"
+
+    class Status(models.TextChoices):
+        PENDING = "Pending", "Pending"
+        PREPARING = "Preparing", "Preparing"
+        COMPLETED = "Completed", "Completed"
+        CANCELLED = "Cancelled", "Cancelled"
 
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
-        default=Status.IN_PROGRESS,
+        default=Status.PENDING,
     )
     total = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), validators=[MinValueValidator(Decimal("0.00"))])
 
@@ -104,6 +108,18 @@ class Order(models.Model):
             self.save(update_fields=["total"])
         return self.total
 
+    # Property to get a summary for the staff dashboard
+    @property
+    def get_item_summary(self):
+        items = self.items.all()
+        if not items:
+            return "No items"
+        return ", ".join([f"{item.quantity}x {item.item.name}" for item in items])
+
+    @property
+    def get_total_cost(self):
+        # This function name matches the one used in the customer template
+        return self.total
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
@@ -123,7 +139,7 @@ class OrderItem(models.Model):
         if self.promo:
             # only apply if promo is active AND for this item
             now = timezone.now()
-            if self.promo.item_id == self.item_id and self.promo.start_date <= now <= self.promo.end_date:
+            if self.promo.item_id == self.item.item_id and self.promo.start_date <= now <= self.promo.end_date:
                 unit = unit * (Decimal("1") - self.promo.discountpercent)
         self.price = roundup(unit)
         self.subtotal = roundup(self.price * self.quantity)
@@ -135,18 +151,14 @@ class OrderItem(models.Model):
         super().delete(*args, **kwargs)
         order.update_total()
 
-    def __str__(self): #this is so only the user's name appears on the admin page when an order is added
-        return f"{self.quantity} x {self.item.name}(s)"
-    
+    def __str__(self):
+        return f"{self.quantity} x {self.item.name}"
+
     @property
-    def discounted_price(self):
-        """
-        Returns discounted price if an active promotion exists. Mostly used in views.py since it is not actually a value stored in the db.
-        """
-        if not self.promo:
-            return self.item.price
-        discounted = self.item.price * (Decimal("1") - self.promo.discountpercent)
-        return roundup(discounted)
+    def get_cost(self):
+        # Name matches template
+        return self.subtotal
+
 
 class Delivery(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="delivery")
@@ -156,7 +168,7 @@ class Delivery(models.Model):
         PREPARING_ORDER = "preparing_order" , "Preparing Order"
         IN_PROGRESS = "in_progress", "In Progress"
         DELIVERED   = "delivered",   "Delivered"
-    
+
     delivery_status = models.CharField(
         max_length=20,
         choices=Status.choices,
@@ -190,7 +202,7 @@ class Transaction(models.Model):
         choices=Method.choices,
         default=Method.CREDIT_CARD,
     )
-    transaction_date = models.DateTimeField(auto_now_add=True, editable=False)  
+    transaction_date = models.DateTimeField(auto_now_add=True, editable=False)
     class Status(models.TextChoices): #enum data type
         IN_PROGRESS = "in_progress", "In Progress"
         COMPLETED   = "completed",   "Completed"

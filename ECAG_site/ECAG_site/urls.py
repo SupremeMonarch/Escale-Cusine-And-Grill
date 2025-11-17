@@ -21,8 +21,9 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("apps.core.urls")),  #routing the different pages
-    path("reservations/", include("apps.reservations.urls")),
+    path("reservations/", include("apps.Reservations.urls")),
     path('menu/', include('apps.menu.urls')),
+    path("user/", include("apps.Customer.urls")),
 ]
 
 if settings.DEBUG:
@@ -30,6 +31,7 @@ if settings.DEBUG:
     urlpatterns += [
         path("__reload__/", include("django_browser_reload.urls")),
         path("menu/", include("apps.menu.urls")),
-        path("reservations/", include("apps.reservations.urls")),
+        path("reservations/", include("apps.Reservations.urls")),
         path("review/", include("apps.review.urls")),
+        path("user/", include("apps.Customer.urls")),
     ]

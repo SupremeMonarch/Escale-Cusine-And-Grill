@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.conf import settings
 import qrcode
 
 class Table(models.Model):
@@ -42,8 +43,8 @@ class Table(models.Model):
 
 class Reservation(models.Model):
     reservation_id = models.AutoField(primary_key=True)
-    user_id =  models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='reservations')
-    table_id = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='reservations')
+    user_id =  models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reservations')
+    table_id = models.ForeignKey(Table, on_delete=models.CASCADE, related_name='reservations')
     date = models.DateField()
     time = models.TimeField()
     guest_count = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(20)])
