@@ -24,6 +24,7 @@ urlpatterns = [
     path("reservations/", include("apps.Reservations.urls")),
     path('menu/', include('apps.menu.urls')),
     path("user/", include("apps.Customer.urls")),
+    path("staff/", include("apps.Staff.urls")),
 ]
 
 if settings.DEBUG:
@@ -34,4 +35,5 @@ if settings.DEBUG:
         path("reservations/", include("apps.Reservations.urls")),
         path("review/", include("apps.review.urls")),
         path("user/", include("apps.Customer.urls")),
+        path("staff/", include("apps.Staff.urls")),
     ]
