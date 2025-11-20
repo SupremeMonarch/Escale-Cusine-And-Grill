@@ -1,575 +1,209 @@
-<!DOCTYPE html>
-<html>
+{% extends "staff/staff_base.html" %}
 
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Orders</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'primary-orange': '#f3703c',
-                        'blue-status': '#3b82f6',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                },
-            }
-        }
-    </script>
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            overflow-y: scroll;
-        }
+{% block title %}Staff | Today's Orders{% endblock %}
 
-        .filter-group {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-            /* Hide scrollbar on Chrome/Safari/Opera */
-            -ms-overflow-style: none;
-            /* IE and Edge */
-            scrollbar-width: none;
-            /* Firefox */
-        }
+{% block styles %}
+{{ block.super }}
+<style>
+    .filter-group {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        scrollbar-width: none;
+    }
 
-        .filter-group::-webkit-scrollbar {
-            display: none;
-        }
+    .filter-group::-webkit-scrollbar {
+        display: none;
+    }
 
-        /* Style for hiding cards during filtering */
-        .hidden-card {
-            display: none !important;
-        }
-    </style>
-</head>
-<!-- Base layout for sidebar + content -->
+    .hidden-card {
+        display: none !important;
+    }
+</style>
+{% endblock styles %}
 
-<body>
-
-    <aside class="hidden md:flex flex-col w-64 bg-white h-screen fixed shadow-sm border-r border-gray-200">
-        <div class="p-6 border-b border-orange-100">
-            <h2 class="text-xl font-semibold text-gray-800">Staff Panel</h2>
+{% block dashboard_content %}
+<div class="p-4 sm:p-6 lg:p-8 w-full max-w-[850px] mx-auto">
+    <header class="flex justify-between items-center w-full w-full h-14 mx-auto mb-6 pl-4 pr-4 pt-4">
+        <div class="flex flex-col justify-start items-start h-auto w-full sm:w-auto pl-2">
+            <h1 class="text-xl font-bold text-gray-900">Today's Orders</h1>
+            <p class="text-xs text-gray-600">Manage today's orders - {{ today_date|date:"F d, Y" }}</p>
         </div>
-        <nav class="flex flex-col p-6 gap-2 text-gray-600">
-            <a href="#" class="flex items-center gap-2 hover:bg-gray-100 rounded-md px-3 py-2">Overview</a>
-            <a href="#" class="flex items-center gap-2 hover:bg-gray-100 rounded-md px-3 py-2"><span>Today's
-                    Orders</span></a>
-            <a href="#"
-                class="flex items-center gap-2 text-primary-orange bg-orange-50 rounded-md px-3 py-2 font-medium"><span>Today's
-                    Reservations</span></a>
-        </nav>
-    </aside>
+        <div class="flex flex-col justify-start items-end">
+            <p id="total-order-count" class="text-2xl font-bold text-right text-green-600">{{ orders|length }}</p>
+            <p class="text-sm text-right text-gray-600">Total Orders</p>
+        </div>
+    </header>
 
-    <!-- 2. MAIN CONTENT WRAPPER -->
-    <main class="md:ml-64 py-6 sm:py-10 flex justify-center px-4">
+    <!-- Filter Controls Container -->
+    <div class="mb-6 space-y-4  pl-4">
+        <div id="status-filters">
 
-        <!-- 3. Content Container  -->
-        <div class="p-4 sm:p-6 lg:p-8 w-full max-w-[850px] mx-auto">
+            <div class="filter-group" data-filter-group="status">
+                <button
+                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-900 text-white hover:bg-gray-700 shadow-sm border border-gray-300"
+                    data-filter-value="all" data-filter-group="status">All</button>
+                <button
+                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border border-gray-300"
+                    data-filter-value="Pending" data-filter-group="status">Pending</button>
+                <button
+                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border border-gray-300"
+                    data-filter-value="Preparing" data-filter-group="status">Preparing</button>
+                <button
+                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border border-gray-300"
+                    data-filter-value="Completed" data-filter-group="status">Completed</button>
+            </div>
+        </div>
+        <div id="type-filters">
 
-            <!-- Header Section -->
-            <div class="flex justify-between items-center w-full h-14 mb-5 pl-4 pr-4">
+            <div class="filter-group" data-filter-group="type">
+                <button
+                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-900 text-white hover:bg-gray-700 shadow-sm border border-gray-300"
+                    data-filter-value="all" data-filter-group="type">All</button>
+                <button
+                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border border-gray-300"
+                    data-filter-value="Dine-in" data-filter-group="type">Dine-in</button>
+                <button
+                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border border-gray-300"
+                    data-filter-value="Delivery" data-filter-group="type">Delivery</button>
+                <button
+                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border border-gray-300"
+                    data-filter-value="Takeout" data-filter-group="type">Takeout</button>
+            </div>
+        </div>
+    </div>
 
+    <!-- Orders Container -->
+    <div id="orders-container" class="space-y-6">
+        {% for order in orders %}
+        <div class="order-card flex flex-col w-full p-6 rounded-lg bg-white border border-gray-200 shadow-sm"
+            data-status="{{ order.status }}" data-type="{{ order.order_type }}">
+            <div
+                class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-gray-200 px-4 gap-2">
                 <div class="flex flex-col justify-start items-start">
-                    <p class="text-2xl font-bold text-left text-gray-900">
-                        Today's Orders
-                    </p>
-                    <p class="text-base text-left text-gray-600">
-                        Manage today's Orders - 19/9/2025
-                    </p>
+                    <p class="text-lg font-semibold text-gray-900 ">#{{ order.order_id_str }}</p>
+                    <p class="text-sm text-left text-gray-600">{{ order.order_date|date:"F d, Y \a\t g:i A" }}</p>
                 </div>
 
-                <div class="flex flex-col justify-start items-end">
-                    <!-- Order Counter (to be updated by JS) -->
-                    <p id="total-order-count" class="text-2xl font-bold text-right text-green-600">
-                        5
-                    </p>
-                    <p class="text-sm text-right text-gray-600">Total Orders</p>
+                <div class="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
+                    <div class="px-3 py-1 rounded-lg bg-gray-100 text-sm font-medium text-gray-800">{{ order.order_type }}</div>
+                    {% if order.status == 'Pending' %}<div class="px-3 py-1 rounded-lg bg-yellow-100 text-sm font-medium text-yellow-800">Pending</div>
+                    {% elif order.status == 'Preparing' %}<div class="px-3 py-1 rounded-lg bg-orange-100 text-sm font-medium text-orange-800">Preparing</div>
+                    {% elif order.status == 'Completed' %}<div class="px-3 py-1 rounded-lg bg-gray-100 text-sm font-medium text-gray-800">Completed</div>
+                    {% else %}<div class="px-3 py-1 rounded-lg bg-gray-100 text-sm font-medium text-gray-800">{{order.status }}</div>
+                    {% endif %}
+                </div>
+
+            </div>
+            <div class="w-full py-4">
+                <p class="text-base font-medium text-gray-900 pb-2 px-4">Order Items:</p>
+                <div class="flex flex-col gap-1">
+                    {% for item in order.items.all %}
+                    <div class="flex justify-between items-center px-6">
+                        <p class="text-sm text-gray-700">{{ item.quantity }}x {{ item.item.name }}</p>
+                        <p class="text-sm font-medium text-gray-900">Rs {{ item.get_cost|floatformat:2 }}</p>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
-
-            <!-- Filter Controls Container -->
-            <div class="mb-8 space-y-4  pl-4">
-                <!-- Status Filters -->
-                <div id="status-filters">
-                    <p class="text-sm font-medium text-gray-700 mb-2">Filter by Status:</p>
-                    <div class="filter-group" data-filter-group="status">
-                        <!-- All Filter (Active by default) -->
-                        <button
-                            class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-900 text-white hover:bg-gray-700"
-                            data-filter-value="all" data-filter-group="status">
-                            All
-                        </button>
-                        <!-- Inactive Filters -->
-                        <button
-                            class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap"
-                            data-filter-value="Pending" data-filter-group="status">
-                            Pending
-                        </button>
-                        <button
-                            class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap "
-                            data-filter-value="Preparing" data-filter-group="status">
-                            Preparing
-                        </button>
-                        <button
-                            class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap "
-                            data-filter-value="Completed" data-filter-group="status">
-                            Completed
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Type Filters -->
-                <div id="type-filters">
-                    <p class="text-sm font-medium text-gray-700 mb-2">Filter by Type:</p>
-                    <div class="filter-group" data-filter-group="type">
-                        <!-- All Filter (Active by default) -->
-                        <button
-                            class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap filter-button-active bg-gray-900 text-white hover:bg-gray-700"
-                            data-filter-value="all" data-filter-group="type">
-                            All
-                        </button>
-                        <!-- Inactive Filters -->
-                        <button
-                            class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap "
-                            data-filter-value="Dine-in" data-filter-group="type">
-                            Dine-in
-                        </button>
-                        <button
-                            class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap "
-                            data-filter-value="Delivery" data-filter-group="type">
-                            Delivery
-                        </button>
-                        <button
-                            class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap "
-                            data-filter-value="Takeout" data-filter-group="type">
-                            Takeout
-                        </button>
-                    </div>
+            {% if order.order_type == 'Delivery' and order.user.profile.street_address %}
+            <div class="w-full pb-4">
+                <div class="p-3 rounded-lg bg-blue-50">
+                    <p class="text-sm font-medium text-blue-800 pb-1">Delivery Address:</p>
+                    <p class="text-sm text-blue-700">{{ order.user.profile.street_address }}, {{ order.user.profile.city}}</p>
                 </div>
             </div>
-
-            <!-- Orders Container -->
-            <div id="orders-container" class="space-y-6">
-
-                <!-- Hardcoded Order Card 1: ORD-001 (Pending, Dine-in) -->
-                <div class="order-card flex flex-col justify-start items-start w-full p-[25px] rounded-lg bg-white border border-gray-200 shadow-sm transition-all duration-300"
-                    data-status="Pending" data-type="Dine-in">
-                    <!-- Header -->
-                    <div
-                        class="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full pb-4 border-b border-gray-200 gap-4">
-                        <div class="flex flex-col justify-start items-start w-full">
-                            <div class="flex flex-wrap items-center gap-3 pb-2">
-                                <p class="text-lg font-semibold text-gray-900">ORD-001</p>
-                                <!-- Status Badge: Pending (Yellow) -->
-                                <div class="px-3 py-1 rounded-full bg-yellow-100">
-                                    <p class="text-xs font-medium text-yellow-800">Pending</p>
-                                </div>
-                                <!-- Type Badge: Dine-in (Purple) -->
-                                <div class="px-3 py-1 rounded-full bg-purple-100">
-                                    <p class="text-xs font-medium text-purple-800">Dine-in</p>
-                                </div>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-4">
-                                <div class="flex items-center">
-                                    <p class="text-sm text-left text-gray-600">
-                                        2024-01-16 at 6:00 PM
-                                    </p>
-                                </div>
-
-                            </div>
-                        </div>
-                        <!-- Total Price -->
-                        <p class="text-xl font-bold text-right text-gray-900 w-full sm:w-auto">Rs 2,500</p>
-                    </div>
-
-                    <!-- Items -->
-                    <div class="w-full py-4">
-                        <p class="text-base font-medium text-left text-gray-900 pb-2">Order Items:</p>
-                        <div class="flex flex-col gap-1">
-                            <div class="flex justify-between items-center">
-                                <p class="text-sm text-left text-gray-700">Grilled Salmon</p>
-                                <p class="text-sm font-medium text-left text-gray-900">Rs 1,200</p>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <p class="text-sm text-left text-gray-700">Caesar Salad</p>
-                                <p class="text-sm font-medium text-left text-gray-900">Rs 800</p>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <p class="text-sm text-left text-gray-700">Red Wine</p>
-                                <p class="text-sm font-medium text-left text-gray-900">Rs 500</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="flex flex-wrap justify-start items-center w-full pt-4 gap-3 border-t border-gray-200">
-                        <button
-                            class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-red-600 text-sm font-medium text-white hover:bg-red-700 transition">
-                            Cancel Order
-                        </button>
-                        <button
-                            class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200 transition">
-                            View Receipt
-                        </button>
-                    </div>
+            {% endif %}
+            <div class="flex flex-wrap justify-between items-center w-full pt-4 gap-3 border-t border-gray-200 pr-4">
+                <div class="flex gap-3">
+                    <button
+                        class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-green-600 text-sm font-medium text-white hover:bg-green-700">
+                        Update Status</button>
+                    <button
+                        class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200">
+                        View Receipt</button>
                 </div>
-
-                <!-- Hardcoded Order Card 2: ORD-003 (Preparing, Delivery, with Address) -->
-                <div class="order-card flex flex-col justify-start items-start w-full p-[25px] rounded-lg bg-white border border-gray-200 shadow-sm transition-all duration-300"
-                    data-status="Preparing" data-type="Delivery">
-                    <!-- Header -->
-                    <div
-                        class="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full pb-4 border-b border-gray-200 gap-4">
-                        <div class="flex flex-col justify-start items-start w-full">
-                            <div class="flex flex-wrap items-center gap-3 pb-2">
-                                <p class="text-lg font-semibold text-gray-900">ORD-003</p>
-                                <!-- Status Badge: Preparing (Orange) -->
-                                <div class="px-3 py-1 rounded-full bg-orange-100">
-                                    <p class="text-xs font-medium text-orange-800">Preparing</p>
-                                </div>
-                                <!-- Type Badge: Delivery (Purple) -->
-                                <div class="px-3 py-1 rounded-full bg-purple-100">
-                                    <p class="text-xs font-medium text-purple-800">Delivery</p>
-                                </div>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-4">
-                                <div class="flex items-center">
-                                    <p class="text-sm text-left text-gray-600">
-                                        2024-01-15 at 8:10 PM
-                                    </p>
-                                </div>
-
-                            </div>
-                        </div>
-                        <!-- Total Price -->
-                        <p class="text-xl font-bold text-right text-gray-900 w-full sm:w-auto">Rs 1,800</p>
-                    </div>
-
-                    <!-- Items -->
-                    <div class="w-full py-4">
-                        <p class="text-base font-medium text-left text-gray-900 pb-2">Order Items:</p>
-                        <div class="flex flex-col gap-1">
-                            <div class="flex justify-between items-center">
-                                <p class="text-sm text-left text-gray-700">Chicken Alfredo</p>
-                                <p class="text-sm font-medium text-left text-gray-900">Rs 1,200</p>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <p class="text-sm text-left text-gray-700">Chocolate Cake</p>
-                                <p class="text-sm font-medium text-left text-gray-900">Rs 600</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Address Block -->
-                    <div class="w-full pb-4">
-                        <div class="p-3 rounded-lg bg-blue-50">
-                            <p class="text-sm font-medium text-left text-blue-800 pb-1">Delivery Address:</p>
-                            <p class="text-sm text-left text-blue-700">123 Main St, Apartment 4B</p>
-                        </div>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="flex flex-wrap justify-start items-center w-full pt-4 gap-3 border-t border-gray-200">
-                        <button
-                            class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-green-600 text-sm font-medium text-white hover:bg-green-700 transition">
-                            Track Order
-                        </button>
-                        <button
-                            class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200 transition">
-                            View Receipt
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Hardcoded Order Card 3: ORD-005 (Completed, Takeout) -->
-                <div class="order-card flex flex-col justify-start items-start w-full p-[25px] rounded-lg bg-white border border-gray-200 shadow-sm transition-all duration-300"
-                    data-status="Completed" data-type="Takeout">
-                    <!-- Header -->
-                    <div
-                        class="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full pb-4 border-b border-gray-200 gap-4">
-                        <div class="flex flex-col justify-start items-start w-full">
-                            <div class="flex flex-wrap items-center gap-3 pb-2">
-                                <p class="text-lg font-semibold text-gray-900">ORD-005</p>
-                                <!-- Status Badge: Completed (Gray) -->
-                                <div class="px-3 py-1 rounded-full bg-gray-100">
-                                    <p class="text-xs font-medium text-gray-800">Completed</p>
-                                </div>
-                                <!-- Type Badge: Takeout (Purple) -->
-                                <div class="px-3 py-1 rounded-full bg-purple-100">
-                                    <p class="text-xs font-medium text-purple-800">Takeout</p>
-                                </div>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-4">
-                                <div class="flex items-center">
-                                    <p class="text-sm text-left text-gray-600">
-                                        2024-01-14 at 1:06 PM
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Total Price -->
-                        <p class="text-xl font-bold text-right text-gray-900 w-full sm:w-auto">Rs 2,000</p>
-                    </div>
-
-                    <!-- Items -->
-                    <div class="w-full py-4">
-                        <p class="text-base font-medium text-left text-gray-900 pb-2">Order Items:</p>
-                        <div class="flex flex-col gap-1">
-                            <div class="flex justify-between items-center">
-                                <p class="text-sm text-left text-gray-700">3x Fish Tacos</p>
-                                <p class="text-sm font-medium text-left text-gray-900">Rs 1,500</p>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <p class="text-sm text-left text-gray-700">1x Guacamole</p>
-                                <p class="text-sm font-medium text-left text-gray-900">Rs 500</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="flex flex-wrap justify-start items-center w-full pt-4 gap-3 border-t border-gray-200">
-                        <button
-                            class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-gray-900 text-sm font-medium text-white hover:bg-black transition">
-                            Reorder
-                        </button>
-                        <button
-                            class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200 transition">
-                            View Receipt
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Hardcoded Order Card 4: ORD-007 (Pending, Delivery) -->
-                <div class="order-card flex flex-col justify-start items-start w-full p-[25px] rounded-lg bg-white border border-gray-200 shadow-sm transition-all duration-300"
-                    data-status="Pending" data-type="Delivery">
-                    <!-- Header -->
-                    <div
-                        class="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full pb-4 border-b border-gray-200 gap-4">
-                        <div class="flex flex-col justify-start items-start w-full">
-                            <div class="flex flex-wrap items-center gap-3 pb-2">
-                                <p class="text-lg font-semibold text-gray-900">ORD-007</p>
-                                <!-- Status Badge: Pending (Yellow) -->
-                                <div class="px-3 py-1 rounded-full bg-yellow-100">
-                                    <p class="text-xs font-medium text-yellow-800">Pending</p>
-                                </div>
-                                <!-- Type Badge: Delivery (Purple) -->
-                                <div class="px-3 py-1 rounded-full bg-purple-100">
-                                    <p class="text-xs font-medium text-purple-800">Delivery</p>
-                                </div>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-4">
-                                <div class="flex items-center">
-                                    <p class="text-sm text-left text-gray-600">
-                                        2024-01-16 at 7:30 PM
-                                    </p>
-                                </div>
-
-                            </div>
-                        </div>
-                        <!-- Total Price -->
-                        <p class="text-xl font-bold text-right text-gray-900 w-full sm:w-auto">Rs 1,550</p>
-                    </div>
-
-                    <!-- Items -->
-                    <div class="w-full py-4">
-                        <p class="text-base font-medium text-left text-gray-900 pb-2">Order Items:</p>
-                        <div class="flex flex-col gap-1">
-                            <div class="flex justify-between items-center">
-                                <p class="text-sm text-left text-gray-700">Margherita Pizza</p>
-                                <p class="text-sm font-medium text-left text-gray-900">Rs 900</p>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <p class="text-sm text-left text-gray-700">Coke Zero</p>
-                                <p class="text-sm font-medium text-left text-gray-900">Rs 50</p>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <p class="text-sm text-left text-gray-700">Tiramisu</p>
-                                <p class="text-sm font-medium text-left text-gray-900">Rs 600</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="flex flex-wrap justify-start items-center w-full pt-4 gap-3 border-t border-gray-200">
-                        <button
-                            class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-red-600 text-sm font-medium text-white hover:bg-red-700 transition">
-                            Cancel Order
-                        </button>
-                        <button
-                            class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200 transition">
-                            View Receipt
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Hardcoded Order Card 5: ORD-009 (Preparing, Dine-in) -->
-                <div class="order-card flex flex-col justify-start items-start w-full p-[25px] rounded-lg bg-white border border-gray-200 shadow-sm transition-all duration-300"
-                    data-status="Preparing" data-type="Dine-in">
-                    <!-- Header -->
-                    <div
-                        class="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full pb-4 border-b border-gray-200 gap-4">
-                        <div class="flex flex-col justify-start items-start w-full">
-                            <div class="flex flex-wrap items-center gap-3 pb-2">
-                                <p class="text-lg font-semibold text-gray-900">ORD-009</p>
-                                <!-- Status Badge: Preparing (Orange) -->
-                                <div class="px-3 py-1 rounded-full bg-orange-100">
-                                    <p class="text-xs font-medium text-orange-800">Preparing</p>
-                                </div>
-                                <!-- Type Badge: Dine-in (Purple) -->
-                                <div class="px-3 py-1 rounded-full bg-purple-100">
-                                    <p class="text-xs font-medium text-purple-800">Dine-in</p>
-                                </div>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-4">
-                                <div class="flex items-center">
-                                    <p class="text-sm text-left text-gray-600">
-                                        2024-01-17 at 11:00 AM
-                                    </p>
-                                </div>
-
-                            </div>
-                        </div>
-                        <!-- Total Price -->
-                        <p class="text-xl font-bold text-right text-gray-900 w-full sm:w-auto">Rs 900</p>
-                    </div>
-
-                    <!-- Items -->
-                    <div class="w-full py-4">
-                        <p class="text-base font-medium text-left text-gray-900 pb-2">Order Items:</p>
-                        <div class="flex flex-col gap-1">
-                            <div class="flex justify-between items-center">
-                                <p class="text-sm text-left text-gray-700">Breakfast Burrito</p>
-                                <p class="text-sm font-medium text-left text-gray-900">Rs 900</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="flex flex-wrap justify-start items-center w-full pt-4 gap-3 border-t border-gray-200">
-                        <button
-                            class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-green-600 text-sm font-medium text-white hover:bg-green-700 transition">
-                            Track Order
-                        </button>
-                        <button
-                            class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200 transition">
-                            View Receipt
-                        </button>
-                    </div>
-                </div>
-
+                <p class="text-xl font-bold text-right text-gray-900">Rs {{ order.get_total_cost|floatformat:2 }}</p>
             </div>
         </div>
-    </main>
+        {% empty %}
+        <p class="text-center text-gray-500 py-10">No orders for today yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock dashboard_content %}
 
-    <script>
-        // --- Filtering Logic ---
+{% block scripts %}
+<script>
+    let activeStatus = 'all';
+    let activeType = 'all';
 
-        // Track the current active filters (default to 'all')
-        let activeStatus = 'all';
-        let activeType = 'all';
+    const activeStyles = {
+        all: ["bg-gray-900", "text-white", "hover:bg-gray-700"],
+        Pending: ["bg-yellow-100", "text-yellow-800", "hover:bg-yellow-200"],
+        Preparing: ["bg-orange-100", "text-orange-800", "hover:bg-orange-200"],
+        Completed: ["bg-green-100", "text-green-800", "hover:bg-green-200"],
+        'Dine-in': ["bg-gray-900", "text-white", "hover:bg-gray-700"],
+        Delivery: ["bg-gray-900", "text-white", "hover:bg-gray-700"],
+        Takeout: ["bg-gray-900", "text-white", "hover:bg-gray-700"],
+    };
 
-        // Select all the relevant elements once the page is loaded
-        const orderCards = document.querySelectorAll('.order-card');
-        const filterButtons = document.querySelectorAll('.filter-button');
-        const totalCountElement = document.getElementById('total-order-count');
+    const inactiveStyles = ["bg-gray-100", "text-gray-700", "hover:bg-gray-200"];
+    const allActiveStyleClasses = [...new Set(Object.values(activeStyles).flat())];
 
-        /**
-         * Applies the active filters to the list of orders.
-         */
-        function filterOrders() {
-            let visibleCount = 0;
 
-            orderCards.forEach(card => {
-                const cardStatus = card.getAttribute('data-status');
-                const cardType = card.getAttribute('data-type');
+    const orderCards = document.querySelectorAll('.order-card');
+    const filterButtons = document.querySelectorAll('.filter-button');
+    const totalCountElement = document.getElementById('total-order-count');
 
-                // Check if the card matches the active status filter
-                const statusMatch = activeStatus === 'all' || cardStatus === activeStatus;
-
-                // Check if the card matches the active type filter
-                const typeMatch = activeType === 'all' || cardType === activeType;
-
-                // Show or hide the card based on both matches
-                if (statusMatch && typeMatch) {
-                    card.classList.remove('hidden-card');
-                    visibleCount++;
-                } else {
-                    card.classList.add('hidden-card');
-                }
-            });
-
-            // Update the visible order count in the header
-            totalCountElement.textContent = visibleCount;
-        }
-
-        /**
-         * Handles the click event for filter buttons.
-         * @param {Event} event - The click event object.
-         */
-        function handleFilterClick(event) {
-            const button = event.currentTarget;
-            const group = button.getAttribute('data-filter-group');
-            const value = button.getAttribute('data-filter-value');
-
-            // 1. Update the active filter variable
-            if (group === 'status') {
-                activeStatus = value;
-            } else if (group === 'type') {
-                activeType = value;
+    function filterOrders() {
+        let visibleCount = 0;
+        orderCards.forEach(card => {
+            const cardStatus = card.getAttribute('data-status');
+            const cardType = card.getAttribute('data-type');
+            const statusMatch = activeStatus === 'all' || cardStatus === activeStatus;
+            const typeMatch = activeType === 'all' || cardType === activeType;
+            if (statusMatch && typeMatch) {
+                card.classList.remove('hidden-card');
+                visibleCount++;
+            } else {
+                card.classList.add('hidden-card');
             }
-
-            // 2. Update button styling for the specific group
-            // Get all buttons in the same group (e.g., all Status buttons or all Type buttons)
-            const groupButtons = document.querySelectorAll(`.filter-button[data-filter-group="${group}"]`);
-
-            groupButtons.forEach(btn => {
-                btn.classList.remove(
-                    "bg-gray-900",
-                    "text-white",
-                    "hover:bg-gray-700",
-                    "bg-gray-100",
-                    "text-gray-700",
-                    "hover:bg-gray-200"
-                );
-                if (btn === button) {
-                    // Activate clicked button (Apply Green color)
-                    btn.classList.add("bg-gray-900", "text-white", "hover:bg-gray-700");
-                    btn.classList.remove("bg-gray-100", "text-gray-700", "hover:bg-gray-200");
-                } else {
-                    // Deactivate sibling buttons (Apply Gray color)
-                    btn.classList.remove("bg-gray-900", "text-white", "hover:bg-gray-700");
-                    btn.classList.add("bg-gray-100", "text-gray-700", "hover:bg-gray-200");
-                }
-            });
-
-            // 3. Re-filter the orders
-            filterOrders();
-        }
-
-        // --- Initialization ---
-
-        // Attach event listeners to all filter buttons
-        filterButtons.forEach(button => {
-            button.addEventListener('click', handleFilterClick);
-
         });
+        totalCountElement.textContent = visibleCount;
+    }
 
-        // Run filter once on load to ensure initial counts are correct and filters are applied
-        window.onload = function () {
-            filterOrders();
-        };
+    function handleFilterClick(event) {
+        const button = event.currentTarget;
+        const group = button.getAttribute('data-filter-group');
+        const value = button.getAttribute('data-filter-value');
+        if (group === 'status') {
+            activeStatus = value;
+        } else if (group === 'type') {
+            activeType = value;
+        }
+        const groupButtons = document.querySelectorAll(`.filter-button[data-filter-group="${group}"]`);
+        groupButtons.forEach(btn => {
+            const btnValue = btn.getAttribute('data-filter-value');
+            // Reset styles
+            btn.classList.remove(...allActiveStyleClasses);
+            btn.classList.add(...inactiveStyles);
 
+            // Apply active styles
+            if (btnValue === value) {
+                btn.classList.remove(...inactiveStyles);
+                btn.classList.add(...(activeStyles[btnValue] || activeStyles.all));
+            }
+        });
+        filterOrders();
+    }
 
-    </script>
-</body>
+    filterButtons.forEach(button => {
+        button.addEventListener('click', handleFilterClick);
+    });
 
-</html>
+    // Run on load
+    document.addEventListener('DOMContentLoaded', () => filterOrders());
+</script>
+{% endblock scripts %}

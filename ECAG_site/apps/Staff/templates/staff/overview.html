@@ -1,509 +1,149 @@
-<!DOCTYPE html>
-<html>
+{% extends "staff/staff_base.html" %}
 
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>staff overview</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'primary-orange': '#f3703c',
-                        'blue-status': '#3b82f6',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                },
-            }
-        }
-    </script>
-    <style>
-        html,
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Inter', sans-serif;
-        }
+{% block title %}Staff Overview{% endblock %}
 
-        .card-shadow {
-            box-shadow: 0px 2px 4px -2px rgba(0, 0, 0, 0.1), 0px 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-    </style>
-</head>
-
-<body class="flex min-h-screen bg-gray-50">
-
-    <!-- Sidebar -->
-    <aside class="hidden md:flex flex-col w-64 bg-white h-screen fixed shadow-sm border-r border-gray-200">
-        <div class="p-6 border-b border-orange-100">
-            <h2 class="text-xl font-semibold text-gray-800">Staff Panel</h2>
+{% block dashboard_content %}
+<div class="p-4 sm:p-6 lg:p-8 w-full max-w-[900px] mx-auto space-y-6">
+    <header class="flex justify-between items-center w-full w-full h-14 mx-auto mb-6 px-4 pt-4">
+        <div class="flex flex-col justify-start items-start h-auto w-full sm:w-auto pl-2">
+            <h1 class="text-xl font-bold text-gray-900">Overview</h1>
+            <p class="text-xs text-gray-600">A summary of today's orders and reservations</p>
         </div>
-        <nav class="flex flex-col p-6 gap-2 text-gray-600">
-            <a href="#"
-                class="flex items-center gap-2 text-primary-orange bg-orange-50 rounded-md px-3 py-2 font-medium">Overview</a>
-            <a href="#" class="flex items-center gap-2 hover:bg-gray-100 rounded-md px-3 py-2"><span>Today's
-                    Orders</span></a>
-            <a href="#" class="flex items-center gap-2 hover:bg-gray-100 rounded-md px-3 py-2"><span>Today's
-                    Reservations</span></a>
-        </nav>
-    </aside>
-
-    <main class="ml-0 md:ml-64 w-full p-4 md:p-10">
-        <div class="flex flex-col gap-6 w-full max-w-7xl">
-
-            <!-- SUMMARY CARDS CONTAINER -->
-            <div class="w-full max-w-[850px] mx-auto grid grid-cols-2 gap-4">
-
-                <!-- Today's Orders Card -->
-                <div
-                    class="flex flex-col p-6 rounded-lg bg-white card-shadow hover:shadow-lg transition-shadow col-span-1">
-                    <div class="flex justify-between items-center w-full">
-                        <div class="flex flex-col">
-                            <p class="text-sm font-medium text-gray-500">Today's Orders</p>
-                            <p class="text-2xl font-bold text-gray-900">24</p>
-                            <p class="text-xs text-gray-400 mt-1">Orders for the day</p>
-                        </div>
-                        <div
-                            class="flex justify-center items-center w-12 h-12 rounded-lg bg-blue-100 text-blue-600 p-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                        </div>
-                    </div>
+        <!-- Stats Section -->
+        <div class="flex gap-3 justify-start sm:justify-end w-full sm:w-auto over">
+            <!-- Preparing Orders -->
+            <div class=" items-center gap-2 bg-amber-50 text-amber-800 px-3 py-1 border rounded-lg shadow-sm">
+                <div class="flex items-center gap-2">
+                    <p class="text-lg font-bold">{{ orders_in_progress_count }}</p>
+                    <p class="text-sm font-medium truncate">Orders in Progress</p>
                 </div>
-
-                <!-- Today's Reservations Card -->
-                <div
-                    class="flex flex-col p-6 rounded-lg bg-white card-shadow hover:shadow-lg transition-shadow col-span-1">
-                    <div class="flex justify-between items-center w-full">
-                        <div class="flex flex-col">
-                            <p class="text-sm font-medium text-gray-500">Today's Reservations</p>
-                            <p class="text-2xl font-bold text-gray-900">8</p>
-                            <p class="text-xs text-gray-400 mt-1">Confirmed reservations</p>
-                        </div>
-                        <div
-                            class="flex justify-center items-center w-12 h-12 rounded-lg bg-green-100 text-green-600 p-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pending Orders Card -->
-                <div
-                    class="flex flex-col p-6 rounded-lg bg-white card-shadow hover:shadow-lg transition-shadow col-span-1">
-                    <div class="flex justify-between items-center w-full">
-                        <div class="flex flex-col">
-                            <p class="text-sm font-medium text-gray-500">Pending Orders</p>
-                            <p class="text-2xl font-bold text-gray-900">2</p>
-                            <p class="text-xs text-gray-400 mt-1">Orders in progress</p>
-                        </div>
-                        <div
-                            class="flex justify-center items-center w-12 h-12 rounded-lg bg-amber-100 text-amber-600 p-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pending Reservations Card -->
-                <div
-                    class="flex flex-col p-6 rounded-lg bg-white card-shadow hover:shadow-lg transition-shadow col-span-1">
-                    <div class="flex justify-between items-center w-full">
-                        <div class="flex flex-col">
-                            <p class="text-sm font-medium text-gray-500">Upcoming Reservations</p>
-                            <p class="text-2xl font-bold text-gray-900">1</p>
-                            <p class="text-xs text-gray-400 mt-1">Unconfirmed reservations</p>
-                        </div>
-                        <div
-                            class="flex justify-center items-center w-12 h-12 rounded-lg bg-purple-100 text-purple-600 p-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- ORDER/RESERVATION CARDS CONTAINER -->
-            <div class="flex flex-col md:flex-row md:items-start gap-4 w-full max-w-[850px] mx-auto">
-
-                <!-- Active Orders Card -->
-                <div class="flex flex-col w-full md:w-1/2 overflow-hidden rounded-xl bg-white card-shadow">
-                    <!-- Card Header -->
-                    <div class="flex flex-nowrap justify-between items-center px-6 py-5 border-b border-gray-200">
-                        <div class="flex justify-between items-center w-full h-7">
-                            <p class="text-xl font-semibold text-gray-900">
-                                Active Orders
-                            </p>
-                        </div>
-
-                        <!-- View All Button -->
-                        <div class="flex justify-center whitespace-nowrap ">
-                            <button
-                                class="text-sm font-medium text-blue-status hover:text-blue-700 transition duration-150 border border-blue-status hover:border-blue-700 rounded-lg px-4 py-2 bg-white hover:bg-blue-50">
-                                View All
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Card Content -->
-                    <div class="flex flex-col p-6 space-y-4 h-[530px]">
-
-                        <!-- Order List -->
-                        <div class="flex flex-col gap-4 flex-grow overflow-y-auto hide-scrollbar">
-
-                            <!-- Order 1 -->
-                            <div
-                                class="flex flex-col w-full p-4 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition duration-150 space-y-2">
-                                <div class="flex justify-between items-center w-full">
-                                    <p class="text-base font-medium text-gray-900">
-                                        #ORD-101
-                                    </p>
-                                    <p class="text-sm text-gray-500">
-                                        10:30 AM
-                                    </p>
-                                </div>
-
-                                <div class="flex justify-between items-center w-full">
-                                    <p class="text-sm text-gray-600">
-                                        John Smith
-                                    </p>
-                                    <p class="text-sm font-medium text-gray-700">
-                                        Table 5
-                                    </p>
-                                </div>
-
-                                <p class="text-sm text-gray-600">
-                                    Grilled Salmon, Caesar Salad
-                                </p>
-
-                                <div class="flex justify-between items-center w-full pt-1">
-                                    <div class="px-3 py-1 rounded-full bg-blue-100 text-xs font-medium text-blue-800">
-                                        Preparing
-                                    </div>
-                                    <button
-                                        class="text-sm font-medium text-green-600 hover:text-green-500 transition-colors">
-                                        Update Status
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Order 2 -->
-                            <div
-                                class="flex flex-col w-full p-4 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition duration-150 space-y-2">
-                                <div class="flex justify-between items-center w-full">
-                                    <p class="text-base font-medium text-gray-900">
-                                        #ORD-102
-                                    </p>
-                                    <p class="text-sm text-gray-500">
-                                        10:45 AM
-                                    </p>
-                                </div>
-
-                                <div class="flex justify-between items-center w-full">
-                                    <p class="text-sm text-gray-600">
-                                        Sarah Johnson
-                                    </p>
-                                    <p class="text-sm font-medium text-gray-700">
-                                        Table 8
-                                    </p>
-                                </div>
-
-                                <p class="text-sm text-gray-600">
-                                    Pasta Carbonara, Garlic Bread
-                                </p>
-
-                                <div class="flex justify-between items-center w-full pt-1">
-                                    <div class="px-3 py-1 rounded-full bg-green-100 text-xs font-medium text-green-800">
-                                        Ready
-                                    </div>
-                                    <button
-                                        class="text-sm font-medium text-green-600 hover:text-green-500 transition-colors">
-                                        Update Status
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Order 3 -->
-                            <div
-                                class="flex flex-col w-full p-4 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition duration-150 space-y-2">
-                                <div class="flex justify-between items-center w-full">
-                                    <p class="text-base font-medium text-gray-900">
-                                        #ORD-103
-                                    </p>
-                                    <p class="text-sm text-gray-500">
-                                        11:00 AM
-                                    </p>
-                                </div>
-
-                                <div class="flex justify-between items-center w-full">
-                                    <p class="text-sm text-gray-600">
-                                        Mike Davis
-                                    </p>
-                                    <p class="text-sm font-medium text-gray-700">
-                                        Table 12
-                                    </p>
-                                </div>
-
-                                <p class="text-sm text-gray-600">
-                                    Beef Steak, Mashed Potatoes
-                                </p>
-
-                                <div class="flex justify-between items-center w-full pt-1">
-                                    <div
-                                        class="px-3 py-1 rounded-full bg-yellow-100 text-xs font-medium text-yellow-800">
-                                        Pending
-                                    </div>
-                                    <button
-                                        class="text-sm font-medium text-green-600 hover:text-green-500 transition-colors">
-                                        Update Status
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Order 4 -->
-                            <div
-                                class="flex flex-col w-full p-4 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition duration-150 space-y-2">
-                                <div class="flex justify-between items-center w-full">
-                                    <p class="text-base font-medium text-gray-900">
-                                        #ORD-104
-                                    </p>
-                                    <p class="text-sm text-gray-500">
-                                        11:15 AM
-                                    </p>
-                                </div>
-
-                                <div class="flex justify-between items-center w-full">
-                                    <p class="text-sm text-gray-600">
-                                        Anna Lee
-                                    </p>
-                                    <p class="text-sm font-medium text-gray-700">
-                                        Table 2
-                                    </p>
-                                </div>
-
-                                <p class="text-sm text-gray-600">
-                                    Chicken Soup, Side of Fries
-                                </p>
-
-                                <div class="flex justify-between items-center w-full pt-1">
-                                    <div class="px-3 py-1 rounded-full bg-blue-100 text-xs font-medium text-blue-800">
-                                        Preparing
-                                    </div>
-                                    <button
-                                        class=" text-sm font-medium text-green-600 hover:text-green-500 transition-colors">
-                                        Update Status
-                                    </button>
-                                </div>
-                            </div>
-
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- Reservations Card -->
-                <div class="flex flex-col w-full md:w-1/2 overflow-hidden rounded-xl bg-white card-shadow">
-                    <!-- Card Header -->
-                    <div
-                        class="flex flex-nowrap justify-between items-center px-6 py-5 border-b border-gray-200 flex-shrink-0">
-                        <div class="flex justify-between items-center w-full h-7">
-                            <p class="text-xl font-semibold text-gray-900 truncate mr-2">
-                                Today's Reservations
-                            </p>
-                        </div>
-
-                        <!-- View All Button -->
-                        <div class="flex justify-center flex-shrink-0">
-                            <button
-                                class="text-sm font-medium text-blue-status hover:text-blue-700 transition duration-150 border border-blue-status hover:border-blue-700 rounded-lg px-4 py-2 bg-white hover:bg-blue-50">
-                                View All
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Card Content -->
-                    <div class="flex flex-col p-6 space-y-4 h-[530px]">
-
-                        <!-- Reservation List -->
-                        <div class="flex flex-col space-y-4 flex-grow overflow-y-auto hide-scrollbar">
-
-                            <!-- Reservation 1 -->
-                            <div
-                                class="flex flex-col w-full p-4 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition duration-150 space-y-2">
-                                <div class="flex justify-between items-center w-full">
-                                    <p class="text-base font-medium text-gray-900">
-                                        RES-201
-                                    </p>
-                                    <p class="text-sm text-gray-500">
-                                        12:00 PM
-                                    </p>
-                                </div>
-
-                                <div class="flex justify-between items-center w-full">
-                                    <p class="text-sm text-gray-600">
-                                        Emma Wilson
-                                    </p>
-                                    <p class="text-sm font-medium text-gray-700">
-                                        4 guests
-                                    </p>
-                                </div>
-
-                                <p class="text-sm text-gray-600">
-                                    Table 15, Standard booking
-                                </p>
-
-                                <div class="flex justify-between items-center w-full pt-1">
-                                    <div class="px-3 py-1 rounded-full bg-green-100 text-xs font-medium text-green-800">
-                                        Confirmed
-                                    </div>
-                                    <button
-                                        class=" text-sm font-medium text-green-600 hover:text-green-500 transition-colors">
-                                        Update Status
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Reservation 2 -->
-                            <div
-                                class="flex flex-col w-full p-4 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition duration-150 space-y-2">
-                                <div class="flex justify-between items-center w-full">
-                                    <p class="text-base font-medium text-gray-900">
-                                        RES-202
-                                    </p>
-                                    <p class="text-sm text-gray-500">
-                                        1:30 PM
-                                    </p>
-                                </div>
-
-                                <div class="flex justify-between items-center w-full">
-                                    <p class="text-sm text-gray-600">
-                                        David Brown
-                                    </p>
-                                    <p class="text-sm font-medium text-gray-700">
-                                        2 guests
-                                    </p>
-                                </div>
-
-                                <p class="text-sm text-gray-600">
-                                    Table 7, Window request
-                                </p>
-
-                                <div class="flex justify-between items-center w-full pt-1">
-                                    <div class="px-3 py-1 rounded-full bg-green-100 text-xs font-medium text-green-800">
-                                        Confirmed
-                                    </div>
-                                    <button
-                                        class=" text-sm font-medium text-green-600 hover:text-green-500 transition-colors">
-                                        Update Status
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Reservation 3 -->
-                            <div
-                                class="flex flex-col w-full p-4 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition duration-150 space-y-2">
-                                <div class="flex justify-between items-center w-full">
-                                    <p class="text-base font-medium text-gray-900">
-                                        RES-203
-                                    </p>
-                                    <p class="text-sm text-gray-500">
-                                        6:00 PM
-                                    </p>
-                                </div>
-
-                                <div class="flex justify-between items-center w-full">
-                                    <p class="text-sm text-gray-600">
-                                        Lisa Garcia
-                                    </p>
-                                    <p class="text-sm font-medium text-gray-700">
-                                        6 guests
-                                    </p>
-                                </div>
-
-                                <p class="text-sm text-gray-600">
-                                    Table 20, Large party
-                                </p>
-
-                                <div class="flex justify-between items-center w-full pt-1">
-                                    <div
-                                        class="px-3 py-1 rounded-full bg-yellow-100 text-xs font-medium text-yellow-800">
-                                        Pending
-                                    </div>
-                                    <button
-                                        class=" text-sm font-medium text-green-600 hover:text-green-500 transition-colors">
-                                        Update Status
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Reservation 4 -->
-                            <div
-                                class="flex flex-col w-full p-4 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition duration-150 space-y-2">
-                                <div class="flex justify-between items-center w-full">
-                                    <p class="text-base font-medium text-gray-900">
-                                        RES-204
-                                    </p>
-                                    <p class="text-sm text-gray-500">
-                                        7:00 PM
-                                    </p>
-                                </div>
-
-                                <div class="flex justify-between items-center w-full">
-                                    <p class="text-sm text-gray-600">
-                                        Mark Foster
-                                    </p>
-                                    <p class="text-sm font-medium text-gray-700">
-                                        2 guests
-                                    </p>
-                                </div>
-
-                                <p class="text-sm text-gray-600">
-                                    Table 3, VIP room
-                                </p>
-
-                                <div class="flex justify-between items-center w-full pt-1">
-                                    <div class="px-3 py-1 rounded-full bg-green-100 text-xs font-medium text-green-800">
-                                        Confirmed
-                                    </div>
-                                    <button
-                                        class=" text-sm font-medium text-green-600 hover:text-green-500 transition-colors">
-                                        Update Status
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                <div class="flex items-center gap-2">
+                    <p class="text-lg font-bold">{{ pending_orders_count }}</p>
+                    <p class="text-sm font-medium truncate">Orders Pending</p>
                 </div>
             </div>
-
+            <!-- Upcoming Reservations -->
+            <div class="items-center gap-2 bg-purple-50 text-purple-800 px-3 py-1 border rounded-lg shadow-sm">
+                <div class="flex items-center gap-2">
+                    <p class="text-lg font-bold">{{ upcoming_reservations_count }}</p>
+                    <p class="text-sm font-medium truncate">Upcoming Reservations</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <p class="text-lg font-bold">{{ pending_reservations_count }}</p>
+                    <p class="text-sm font-medium truncate">Pending Reservations</p>
+                </div>
+            </div>
         </div>
-    </main>
-</body>
+    </header>
 
-</html>
+    <div class="flex flex-col md:flex-row md:items-start gap-4 w-full mx-auto">
+        <!-- Active Orders -->
+        <div class="flex flex-col w-full md:w-1/2 overflow-hidden rounded-xl bg-white shadow-sm border border-gray-200">
+            <div class="flex justify-between items-center px-8 py-5 border-b border-gray-200">
+                <p class="text-xl font-semibold text-gray-900">Active Orders</p>
+                <a href="{% url 'staff_orders' %}" class="text-sm font-medium text-blue-600 hover:text-blue-800 border border-blue-600 rounded-lg px-4 py-2">View All</a>
+            </div>
+            <div class="flex flex-col p-6 space-y-4 h-[525px] overflow-y-auto hide-scrollbar">
+                {% for order in active_orders %}
+                <div class="flex flex-col w-full p-4 rounded-lg bg-white border border-gray-200 space-y-2">
+                    <div class="flex justify-between items-center w-full">
+                        <p class="text-base font-medium text-gray-900">#{{ order.order_id_str }}</p>
+                        <p class="text-sm text-gray-500">{{ order.order_date|time:"g:i A" }}</p>
+                    </div>
+                    <p class="text-sm text-gray-600">{{ order.user.get_full_name }}</p>
+                    <p class="text-sm text-gray-600 truncate">{{ order.get_item_summary }}</p>
+                    <div class="flex justify-between items-center w-full pt-2">
+                        <button class="text-sm font-medium text-green-600 hover:text-green-500">Update Status</button>
+                        <div class="flex items-center gap-2">
+                            <div class="px-2 py-1 rounded-lg bg-purple-100 text-xs font-medium text-purple-800">{{ order.order_type }}</div>
+                            {% if order.status == 'Pending' %}
+                            <div class="px-2 py-1 rounded-lg bg-yellow-100 text-xs font-medium text-yellow-800">Pending</div>
+                            {% elif order.status == 'Preparing' %}
+                            <div class="px-2 py-1 rounded-lg bg-blue-100 text-xs font-medium text-blue-800">Preparing</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-center text-gray-500 py-8">No active orders right now.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Today's Reservations -->
+        <div class="flex flex-col w-full md:w-1/2 overflow-hidden rounded-xl bg-white shadow-sm border border-gray-200">
+            <div class="flex justify-between items-center px-8 py-5 border-b border-gray-200">
+                <p class="text-xl font-semibold text-gray-900">Today's Reservations</p>
+                <a href="{% url 'staff_reservations' %}" class="text-sm font-medium text-blue-600 hover:text-blue-800 border border-blue-600 rounded-lg px-4 py-2">View All</a>
+            </div>
+            <div class="flex flex-col p-6 space-y-4 h-[525px] overflow-y-auto hide-scrollbar">
+                 {% for res in reservations_today %}
+                <div class="flex flex-col w-full p-4 rounded-lg bg-white border border-gray-200 space-y-2 ">
+                    <div class="flex justify-between items-center w-full">
+                        <p class="text-base font-medium text-gray-900">#RES-{{ res.reservation_id }}</p>
+                        <p class="text-sm text-gray-500">{{ res.time|time:"g:i A" }}</p>
+                    </div>
+                    <div class="flex justify-between items-center w-full">
+                        <p class="text-sm text-gray-600">{{ res.user_id.get_full_name }}</p>
+                        <p class="text-sm font-medium text-gray-700">{{ res.guest_count }} guests</p>
+                    </div>
+                     <p class="text-sm text-gray-600">Table {{ res.table_id.table_number|default:"N/A" }}</p>
+                    <div class="flex justify-between items-center w-full pt-1">
+                        <button class="text-sm font-medium text-green-600 hover:text-green-500">Update Status</button>
+                        {% if res.status == 'confirmed' %}
+                        <div class="px-2 py-1 rounded-lg bg-green-100 text-xs font-medium text-green-800">Confirmed</div>
+                        {% elif res.status == 'pending' %}
+                        <div class="px-2 py-1 rounded-lg bg-yellow-100 text-xs font-medium text-yellow-800">Pending</div>
+                        {% else %}
+                         <div class="px-2 py-1 rounded-lg bg-gray-100 text-xs font-medium text-gray-800">{{ res.status|title }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-center text-gray-500 py-8">No reservations for today.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="flex flex-col p-6 rounded-lg bg-white card-shadow col-span-1">
+            <div class="flex justify-between items-center w-full">
+                <div class="flex flex-col">
+                    <p class="text-sm font-medium text-gray-500">Today's Orders</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ todays_orders_count }}</p>
+                </div>
+                <div class="flex justify-center items-center w-12 h-12 rounded-lg bg-blue-100 text-blue-600 p-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg></div>
+            </div>
+        </div>
+        <div class="flex flex-col p-6 rounded-lg bg-white card-shadow col-span-1">
+            <div class="flex justify-between items-center w-full">
+                <div class="flex flex-col">
+                    <p class="text-sm font-medium text-gray-500">Today's Reservations</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ todays_reservations_count }}</p>
+                </div>
+                <div class="flex justify-center items-center w-12 h-12 rounded-lg bg-green-100 text-green-600 p-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+            </div>
+        </div>
+        <div class="flex flex-col p-6 rounded-lg bg-white card-shadow col-span-1">
+            <div class="flex justify-between items-center w-full">
+                <div class="flex flex-col">
+                    <p class="text-sm font-medium text-gray-500">Pending Orders</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ pending_orders_count }}</p>
+                </div>
+                <div class="flex justify-center items-center w-12 h-12 rounded-lg bg-amber-100 text-amber-600 p-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+            </div>
+        </div>
+        <div class="flex flex-col p-6 rounded-lg bg-white card-shadow col-span-1">
+            <div class="flex justify-between items-center w-full">
+                <div class="flex flex-col">
+                    <p class="text-sm font-medium text-gray-500">Upcoming Reservations</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ upcoming_reservations_count }}</p>
+                </div>
+                <div class="flex justify-center items-center w-12 h-12 rounded-lg bg-purple-100 text-purple-600 p-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock dashboard_content %}
