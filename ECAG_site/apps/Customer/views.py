@@ -5,9 +5,9 @@ from django.db.models import Sum, Q
 import datetime
 
 from apps.menu.models import Order
-from apps.Reservations.models import Reservation
+from apps.reservations.models import Reservation
 # from apps.Users.models import Profile <-- not added to preject yet
-from .models import Profile  #<-- using Profile from Customer model until official Profile model is added to Users app
+#from .models import Profile  #<-- using Profile from Customer model until official Profile model is added to Users app
 
 # Helper function to get the current user (real or fake)
 def get_current_user(request):

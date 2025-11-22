@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 import datetime  # <--- Added import for custom date
 
 from apps.menu.models import Order
-from apps.Reservations.models import Reservation, Table
+from apps.reservations.models import Reservation, Table
 
 # Helper function to get a staff user for development
 def get_current_staff_user(request):
