@@ -13,21 +13,22 @@ def review(request):
     """Landing page: show aggregated review stats and recent reviews."""
     # Ensure CSRF cookie is set so client-side JS can read it for POSTs
     get_token(request)
-    # base queryset
-    reviews = Review.objects.all()
+    # base queryset (all reviews)
+    base_reviews = Review.objects.all()
 
     # total helpful across all reviews (site-wide)
-    total_helpful_agg = Review.objects.aggregate(total_helpful=Sum('helpful_count'))
+    total_helpful_agg = base_reviews.aggregate(total_helpful=Sum('helpful_count'))
     total_helpful = total_helpful_agg.get('total_helpful') or 0
 
-    # verified reviews: count reviews admins marked as verified
-    verified_count = reviews.filter(is_verified=True).count()
+    # verified reviews: count reviews admins marked as verified (site-wide)
+    verified_count = base_reviews.filter(is_verified=True).count()
 
     # read filters/sort from query params
     sort = request.GET.get('sort', 'newest')
     rating_filter = request.GET.get('rating', 'all')
 
-    # apply rating filter if numeric
+    # Start from base_reviews for the listing, then apply rating filter if numeric
+    reviews = base_reviews
     try:
         if rating_filter is not None and rating_filter.isdigit():
             reviews = reviews.filter(rating=int(rating_filter))
@@ -46,19 +47,19 @@ def review(request):
     else:
         reviews = reviews.order_by('-submission_date')
 
-    # average rating (float) and total count
-    agg = reviews.aggregate(avg_rating=Avg('rating'), total=Count('pk'))
-    average_rating = agg.get('avg_rating') or 0.0
-    total_reviews = agg.get('total') or 0
+    # Compute overall aggregates (site-wide) from base_reviews so UI stats don't change when filtering
+    agg_all = base_reviews.aggregate(avg_rating=Avg('rating'), total=Count('pk'))
+    average_rating = agg_all.get('avg_rating') or 0.0
+    total_reviews = agg_all.get('total') or 0
 
-    # distribution counts for 1..5
-    dist_qs = reviews.values('rating').annotate(count=Count('rating'))
+    # distribution counts for 1..5 (site-wide)
+    dist_qs_all = base_reviews.values('rating').annotate(count=Count('rating'))
     distribution = {i: 0 for i in range(1, 6)}
-    for row in dist_qs:
+    for row in dist_qs_all:
         rating = int(row['rating'])
         distribution[rating] = row['count']
 
-    # percentages for distribution bars
+    # percentages for distribution bars (site-wide)
     distribution_pct = {i: (distribution[i] / total_reviews * 100) if total_reviews else 0 for i in range(1, 6)}
 
     # Track reviews the current session has marked as helpful (list of ints)
@@ -66,6 +67,7 @@ def review(request):
 
     context = {
         'reviews': reviews,
+        # site-wide aggregates (do not change when user filters the list)
         'average_rating': round(float(average_rating), 1) if average_rating else 0.0,
         'average_int': int(round(float(average_rating))) if average_rating else 0,
         'review_count': total_reviews,
@@ -97,6 +99,8 @@ def review(request):
             'is_verified': r.is_verified,
         })
 
+    # number of reviews currently displayed (after filter)
+    context['displayed_count'] = len(review_items)
     context['review_items'] = review_items
 
     return render(request, 'review/review.html', context)

@@ -75,9 +75,11 @@
         <p class="text-base text-center text-gray-600">
           Thank you for choosing Escale Maurice &amp; Grill. We've sent a confirmation email to
         </p>
-        <p class="text-base text-center text-gray-600 font-medium">
-          luiismiguel2007@gmail.com
-        </p>
+        {% if reservation %}
+        <p class="text-base text-center text-gray-600 font-medium">{{ reservation.email }}</p>
+        {% else %}
+        <p class="text-base text-center text-gray-600 font-medium">(no email available)</p>
+        {% endif %}
       </div>
 
       <!-- Reservation Details Card -->
@@ -91,37 +93,37 @@
             <!-- Confirmation Number -->
             <div class="flex justify-between items-center">
               <p class="text-sm text-gray-600">Confirmation #:</p>
-              <p class="text-sm font-medium text-black">BV-110730</p>
+              <p class="text-sm font-medium text-black">{% if reservation %}RES-{{ reservation.reservation_id }}{% else %}--{% endif %}</p>
             </div>
             
             <!-- Name -->
             <div class="flex justify-between items-center">
               <p class="text-sm text-gray-600">Name:</p>
-              <p class="text-sm font-medium text-black text-right">Luis Miguël Juliano Larhubarbe</p>
+              <p class="text-sm font-medium text-black text-right">{% if reservation %}{{ reservation.full_name }}{% else %}--{% endif %}</p>
             </div>
             
             <!-- Date & Time -->
             <div class="flex justify-between items-center">
               <p class="text-sm text-gray-600">Date &amp; Time:</p>
-              <p class="text-sm font-medium text-black">2025-09-26 at 11:30 AM</p>
+              <p class="text-sm font-medium text-black">{% if reservation %}{{ reservation.date }} at {{ reservation.time }}{% else %}--{% endif %}</p>
             </div>
             
             <!-- Guests -->
             <div class="flex justify-between items-center">
               <p class="text-sm text-gray-600">Guests:</p>
-              <p class="text-sm font-medium text-black">2</p>
+              <p class="text-sm font-medium text-black">{% if reservation %}{{ reservation.guests }}{% else %}--{% endif %}</p>
             </div>
             
             <!-- Table -->
             <div class="flex justify-between items-center">
               <p class="text-sm text-gray-600">Table:</p>
-              <p class="text-sm font-medium text-black">T2 (2-Seater)</p>
+              <p class="text-sm font-medium text-black">{% if reservation %}{{ reservation.table_label }}{% else %}--{% endif %}</p>
             </div>
             
             <!-- Phone -->
             <div class="flex justify-between items-center">
               <p class="text-sm text-gray-600">Phone:</p>
-              <p class="text-sm font-medium text-black">58307677</p>
+              <p class="text-sm font-medium text-black">{% if reservation %}{{ reservation.phone }}{% else %}--{% endif %}</p>
             </div>
           </div>
         </div>

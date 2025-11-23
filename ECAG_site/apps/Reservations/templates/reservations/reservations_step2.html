@@ -76,28 +76,35 @@
         <form method="post" novalidate>
           {% csrf_token %}
 
+          {% if error %}
+          <div class="mb-4 p-3 rounded bg-red-50 border border-red-100 text-red-700">
+            <strong class="block font-semibold">Error</strong>
+            <div class="text-sm">{{ error }}</div>
+          </div>
+          {% endif %}
+
           <!-- Name & Phone -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Full Name <span class="text-red-600">*</span></label>
-              <input name="full_name" type="text" placeholder="Enter your full name" class="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              <input name="full_name" type="text" required placeholder="Enter your full name" value="{{ reservation.full_name|default:'' }}" class="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300" />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number <span class="text-red-600">*</span></label>
-              <input name="phone" type="text" placeholder="(555) 123-4567" class="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              <input name="phone" type="text" required placeholder="(555) 123-4567" value="{{ reservation.phone|default:'' }}" class="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300" />
             </div>
           </div>
 
           <!-- Email -->
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">Email Address <span class="text-red-600">*</span></label>
-            <input name="email" type="email" placeholder="your.email@example.com" class="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300" />
+            <input name="email" type="email" required placeholder="your.email@example.com" value="{{ reservation.email|default:'' }}" class="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300" />
           </div>
 
           <!-- Special requests -->
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">Special Requests</label>
-            <textarea name="special_requests" rows="5" maxlength="500" placeholder="Any special dietary requirements, celebrations, or other requests..." class="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300"></textarea>
+            <textarea name="special_requests" rows="5" maxlength="500" placeholder="Any special dietary requirements, celebrations, or other requests..." class="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300">{{ reservation.special_requests|default:'' }}</textarea>
             <p class="text-xs text-gray-500 mt-1">0/500 characters</p>
           </div>
 

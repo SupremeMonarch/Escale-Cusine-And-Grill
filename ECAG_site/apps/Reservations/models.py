@@ -48,6 +48,11 @@ class Reservation(models.Model):
     date = models.DateField()
     time = models.TimeField()
     guest_count = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(20)])
+    # Contact fields collected at step 2
+    full_name = models.CharField(max_length=200, blank=True, null=True)
+    phone = models.CharField(max_length=32, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    special_requests = models.TextField(blank=True, null=True)
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),
