@@ -51,10 +51,9 @@
                   <p class="text-sm text-gray-600 mb-4">{{ item.desc }}</p>
 
                   <button
-                      type="button"
-                      data-add-to-cart="1"
-                      data-name="{{ item.name }}"
-                      data-price="{{ item.price }}"
+                      class="order-now-btn"
+                      data-item-name="{{ item.name }}"
+                      data-item-price="{{ item.price }}"
                       style="width: 100%; padding: 8px 16px; border-radius: 8px; border: none; color: #fff;
                             font-size: 16px; font-weight: 500; cursor: pointer;
                             background: linear-gradient(to right, #e97820, #ef4444); box-shadow: 0 4px 8px rgba(0,0,0,.12);">
