@@ -1,0 +1,153 @@
+{% extends "staff/staff_base.html" %}
+
+{% block title %}Staff | Today's Reservations{% endblock %}
+
+{% block dashboard_content %}
+<div class="p-4 sm:p-6 lg:p-8 w-full max-w-[850px] mx-auto">
+
+    <header class="flex justify-between items-center w-full w-full h-14 mx-auto mb-6 pl-4 pr-4 pt-4">
+        <div class="flex flex-col justify-start items-start h-auto w-full sm:w-auto pl-2">
+            <h1 class="text-xl font-bold text-gray-900">Today's Reservations</h1>
+            <p class="text-xs text-gray-600">Manage today's dining reservations - {{ today_date|date:"F d, Y" }}</p>
+        </div>
+        <div class="flex flex-col justify-start items-end">
+            <p id="total-order-count" class="text-2xl font-bold text-right text-green-600">{{ total_reservations }}</p>
+            <p class="text-sm text-right text-gray-600">Total Reservations</p>
+      </div>
+    </header>
+
+    <!-- Summary Cards -->
+    <div class="flex flex-wrap gap-3 justify-start w-full sm:w-auto mb-6 pl-4">
+        <div class="flex items-center gap-2 bg-green-50 text-green-800 px-3 py-1 border rounded-lg shadow-sm">
+            <p class="text-lg font-bold ">{{ total_reservations }}</p>
+            <p class="text-sm font-medium">Total Reservations</p>
+        </div>
+        <div class="flex items-center gap-2 bg-amber-50 text-amber-800 px-3 py-1 border rounded-lg shadow-sm">
+            <p class="text-lg font-bold">{{ pending_count }}</p>
+            <p class="text-sm font-medium">Pending Reservations</p>
+        </div>
+        <div class="flex items-center gap-2 bg-blue-50 text-blue-800 px-3 py-1 border rounded-lg shadow-sm">
+            <p class="text-lg font-bold ">{{ seated_count }}</p>
+            <p class="text-sm font-medium">Currently Seated</p>
+        </div>
+        <div class="flex items-center gap-2 bg-purple-50 text-purple-800 px-3 py-1 border rounded-lg shadow-sm">
+            <p class="text-lg font-bold ">{{ total_guests }}</p>
+            <p class="text-sm font-medium">Total Guests</p>
+        </div>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="flex flex-wrap justify-start gap-2 items-center w-full mb-5 pl-4">
+        <button data-status="All" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-900 text-white hover:bg-gray-700 shadow-sm border border-gray-300">All</button>
+        <button data-status="pending" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border border-gray-300">Pending</button>
+        <button data-status="confirmed" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border border-gray-300">Confirmed</button>
+        <button data-status="seated" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border border-gray-300">Seated</button>
+        <button data-status="completed" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border border-gray-300">Completed</button>
+        <button data-status="cancelled" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border border-gray-300">Cancelled</button>
+    </div>
+
+    <!-- Reservation Cards List -->
+    <div id="reservation-list" class="flex flex-col justify-start items-start self-stretch gap-4">
+      {% for res in reservations %}
+      <div data-status="{{ res.status }}" class="reservation-card w-full flex-col justify-between items-start p-6 rounded-lg bg-white border border-gray-200 shadow-sm">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center self-stretch pb-4 gap-3 border-b border-gray-200">
+            <p class="text-base font-semibold text-gray-900">#RES-{{ res.reservation_id }} - {{ res.user_id.get_full_name }}</p>
+            <div class="flex items-center gap-2 text-sm text-gray-500">{{ res.time|time:"g:i A" }}</div>
+            {% if res.status == 'confirmed' %}<div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Confirmed</div>
+            {% elif res.status == 'pending' %}<div class="px-3 py-1 rounded-lg bg-yellow-100 text-sm font-medium text-yellow-800">Pending</div>
+            {% elif res.status == 'seated' %}<div class="px-3 py-1 rounded-lg bg-blue-100 text-sm font-medium text-blue-800">Seated</div>
+            {% elif res.status == 'completed' %}<div class="px-3 py-1 rounded-lg bg-gray-200 text-sm font-medium text-gray-800">Completed</div>
+            {% elif res.status == 'cancelled' %}<div class="px-3 py-1 rounded-lg bg-red-100 text-sm font-medium text-red-800">Cancelled</div>
+            {% else %}<div class="px-3 py-1 rounded-lg bg-gray-200 text-sm font-medium text-gray-800">{{ res.status|title }}</div>
+            {% endif %}
+        </div>
+        <div class="grid grid-cols-2 gap-4 py-4 border-b border-gray-200 w-full">
+
+            <div class="flex flex-col items-center"><span class="text-xs font-medium text-gray-600 mb-1">Guests</span><p class="text-ms font-semibold text-gray-900 w-full flex justify-center">{{ res.guest_count }} people</p></div>
+
+            <div class="flex flex-col items-center"><span class="text-xs font-medium text-gray-600 mb-1">Table</span><p class="text-ms font-semibold text-gray-900 w-full flex justify-center">{{ res.table_id.table_number|default:"N/A" }}</p></div>
+        </div>
+        <div class="flex flex-wrap justify-between items-center self-stretch pt-4 gap-4">
+            <div class="flex flex-wrap items-center gap-3">
+                {% if res.status == 'confirmed' %}
+                <button class="px-4 py-2 rounded-lg bg-green-600 text-sm font-medium text-white">Mark Seated</button>
+                {% elif res.status == 'pending' %}
+                <button class="px-4 py-2 rounded-lg bg-green-600 text-sm font-medium text-white">Confirm</button>
+                <button class="px-4 py-2 rounded-lg bg-red-600 text-sm font-medium text-white">Cancel</button>
+                {% endif %}
+            </div>
+            <a href="#" class="text-sm font-medium text-blue-600 hover:underline">View Details</a>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-center text-gray-500 py-10">No reservations for today.</p>
+      {% endfor %}
+    </div>
+</div>
+{% endblock dashboard_content %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const buttons = document.querySelectorAll(".filter-button");
+        const cards = document.querySelectorAll(".reservation-card");
+        const totalCountEl = document.getElementById('total-order-count');
+        const originalTotal = '{{ total_reservations }}';
+
+        const styles = {
+            inactive: ["bg-gray-100", "text-gray-700", "hover:bg-gray-200"],
+            All: ["bg-gray-900", "text-white", "hover:bg-gray-700"],
+            pending: ["bg-yellow-100", "text-yellow-800", "hover:bg-yellow-200"],
+            confirmed: ["bg-green-100", "text-green-800", "hover:bg-green-200"],
+            seated: ["bg-blue-100", "text-blue-800", "hover:bg-blue-200"],
+            completed: ["bg-purple-100", "text-purple-800", "hover:bg-purple-200"],
+            cancelled: ["bg-red-100", "text-red-800", "hover:bg-red-200"],
+        };
+
+        function filterReservations(status) {
+            let visibleCount = 0;
+
+            // Update button styles
+            buttons.forEach(button => {
+                const buttonStatus = button.getAttribute("data-status");
+                // Reset all styles first by removing all possible style classes
+                Object.values(styles).flat().forEach(styleClass => button.classList.remove(styleClass));
+
+                // Apply active or inactive styles
+                if (buttonStatus === status) {
+                    button.classList.add(...(styles[buttonStatus] || styles.All));
+                } else {
+                    button.classList.add(...styles.inactive);
+                }
+            });
+
+            // Filter cards
+            cards.forEach(card => {
+                const cardStatus = card.getAttribute("data-status");
+                if (status === "All" || cardStatus === status) {
+                    card.style.display = "flex";
+                    visibleCount++;
+                } else {
+                    card.style.display = "none";
+                }
+            });
+
+            // Update total count display
+            if (totalCountEl) {
+                totalCountEl.textContent = (status === 'All') ? originalTotal : visibleCount;
+            }
+        }
+
+        // Attach click event listeners
+        buttons.forEach(button => {
+            button.addEventListener("click", () => {
+                const status = button.getAttribute("data-status");
+                filterReservations(status);
+            });
+        });
+
+        // Initialize filter on load
+        filterReservations('All');
+    });
+</script>
+{% endblock scripts %}

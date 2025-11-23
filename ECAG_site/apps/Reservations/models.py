@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-import qrcode
+from django.conf import settings
+
 
 class Table(models.Model):
     table_id = models.AutoField(primary_key=True)
@@ -42,11 +43,16 @@ class Table(models.Model):
 
 class Reservation(models.Model):
     reservation_id = models.AutoField(primary_key=True)
-    user_id =  models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='reservations')
-    table_id = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='reservations')
+    user_id =  models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reservations')
+    table_id = models.ForeignKey(Table, on_delete=models.CASCADE, related_name='reservations')
     date = models.DateField()
     time = models.TimeField()
     guest_count = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(20)])
+    # Contact fields collected at step 2
+    full_name = models.CharField(max_length=200, blank=True, null=True)
+    phone = models.CharField(max_length=32, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    special_requests = models.TextField(blank=True, null=True)
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),

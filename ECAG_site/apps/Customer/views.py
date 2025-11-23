@@ -5,9 +5,9 @@ from django.db.models import Sum, Q
 import datetime
 
 from apps.menu.models import Order
-from apps.Reservations.models import Reservation
+from apps.reservations.models import Reservation
 # from apps.Users.models import Profile <-- not added to preject yet
-from .models import Profile  #<-- using Profile from Customer model until official Profile model is added to Users app
+#from .models import Profile  #<-- using Profile from Customer model until official Profile model is added to Users app
 
 # Helper function to get the current user (real or fake)
 def get_current_user(request):
@@ -16,27 +16,29 @@ def get_current_user(request):
     # Fallback to 'johndoe' for demonstration if no user is logged in
     return get_object_or_404(User, username='johndoe')
 
-@login_required
+# @login_required
 def overview(request):
     customer = get_current_user(request)
 
-    # Order statistics
-    all_orders = Order.objects.filter(customer=customer)
+    all_orders = Order.objects.filter(user=customer)
     total_orders = all_orders.count()
     pending_orders = all_orders.filter(status__in=['Pending', 'Preparing']).count()
-    total_spent = all_orders.filter(status='Completed').aggregate(total=Sum('orderitem__product__price', 'orderitem__quantity'))['total'] or 0.00
 
-    # Reservation statistics
-    all_reservations = Reservation.objects.filter(customer=customer)
+    total_spent_data = all_orders.filter(status='Completed').aggregate(
+        total=Sum('total')
+    )
+    total_spent = total_spent_data['total'] or 0.00
+
+    all_reservations = Reservation.objects.filter(user_id=customer)
     total_reservations = all_reservations.count()
 
     upcoming_reservations_count = all_reservations.filter(
-        status='Confirmed',
+        status='confirmed',
         date__gte=datetime.date.today()
     ).count()
 
-    recent_orders = all_orders[:3]
-    recent_reservations = all_reservations[:3]
+    recent_orders = all_orders.order_by('-order_date')[:3]
+    recent_reservations = all_reservations.order_by('-date', '-time')[:3]
 
     context = {
         'user': customer,
@@ -47,33 +49,31 @@ def overview(request):
         'upcoming_reservations': upcoming_reservations_count,
         'recent_orders': recent_orders,
         'recent_reservations': recent_reservations,
+        'active_page': 'overview'
     }
     # IMPORTANT: Note the namespaced template path
     return render(request, 'customer/overview.html', context)
 
-@login_required
+# @login_required
 def my_orders(request):
     customer = get_current_user(request)
-    orders = Order.objects.filter(customer=customer)
-    context = {'orders': orders}
-    # IMPORTANT: Note the namespaced template path
+    orders = Order.objects.filter(user=customer)
+    context = {'orders': orders, 'active_page': 'my_orders'}
     return render(request, 'customer/my_orders.html', context)
 
-@login_required
+# @login_required
 def my_reservations(request):
     customer = get_current_user(request)
-    reservations = Reservation.objects.filter(customer=customer)
-    context = {'reservations': reservations}
-    # IMPORTANT: Note the namespaced template path
+    reservations = Reservation.objects.filter(user_id=customer).order_by('-date', '-time')
+    context = {'reservations': reservations, 'active_page': 'my_reservations'}
     return render(request, 'customer/my_reservations.html', context)
 
-@login_required
+# @login_required
 def profile(request):
     customer = get_current_user(request)
-    profile_data = customer.profile
     context = {
         'user': customer,
-        'profile': profile_data,
+        'profile': customer.profile,
+        'active_page': 'profile'
     }
-    # IMPORTANT: Note the namespaced template path
     return render(request, 'customer/profile.html', context)

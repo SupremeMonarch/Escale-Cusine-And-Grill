@@ -1,7 +1,7 @@
 // progress.js - Cumulative Progress Indicator with Connectors
 
 function updateProgress(currentStep) {
-    console.log("Updating progress to step:", currentStep);
+    // progress update (no debug logs)
     
     // Reset all steps to inactive first
     const steps = document.querySelectorAll('[data-step]');
@@ -16,7 +16,7 @@ function updateProgress(currentStep) {
         if (stepElement) {
             stepElement.classList.remove('bg-gray-400');
             stepElement.classList.add('bg-amber-600');
-            console.log(`Step ${step} activated`);
+            // step activated
         }
     }
     
@@ -25,7 +25,7 @@ function updateProgress(currentStep) {
 }
 
 function updateConnectorLines(currentStep) {
-    console.log("Updating connector lines for step:", currentStep);
+    // update connector lines
     
     // Get all connector lines
     const connectors = document.querySelectorAll('[data-connector]');
@@ -37,17 +37,16 @@ function updateConnectorLines(currentStep) {
         if (connectorStep < currentStep) {
             connector.classList.remove('bg-gray-400');
             connector.classList.add('bg-amber-600');
-            console.log(`Connector ${connectorStep} set to amber`);
+            // connector set to amber
         } else {
             connector.classList.remove('bg-amber-600');
             connector.classList.add('bg-gray-400');
-            console.log(`Connector ${connectorStep} set to gray`);
+            // connector set to gray
         }
     });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM loaded - CURRENT_STEP:", CURRENT_STEP);
     if (typeof CURRENT_STEP !== 'undefined') {
         updateProgress(parseInt(CURRENT_STEP));
     } else {

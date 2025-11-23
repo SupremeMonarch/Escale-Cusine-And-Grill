@@ -1,0 +1,104 @@
+{% extends "customer/customer_base.html" %}
+
+{% block title %}My Orders{% endblock %}
+
+{% block dashboard_content %}
+    <div class="p-4 sm:p-6 lg:p-8 w-full max-w-[850px] mx-auto space-y-6">
+        <header class="flex justify-between items-center w-full w-full h-14 mx-auto mb-6 pl-4 pr-4 pt-4">
+            <div class="flex flex-col justify-start items-start h-auto w-full sm:w-auto pl-2">
+                <h1 class="text-xl font-bold text-gray-900">My Orders</h1>
+                <p class="text-xs text-gray-600">Track and manage your food orders</p>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="flex flex-wrap gap-2 justify-start sm:justify-end">
+                <button id="filter-All" onclick="filterOrders('All')" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium transition duration-150 ease-in-out bg-blue-600 text-white hover:bg-blue-700">All</button>
+                <button id="filter-Pending" onclick="filterOrders('Pending')" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200">Pending</button>
+                <button id="filter-Preparing" onclick="filterOrders('Preparing')" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200">Preparing</button>
+                <button id="filter-Completed" onclick="filterOrders('Completed')" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200">Completed</button>
+                <button id="filter-Canclled" onclick="filterOrders('Cancelled')" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200">Cancelled</button>
+            </div>
+        </header>
+
+        <!-- Orders List Container -->
+        <div class="space-y-6" id="orders-list">
+            {% for order in orders %}
+            <div class="order-card flex flex-col w-full max-w-full p-6 rounded-xl bg-white card-shadow" data-status="{{ order.status }}">
+                <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+                    <div class="flex flex-col justify-start items-start">
+                        <p class="text-base font-semibold text-gray-900">#{{ order.order_id_str }}</p>
+                        <p class="text-sm text-gray-500">{{ order.order_date|date:"F d, Y \a\t g:i A" }}</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 justify-start items-center ml-4 mr-auto">
+                        {% if order.status == 'Pending' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-yellow-100"><p class="text-sm font-medium text-yellow-800">Pending</p></div>
+                        {% elif order.status == 'Preparing' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-blue-100"><p class="text-sm font-medium text-blue-800">Preparing</p></div>
+                        {% elif order.status == 'Completed' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-green-100"><p class="text-sm font-medium text-green-800">Completed</p></div>
+                        {% else %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-gray-100"><p class="text-sm font-medium text-gray-800">{{ order.status }}</p></div>
+                        {% endif %}
+                        <div class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-gray-100"><p class="text-sm text-gray-700">{{ order.order_type }}</p></div>
+                    </div>
+                    <div class="flex flex-col justify-start items-end">
+                        <p class="text-lg font-bold text-gray-900">Rs {{ order.get_total_cost|floatformat:2 }}</p>
+                    </div>
+                </div>
+                <div class="flex flex-col pt-4">
+                    <h3 class="text-base font-medium text-gray-900 mb-2">Order Items:</h3>
+                    <div class="flex flex-col space-y-2 max-h-40 overflow-y-auto subtle-scrollbar">
+                        {% for item in order.items.all %}
+                        <div class="flex justify-between items-center w-full h-12 pr-5 py-2 rounded-lg border border-gray-200">
+                            <div class="flex items-center space-x-3 pl-2">
+                                <div class="flex justify-center items-center w-8 h-8 rounded-full bg-blue-100 flex-shrink-0"><p class="text-sm font-medium text-blue-600">{{ item.quantity }}</p></div>
+                                <p class="text-base text-gray-900">{{ item.item.name }}</p>
+                            </div>
+                            <p class="text-base font-medium text-gray-900">Rs {{ item.get_cost|floatformat:2 }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center pt-4 border-t border-gray-200 mt-4 space-y-3 sm:space-y-0">
+                    <div class="flex gap-3 w-full sm:w-auto">
+                        {% if order.status == 'Pending' or order.status == 'Preparing' %}
+                        <button class="flex justify-center items-center h-10 px-4 py-2 rounded-lg bg-green-600 text-base text-white hover:bg-green-700 transition w-1/2 sm:w-auto">Track Order</button>
+                        {% endif %}
+                        {% if order.status == 'Pending' %}
+                        <button class="flex justify-center items-center h-10 px-4 py-2 rounded-lg bg-red-600 text-base text-white hover:bg-red-700 transition w-1/2 sm:w-auto">Cancel Order</button>
+                        {% endif %}
+                    </div>
+                    <button class="flex justify-center sm:justify-end items-center h-10 px-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition">View Receipt</button>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center text-gray-500 py-10">You have no orders.</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock dashboard_content %}
+
+
+{% block scripts %}
+<script>
+    function filterOrders(status) {
+        const cards = document.querySelectorAll(".order-card");
+        const buttons = document.querySelectorAll(".filter-button");
+        buttons.forEach((button) => {
+            button.classList.remove("bg-blue-600", "text-white", "hover:bg-blue-700");
+            button.classList.add("bg-gray-100", "text-gray-600", "hover:bg-gray-200");
+            const buttonIdStatus = button.id.replace("filter-", "");
+            if (buttonIdStatus === status) {
+                button.classList.add("bg-blue-600", "text-white", "hover:bg-blue-700");
+                button.classList.remove("bg-gray-100", "text-gray-600", "hover:bg-gray-200");
+            }
+        });
+        cards.forEach((card) => {
+            const cardStatus = card.getAttribute("data-status");
+            if (status === "All" || cardStatus === status) {
+                card.style.display = "flex";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    }
+    // Initialize filter on load
+    document.addEventListener('DOMContentLoaded', () => filterOrders('All'));
+</script>
+{% endblock scripts %}

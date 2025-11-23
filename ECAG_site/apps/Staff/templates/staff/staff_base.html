@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{{ active_page|title }} - Staff Dashboard{% endblock %}
+
+{% block styles %}
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8f9fa;
+    }
+
+    .card-shadow {
+        box-shadow: 0px 2px 4px -2px rgba(0, 0, 0, 0.1), 0px 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>
+{% endblock styles %}
+
+{% block content %}
+<!--
+      This block overrides the main 'content' block from base.html.
+      It creates the sidebar + content layout.
+    -->
+<div class="flex w-full">
+    <!-- Include the staff sidebar -->
+    {% include "Staff/includes/sidebar.html" %}
+
+    <!-- This is the main content area for all staff pages -->
+    <main class="md:ml-64 w-full bg-gray-50 min-h-screen">
+        <!--
+              This 'dashboard_content' block is where child pages will inject their code.
+            -->
+        {% block dashboard_content %}
+        {% endblock dashboard_content %}
+    </main>
+</div>
+{% endblock content %}

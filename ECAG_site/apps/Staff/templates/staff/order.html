@@ -1,0 +1,209 @@
+{% extends "staff/staff_base.html" %}
+
+{% block title %}Staff | Today's Orders{% endblock %}
+
+{% block styles %}
+{{ block.super }}
+<style>
+    .filter-group {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        scrollbar-width: none;
+    }
+
+    .filter-group::-webkit-scrollbar {
+        display: none;
+    }
+
+    .hidden-card {
+        display: none !important;
+    }
+</style>
+{% endblock styles %}
+
+{% block dashboard_content %}
+<div class="p-4 sm:p-6 lg:p-8 w-full max-w-[850px] mx-auto">
+    <header class="flex justify-between items-center w-full w-full h-14 mx-auto mb-6 pl-4 pr-4 pt-4">
+        <div class="flex flex-col justify-start items-start h-auto w-full sm:w-auto pl-2">
+            <h1 class="text-xl font-bold text-gray-900">Today's Orders</h1>
+            <p class="text-xs text-gray-600">Manage today's orders - {{ today_date|date:"F d, Y" }}</p>
+        </div>
+        <div class="flex flex-col justify-start items-end">
+            <p id="total-order-count" class="text-2xl font-bold text-right text-green-600">{{ orders|length }}</p>
+            <p class="text-sm text-right text-gray-600">Total Orders</p>
+        </div>
+    </header>
+
+    <!-- Filter Controls Container -->
+    <div class="mb-6 space-y-4  pl-4">
+        <div id="status-filters">
+
+            <div class="filter-group" data-filter-group="status">
+                <button
+                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-900 text-white hover:bg-gray-700 shadow-sm border border-gray-300"
+                    data-filter-value="all" data-filter-group="status">All</button>
+                <button
+                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border border-gray-300"
+                    data-filter-value="Pending" data-filter-group="status">Pending</button>
+                <button
+                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border border-gray-300"
+                    data-filter-value="Preparing" data-filter-group="status">Preparing</button>
+                <button
+                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border border-gray-300"
+                    data-filter-value="Completed" data-filter-group="status">Completed</button>
+            </div>
+        </div>
+        <div id="type-filters">
+
+            <div class="filter-group" data-filter-group="type">
+                <button
+                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-900 text-white hover:bg-gray-700 shadow-sm border border-gray-300"
+                    data-filter-value="all" data-filter-group="type">All</button>
+                <button
+                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border border-gray-300"
+                    data-filter-value="Dine-in" data-filter-group="type">Dine-in</button>
+                <button
+                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border border-gray-300"
+                    data-filter-value="Delivery" data-filter-group="type">Delivery</button>
+                <button
+                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border border-gray-300"
+                    data-filter-value="Takeout" data-filter-group="type">Takeout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Container -->
+    <div id="orders-container" class="space-y-6">
+        {% for order in orders %}
+        <div class="order-card flex flex-col w-full p-6 rounded-lg bg-white border border-gray-200 shadow-sm"
+            data-status="{{ order.status }}" data-type="{{ order.order_type }}">
+            <div
+                class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-gray-200 px-4 gap-2">
+                <div class="flex flex-col justify-start items-start">
+                    <p class="text-lg font-semibold text-gray-900 ">#{{ order.order_id_str }}</p>
+                    <p class="text-sm text-left text-gray-600">{{ order.order_date|date:"F d, Y \a\t g:i A" }}</p>
+                </div>
+
+                <div class="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
+                    <div class="px-3 py-1 rounded-lg bg-gray-100 text-sm font-medium text-gray-800">{{ order.order_type }}</div>
+                    {% if order.status == 'Pending' %}<div class="px-3 py-1 rounded-lg bg-yellow-100 text-sm font-medium text-yellow-800">Pending</div>
+                    {% elif order.status == 'Preparing' %}<div class="px-3 py-1 rounded-lg bg-orange-100 text-sm font-medium text-orange-800">Preparing</div>
+                    {% elif order.status == 'Completed' %}<div class="px-3 py-1 rounded-lg bg-gray-100 text-sm font-medium text-gray-800">Completed</div>
+                    {% else %}<div class="px-3 py-1 rounded-lg bg-gray-100 text-sm font-medium text-gray-800">{{order.status }}</div>
+                    {% endif %}
+                </div>
+
+            </div>
+            <div class="w-full py-4">
+                <p class="text-base font-medium text-gray-900 pb-2 px-4">Order Items:</p>
+                <div class="flex flex-col gap-1">
+                    {% for item in order.items.all %}
+                    <div class="flex justify-between items-center px-6">
+                        <p class="text-sm text-gray-700">{{ item.quantity }}x {{ item.item.name }}</p>
+                        <p class="text-sm font-medium text-gray-900">Rs {{ item.get_cost|floatformat:2 }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% if order.order_type == 'Delivery' and order.user.profile.street_address %}
+            <div class="w-full pb-4">
+                <div class="p-3 rounded-lg bg-blue-50">
+                    <p class="text-sm font-medium text-blue-800 pb-1">Delivery Address:</p>
+                    <p class="text-sm text-blue-700">{{ order.user.profile.street_address }}, {{ order.user.profile.city}}</p>
+                </div>
+            </div>
+            {% endif %}
+            <div class="flex flex-wrap justify-between items-center w-full pt-4 gap-3 border-t border-gray-200 pr-4">
+                <div class="flex gap-3">
+                    <button
+                        class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-green-600 text-sm font-medium text-white hover:bg-green-700">
+                        Update Status</button>
+                    <button
+                        class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200">
+                        View Receipt</button>
+                </div>
+                <p class="text-xl font-bold text-right text-gray-900">Rs {{ order.get_total_cost|floatformat:2 }}</p>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center text-gray-500 py-10">No orders for today yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock dashboard_content %}
+
+{% block scripts %}
+<script>
+    let activeStatus = 'all';
+    let activeType = 'all';
+
+    const activeStyles = {
+        all: ["bg-gray-900", "text-white", "hover:bg-gray-700"],
+        Pending: ["bg-yellow-100", "text-yellow-800", "hover:bg-yellow-200"],
+        Preparing: ["bg-orange-100", "text-orange-800", "hover:bg-orange-200"],
+        Completed: ["bg-green-100", "text-green-800", "hover:bg-green-200"],
+        'Dine-in': ["bg-gray-900", "text-white", "hover:bg-gray-700"],
+        Delivery: ["bg-gray-900", "text-white", "hover:bg-gray-700"],
+        Takeout: ["bg-gray-900", "text-white", "hover:bg-gray-700"],
+    };
+
+    const inactiveStyles = ["bg-gray-100", "text-gray-700", "hover:bg-gray-200"];
+    const allActiveStyleClasses = [...new Set(Object.values(activeStyles).flat())];
+
+
+    const orderCards = document.querySelectorAll('.order-card');
+    const filterButtons = document.querySelectorAll('.filter-button');
+    const totalCountElement = document.getElementById('total-order-count');
+
+    function filterOrders() {
+        let visibleCount = 0;
+        orderCards.forEach(card => {
+            const cardStatus = card.getAttribute('data-status');
+            const cardType = card.getAttribute('data-type');
+            const statusMatch = activeStatus === 'all' || cardStatus === activeStatus;
+            const typeMatch = activeType === 'all' || cardType === activeType;
+            if (statusMatch && typeMatch) {
+                card.classList.remove('hidden-card');
+                visibleCount++;
+            } else {
+                card.classList.add('hidden-card');
+            }
+        });
+        totalCountElement.textContent = visibleCount;
+    }
+
+    function handleFilterClick(event) {
+        const button = event.currentTarget;
+        const group = button.getAttribute('data-filter-group');
+        const value = button.getAttribute('data-filter-value');
+        if (group === 'status') {
+            activeStatus = value;
+        } else if (group === 'type') {
+            activeType = value;
+        }
+        const groupButtons = document.querySelectorAll(`.filter-button[data-filter-group="${group}"]`);
+        groupButtons.forEach(btn => {
+            const btnValue = btn.getAttribute('data-filter-value');
+            // Reset styles
+            btn.classList.remove(...allActiveStyleClasses);
+            btn.classList.add(...inactiveStyles);
+
+            // Apply active styles
+            if (btnValue === value) {
+                btn.classList.remove(...inactiveStyles);
+                btn.classList.add(...(activeStyles[btnValue] || activeStyles.all));
+            }
+        });
+        filterOrders();
+    }
+
+    filterButtons.forEach(button => {
+        button.addEventListener('click', handleFilterClick);
+    });
+
+    // Run on load
+    document.addEventListener('DOMContentLoaded', () => filterOrders());
+</script>
+{% endblock scripts %}

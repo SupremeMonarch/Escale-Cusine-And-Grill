@@ -8,4 +8,6 @@ urlpatterns = [
     path("step2/", views.reservations_step2, name="reservations_step2"),
     path("step3/", views.reservations_step3, name="reservations_step3"),
     path("review/", views.review, name="review"),
+    path("available/", views.available_tables, name="available_tables"),
+    path("confirm/", views.confirm_reservation, name="confirm_reservation"),
 ]
