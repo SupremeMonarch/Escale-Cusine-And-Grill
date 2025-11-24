@@ -2,8 +2,49 @@
 
 {% block title %}My Reservations{% endblock %}
 
+{% block styles %}
+{{ block.super }}
+<style>
+    /* Highlight effect when redirected to reservation */
+    .reservation-card:target {
+        animation: highlight-fade 2s ease-out;
+    }
+
+    @keyframes highlight-fade {
+        0%, 50% {
+            background-color:#fff7ed; /* orange-50 */
+            border-color: #f54900;; /* orange-600 */
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+        100% {
+            background-color: white;
+            border-color: #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+    }
+
+    /* Modal Animation */
+    @keyframes modal-pop {
+        0% { transform: scale(0.95); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-modal-pop {
+        animation: modal-pop 0.2s ease-out forwards;
+    }
+</style>
+{% endblock styles %}
+
 {% block dashboard_content %}
     <div class="p-4 sm:p-6 lg:p-8 w-full max-w-[850px] mx-auto space-y-6">
+        <!-- Hidden CSRF Token for JS -->
+        {% csrf_token %}
+
         <header class="flex justify-between items-center w-full w-full h-14 mx-auto mb-6 pl-4 pr-4 pt-4">
             <div class="flex flex-col justify-start items-start h-auto w-full sm:w-auto pl-2">
                 <h1 class="text-xl font-bold text-gray-900">My Reservations</h1>
@@ -11,18 +52,21 @@
             </div>
             <!-- Filter Buttons -->
             <div class="flex flex-wrap gap-2 justify-start sm:justify-end">
-                <button id="filter-All" onclick="filterReservations('All')" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium transition duration-150 ease-in-out bg-blue-600 text-white hover:bg-blue-700">All</button>
-                <button id="filter-pending" onclick="filterReservations('pending')" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200">Pending</button>
-                <button id="filter-confirmed" onclick="filterReservations('confirmed')" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200">Confirmed</button>
-                <button id="filter-completed" onclick="filterReservations('completed')" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200">Completed</button>
-                <button id="filter-cancelled" onclick="filterReservations('cancelled')" class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 transition duration-150 ease-in-out hover:bg-gray-200">Cancelled</button>
+                <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition duration-150 ease-in-out shadow-sm border" data-status="All" >All</button>
+                <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition duration-150 ease-in-out shadow-sm border" data-status="pending">Pending</button>
+                <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition duration-150 ease-in-out shadow-sm border" data-status="confirmed">Confirmed</button>
+                <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition duration-150 ease-in-out shadow-sm border" data-status="completed">Completed</button>
+                <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition duration-150 ease-in-out shadow-sm border" data-status="cancelled">Cancelled</button>
             </div>
         </header>
 
         <!-- Reservations List Container  -->
         <div class="space-y-6" id="reservations-list">
             {% for res in reservations %}
-            <div class="reservation-card flex flex-col w-full max-w-full p-6 rounded-xl bg-white card-shadow" data-status="{{ res.status }}">
+
+            <div id="reservation-{{ res.reservation_id }}"
+                 class="reservation-card flex flex-col w-full max-w-full p-6 rounded-xl bg-white border border-gray-200 shadow-sm scroll-mt-24 transition-colors duration-300"
+                 data-status="{{ res.status }}">
                 <div class="flex justify-between items-center pb-4 pl-4 pr-4">
                     <div class="flex items-center">
                         <div class="flex flex-col justify-start items-start">
@@ -31,66 +75,228 @@
                         </div>
                     </div>
 
-                    <!-- Status Badge -->
-                    {% if res.status == 'confirmed' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-green-100 text-green-800 ml-4 flex-shrink-0"><p class="text-sm font-medium">Confirmed</p></div>
-                    {% elif res.status == 'pending' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 ml-4 flex-shrink-0"><p class="text-sm font-medium">Pending</p></div>
-                    {% elif res.status == 'completed' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-blue-100 text-blue-800 ml-4 flex-shrink-0"><p class="text-sm font-medium">Completed</p></div>
-                    {% elif res.status == 'cancelled' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-red-100 text-red-800 ml-4 flex-shrink-0"><p class="text-sm font-medium">Cancelled</p></div>
-                    {% else %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-full bg-gray-100 text-gray-800 ml-4 flex-shrink-0"><p class="text-sm font-medium">{{ res.status|title }}</p></div>
-                    {% endif %}
+                    <!-- Status Badge Container -->
+                    <div class="status-badge-container flex-shrink-0 ml-4">
+                        {% if res.status == 'confirmed' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-green-100 text-green-800"><p class="text-sm font-medium">Confirmed</p></div>
+                        {% elif res.status == 'pending' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-yellow-100 text-yellow-800"><p class="text-sm font-medium">Pending</p></div>
+                        {% elif res.status == 'completed' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-blue-100 text-blue-800"><p class="text-sm font-medium">Completed</p></div>
+                        {% elif res.status == 'cancelled' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-red-100 text-red-800"><p class="text-sm font-medium">Cancelled</p></div>
+                        {% else %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-gray-100 text-gray-800"><p class="text-sm font-medium">{{ res.status|title }}</p></div>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4 py-4 border-y border-gray-200 w-full">
                     <div class="flex flex-col items-center"><span class="text-xs font-medium text-gray-600 mb-1">Guests</span><p class="text-ms font-semibold text-gray-900 w-full flex justify-center">{{ res.guest_count }} people</p></div>
                     <div class="flex flex-col items-center"><span class="text-xs font-medium text-gray-600 mb-1">Table</span><p class="text-ms font-semibold text-gray-900 w-full flex justify-center">{{ res.table_id.table_number|default:"N/A" }}</p></div>
                 </div>
-                <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center pt-4 pr-4 pl-4 w-full">
-                    {% if res.status == 'pending' or res.status == 'confirmed' %}
-                    <div class="flex gap-3 w-full sm:w-auto mt-4 sm:mt-0">
-                        <button class="flex justify-center items-center h-10 px-4 py-2 rounded-lg bg-blue-600 text-base text-white hover:bg-blue-700 transition w-full sm:w-auto font-medium">Modify</button>
-                        <button class="flex justify-center items-center h-10 px-4 py-2 rounded-lg bg-red-600 text-base text-white hover:bg-red-700 transition w-full sm:w-auto font-medium">Cancel</button>
+                <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center pt-4 pr-4 w-full">
+                    <div class="action-buttons flex gap-3 w-full sm:w-auto mt-4 sm:mt-0">
+                        {% if res.status == 'confirmed' or res.status == 'pending' %}
+                            <!-- Cancel Button -->
+                            <button onclick="openCancelModal('{{ res.reservation_id }}')"
+                                    class="flex justify-center items-center h-10 px-4 py-2 rounded-lg bg-red-600 text-base text-white hover:bg-red-700 transition w-full sm:w-auto font-medium">
+                                Cancel
+                            </button>
+                        {% endif %}
+                        <!-- Removed Modify Button -->
                     </div>
-                    {% endif %}
-                    <button class="flex justify-center sm:justify-end items-center h-10 px-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition sm:ml-auto">View Details</button>
                 </div>
             </div>
-            {% empty %}
-            <p class="text-center text-gray-500 py-10">You have no reservations.</p>
+
             {% endfor %}
+
+            <!-- Message when filter returns no results -->
+            <div id="no-reservations-message" class="hidden text-center text-gray-500 py-10">
+                <p>No reservations</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRMATION MODAL -->
+    <div id="cancel-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm mx-4 transform transition-all animate-modal-pop">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                    <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Cancel Reservation?</h3>
+                <div class="mt-2">
+                    <p class="text-sm text-gray-500">
+                        Are you sure you want to cancel Reservation #<span id="modal-res-id"></span>? This action cannot be undone.
+                    </p>
+                </div>
+            </div>
+            <div class="mt-5 sm:mt-6 flex gap-3">
+                <button type="button" onclick="closeCancelModal()"
+                    class="flex-1 justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:text-sm">
+                    No, Keep It
+                </button>
+                <button type="button" onclick="confirmCancelReservation()"
+                    class="flex-1 justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:text-sm">
+                    Yes, Cancel
+                </button>
+            </div>
         </div>
     </div>
 {% endblock dashboard_content %}
 
 {% block scripts %}
     <script>
+    // Variables to track the reservation being cancelled
+    let resToCancelId = null;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const buttons = document.querySelectorAll(".filter-button");
+        const cards = document.querySelectorAll(".reservation-card");
+        const noReservationsMessage = document.getElementById("no-reservations-message");
+
+        const styles = {
+            inactive: ["bg-gray-100", "text-gray-600", "hover:bg-gray-200"],
+            All: ["bg-gray-900", "text-white", "hover:bg-gray-700"],
+            pending: ["bg-yellow-100", "text-yellow-800", "hover:bg-yellow-200"],
+            confirmed: ["bg-green-100", "text-green-800", "hover:bg-green-200"],
+            completed: ["bg-blue-100", "text-blue-800", "hover:bg-blue-200"],
+            cancelled: ["bg-red-100", "text-red-800", "hover:bg-red-200"],
+        };
+
         function filterReservations(status) {
-            // 1. Get all filter buttons and reservation cards
-            const buttons = document.querySelectorAll(".filter-button");
-            const cards = document.querySelectorAll(".reservation-card");
+            let visibleCount = 0;
 
-            // 2. Update button styles (active/inactive)
-            buttons.forEach((button) => {
-            button.classList.remove("bg-blue-600", "text-white", "hover:bg-blue-700");
-            button.classList.add("bg-gray-100", "text-gray-600", "hover:bg-gray-200");
+            // Update button styles
+            buttons.forEach(button => {
+                const buttonStatus = button.getAttribute("data-status");
+                // Reset all styles first
+                Object.values(styles).flat().forEach(styleClass => button.classList.remove(styleClass));
 
-            // Use the 'id' (filter-pending) to get the status value
-            const buttonStatus = button.id.replace("filter-", "");
-            if (buttonStatus === status) {
-                button.classList.add("bg-blue-600", "text-white", "hover:bg-blue-700");
-                button.classList.remove("bg-gray-100", "text-gray-600", "hover:bg-gray-200");
-            }
+                if (buttonStatus === status) {
+                    button.classList.add(...styles[buttonStatus]);
+                } else {
+                    button.classList.add(...styles.inactive);
+                }
             });
 
-            // 3. Filter the cards based on their data-status attribute
-            cards.forEach((card) => {
-            const cardStatus = card.getAttribute("data-status");
-            if (status === "All" || cardStatus === status) {
-                card.style.display = "flex";
+            // Filter cards
+            cards.forEach(card => {
+                const cardStatus = card.getAttribute("data-status");
+                if (status === "All" || cardStatus === status) {
+                    card.style.display = "flex";
+                    visibleCount++;
+                } else {
+                    card.style.display = "none";
+                }
+            });
+
+            // Show or hide the "no reservations" message
+            if (visibleCount === 0) {
+                noReservationsMessage.style.display = "block";
             } else {
-                card.style.display = "none";
+                noReservationsMessage.style.display = "none";
             }
-            });
         }
+
+        // Attach click event listeners
+        buttons.forEach(button => {
+            button.addEventListener("click", () => {
+                const status = button.getAttribute("data-status");
+                filterReservations(status);
+            });
+        });
+
         // Initialize filter on load
-        document.addEventListener('DOMContentLoaded', () => filterReservations('All'));
-    </script>
+        filterReservations('All');
+    });
+
+    // --- Modal Functions ---
+
+    // Helper to determine scrollbar width
+    function getScrollbarWidth() {
+        return window.innerWidth - document.documentElement.clientWidth;
+    }
+
+    function openCancelModal(resId) {
+        resToCancelId = resId;
+        document.getElementById('modal-res-id').textContent = resId;
+        const modal = document.getElementById('cancel-modal');
+
+        // Add padding to body to replace scrollbar width
+        const scrollbarWidth = getScrollbarWidth();
+        if (scrollbarWidth > 0) {
+            document.body.style.paddingRight = `${scrollbarWidth}px`;
+        }
+
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Prevent scrolling
+    }
+
+    function closeCancelModal() {
+        resToCancelId = null;
+
+        const modal = document.getElementById('cancel-modal');
+        modal.classList.add('hidden');
+        document.body.style.overflow = ''; // Restore scrolling
+        document.body.style.paddingRight = ''; // Remove padding
+    }
+
+    async function confirmCancelReservation() {
+        if (!resToCancelId) return;
+
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        try {
+            const response = await fetch(`/staff/reservations/update-status/${resToCancelId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ status: 'cancelled' })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // 1. Update UI
+                updateReservationCardCancelled(resToCancelId);
+                // 2. Close Modal
+                closeCancelModal();
+            } else {
+                alert('Failed to cancel reservation: ' + (data.error || 'Unknown error'));
+                closeCancelModal();
+            }
+        } catch (error) {
+            console.error('Error cancelling reservation:', error);
+            alert('An error occurred. Please try again.');
+            closeCancelModal();
+        }
+    }
+
+    function updateReservationCardCancelled(resId) {
+        const card = document.getElementById(`reservation-${resId}`);
+        if (!card) return;
+
+        // Update data status for filtering
+        card.setAttribute('data-status', 'cancelled');
+
+        // Update Badge
+        const badgeContainer = card.querySelector('.status-badge-container');
+        if (badgeContainer) {
+            badgeContainer.innerHTML = `<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-red-100 text-red-800"><p class="text-sm font-medium">Cancelled</p></div>`;
+        }
+
+        // Remove action buttons (Cancel/Modify)
+        const actionButtons = card.querySelector('.action-buttons');
+        if (actionButtons) {
+            actionButtons.innerHTML = '';
+        }
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape") {
+            closeCancelModal();
+        }
+    });
+</script>
 {% endblock scripts %}
