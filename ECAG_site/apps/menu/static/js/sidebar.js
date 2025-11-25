@@ -5,8 +5,8 @@
     Eggs: 25,
     Chicken: 0,
     Shrimps: 30,
-    Beef: 0,
-    Lamb: 0,
+    Beef: 15,
+    Lamb: 30,
     Mushrooms: 20,
   };
 
@@ -333,8 +333,14 @@
           const isSelected = item.meatTopping === meatName;
 
           const mBtn = document.createElement("button");
-          // 🔹 Only the name – NO price shown
-          mBtn.textContent = meatName;
+
+          // Write meat name + price except for Chicken
+          let label = meatName;
+          if (meatName === "Beef") label = "Beef (Rs 15)";
+          if (meatName === "Lamb") label = "Lamb (Rs 30)";
+
+          mBtn.textContent = label;
+
           mBtn.style.fontSize = "11px";
           mBtn.style.padding = "2px 6px";
           mBtn.style.borderRadius = "9999px";
@@ -351,6 +357,7 @@
 
           meatRow.appendChild(mBtn);
         });
+
 
         toppingsRow.appendChild(meatRow);
 
