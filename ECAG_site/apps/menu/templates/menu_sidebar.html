@@ -1,0 +1,326 @@
+<!-- theme/templates/menu_sidebar.html -->
+
+<!-- Sidebar Toggle Button -->
+<div
+  id="sidebar-button"
+  style="
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 50;
+    width: 25px;
+    height: 172px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  "
+>
+  <!-- Single tab (light grey). 
+       If you want hover color, that will need CSS (not possible with inline only). -->
+  <svg
+    width="25"
+    height="172"
+    viewBox="0 0 25 172"
+    xmlns="http://www.w3.org/2000/svg"
+    preserveAspectRatio="none"
+  >
+    <path
+      opacity="0.88"
+      d="M0 25C0 18.4864 0 15.2295 0.833095 12.5873C2.59907 6.98634 6.98634 2.59907 12.5873 0.833095C15.2295 0 18.4864 0 25 0V0V172V172C18.4864 172 15.2295 172 12.5873 171.167C6.98634 169.401 2.59907 165.014 0.833095 159.413C0 156.77 0 153.514 0 147V25Z"
+      fill="#D9D9D9"
+    />
+    <path
+      d="M7.825 87L13.425 92.6L12 94L4 86L12 78L13.425 79.4L7.825 85H20V87H7.825Z"
+      fill="#1D1B20"
+    />
+  </svg>
+</div>
+
+<!-- Order Sidebar Panel -->
+<div
+  id="order-sidebar"
+  style="
+    position: fixed;
+    top: 64px;                      /* same as navbar height */
+    right: 0;
+    width: 400px;
+    height: calc(100vh - 64px);
+    background-color: #ffffff;
+    border-radius: 10px 0 0 10px;
+    box-shadow: -4px 4px 8px rgba(0, 0, 0, 0.25);
+    z-index: 40;
+    transform: translateX(100%);    /* hidden by default */
+    transition: transform 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+  "
+>
+  <div
+    style="
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 20px;
+      box-sizing: border-box;
+    "
+  >
+
+    <!-- Header -->
+    <div style="flex: 0 0 auto;">
+      <p
+        style="
+          font-size: 24px;
+          font-weight: 700;
+          color: #000000;
+          margin: 0 0 12px 0;
+        "
+      >
+        Your Order
+      </p>
+
+      <svg
+        width="100%"
+        height="2"
+        viewBox="0 0 443 2"
+        xmlns="http://www.w3.org/2000/svg"
+        style="margin-bottom: 16px;"
+      >
+        <line y1="1" x2="443" y2="1" stroke="#E97820" stroke-width="2" />
+      </svg>
+
+      <!-- Order type selection -->
+      <div style="margin-bottom: 16px;">
+        <div
+            id="order-type-wrapper"
+            style="
+            position: relative;
+            display: flex;
+            width: 100%;
+            border-radius: 9999px;
+            background-color: #ffffff;
+            border: 1px solid #969696;
+            padding: 4px;
+            box-sizing: border-box;
+            overflow: hidden;
+            "
+        >
+            <!-- Sliding orange highlight -->
+            <div
+              id="order-type-slider"
+              style="
+                position: absolute;
+                top: 4px;
+                bottom: 4px;
+                left: 4px;
+                border-radius: 9999px;
+                background: linear-gradient(to right, #ff8e47, #ff4747);
+                transition: left 0.25s ease, width 0.25s ease;
+              "
+            ></div>
+
+            <!-- Dine In -->
+            <button
+            type="button"
+            id="order-type-dinein"
+            data-order-type="dine_in"
+            style="
+                position: relative;
+                z-index: 1;
+                flex: 1 1 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 8px 12px;
+                border-radius: 9999px;
+                border: none;
+                background: transparent;
+                color: #000000;           /* active by default */
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+            "
+            >
+            <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style="flex-shrink: 0;"
+            >
+                <path
+                d="M9 22V12H15V22M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                />
+            </svg>
+            <span style="margin-left: 4px;">Dine In</span>
+            </button>
+
+            <!-- Pick Up -->
+            <button
+            id="order-type-pickup"
+            type="button"
+            data-order-type="pick_up"
+            style="
+                position: relative;
+                z-index: 1;
+                flex: 1 1 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 8px 12px;
+                border-radius: 9999px;
+                border: none;
+                background: transparent;
+                color: #000000;
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+            "
+            >
+            <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style="flex-shrink: 0;"
+            >
+                <path
+                d="M3 6L6 2H18L21 6M3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6M3 6H21M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                />
+            </svg>
+            <span style="margin-left: 4px;">Pick Up</span>
+            </button>
+
+            <!-- Delivery -->
+            <button
+            id="order-type-delivery"
+            type="button"
+            data-order-type="delivery"
+            style="
+                position: relative;
+                z-index: 1;
+                flex: 1 1 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 8px 12px;
+                border-radius: 9999px;
+                border: none;
+                background: transparent;
+                color: #4a4459;
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+            "
+            >
+            <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style="flex-shrink: 0;"
+            >
+                <path
+                d="M16 16V3H1V16H16ZM16 16H23V11L20 8H16V16ZM8 18.5C8 19.8807 6.88071 21 5.5 21C4.11929 21 3 19.8807 3 18.5C3 17.1193 4.11929 16 5.5 16C6.88071 16 8 17.1193 8 18.5ZM21 18.5C21 19.8807 19.8807 21 18.5 21C17.1193 21 16 19.8807 16 18.5C16 17.1193 17.1193 16 18.5 16C19.8807 16 21 17.1193 21 18.5Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                />
+            </svg>
+            <span style="margin-left: 4px;">Delivery</span>
+            </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cart Items Container -->
+    <div
+    id="order-items"
+    style="
+        flex: 1 1 auto;
+        overflow-y: auto;
+        padding-right: 6px;
+    "
+    ></div>
+
+    <!-- Footer -->
+    <div style="flex: 0 0 auto; padding-top: 16px;">
+      <svg
+        width="100%"
+        height="1"
+        viewBox="0 0 443 1"
+        xmlns="http://www.w3.org/2000/svg"
+        style="margin-bottom: 12px;"
+      >
+        <line y1="0.5" x2="443" y2="0.5" stroke="#969696" />
+      </svg>
+
+      <div style="margin-bottom: 12px;">
+        <p
+        style="
+            margin: 0 0 4px 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #000000;
+        "
+        >
+        No. of items: <span id="order-count">0</span>
+        </p>
+
+        <p
+        style="
+            margin: 0 0 4px 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #000000;
+        "
+        >
+        Delivery : Rs <span id="order-delivery">0</span>
+        </p>
+
+        <p
+        style="
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: #000000;
+        "
+        >
+        Total Price: Rs <span id="order-total">0</span>
+        </p>
+      </div>
+
+      <button
+        type="button"
+        style="
+          width: 100%;
+          padding: 10px 0;
+          border-radius: 9999px;
+          border: none;
+          color: #ffffff;
+          font-size: 18px;
+          font-weight: 500;
+          cursor: pointer;
+          background: linear-gradient(to right, #f65e00, #ff3737);
+          box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+        "
+      >
+        Proceed to Checkout
+      </button>
+    </div>
+  </div>
+</div>

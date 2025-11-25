@@ -8,4 +8,5 @@ urlpatterns = [
     path('my_orders/', views.my_orders, name='my_orders'),
     path('my_reservations/', views.my_reservations, name='my_reservations'),
     path('profile/', views.profile, name='profile'),
+    #path('profile/edit/', views.edit_profile, name='edit_profile'), # TODO
 ]

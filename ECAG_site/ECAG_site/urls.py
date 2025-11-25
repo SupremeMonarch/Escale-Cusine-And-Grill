@@ -14,26 +14,22 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+# ECAG_site/urls.py
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path("", include("apps.core.urls")),  #routing the different pages
+    path("admin/", admin.site.urls),
+    path("", include("apps.core.urls")),
+    path("menu/", include(("apps.menu.urls", "menu"), namespace="menu")),
     path("reservations/", include("apps.reservations.urls")),
-    path('menu/', include('apps.menu.urls')),
-    path("user/", include("apps.Customer.urls")),
+    path("review/", include("apps.review.urls")),
     path("staff/", include("apps.Staff.urls")),
+    path("user/", include("apps.Customer.urls")),
 ]
 
 if settings.DEBUG:
-    # Include django_browser_reload URLs only in DEBUG mode
-    urlpatterns += [
-        path("__reload__/", include("django_browser_reload.urls")),
-        path("menu/", include("apps.menu.urls")),
-        path("reservations/", include("apps.reservations.urls")),
-        path("review/", include("apps.review.urls")),
-        path("user/", include("apps.Customer.urls")),
-        path("staff/", include("apps.Staff.urls")),
-    ]
+    urlpatterns += [path("__reload__/", include("django_browser_reload.urls"))]
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
