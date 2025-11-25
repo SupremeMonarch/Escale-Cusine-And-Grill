@@ -87,24 +87,28 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Full Name <span class="text-red-600">*</span></label>
-              <input name="full_name" type="text" required placeholder="Enter your full name" value="{{ reservation.full_name|default:'' }}" class="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              <input name="full_name" type="text" maxlength="100" pattern="^[A-Za-zÀ-ÖØ-öø-ÿ'’\-\s]{1,100}$" title="Name may include letters, spaces, apostrophes and hyphens (max 100)." required placeholder="Enter your full name" value="{{ reservation.full_name|default:'' }}" aria-describedby="full-name-error" class="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              <p id="full-name-error" class="text-sm text-red-600 hidden mt-1">Please enter a valid name (letters, spaces, apostrophes and hyphens only).</p>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number <span class="text-red-600">*</span></label>
-              <input name="phone" type="text" required placeholder="(555) 123-4567" value="{{ reservation.phone|default:'' }}" class="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              <input name="phone" type="tel" inputmode="tel" pattern="(?=(?:.*\d){7,15})^[0-9()+\-\s]+$" title="Enter a valid phone number with 7 to 15 digits. You may use spaces, parentheses, dashes and an optional leading +." required placeholder="(555) 123-4567" value="{{ reservation.phone|default:'' }}" aria-describedby="phone-error" class="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              <p id="phone-error" class="text-sm text-red-600 hidden mt-1">Please enter a valid phone number (7–15 digits).</p>
             </div>
           </div>
 
           <!-- Email -->
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">Email Address <span class="text-red-600">*</span></label>
-            <input name="email" type="email" required placeholder="your.email@example.com" value="{{ reservation.email|default:'' }}" class="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300" />
+            <input name="email" type="email" maxlength="254" required placeholder="your.email@example.com" value="{{ reservation.email|default:'' }}" aria-describedby="email-error" class="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300" />
+            <p id="email-error" class="text-sm text-red-600 hidden mt-1">Please enter a valid email address.</p>
           </div>
 
           <!-- Special requests -->
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">Special Requests</label>
-            <textarea name="special_requests" rows="5" maxlength="500" placeholder="Any special dietary requirements, celebrations, or other requests..." class="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300">{{ reservation.special_requests|default:'' }}</textarea>
+            <textarea name="special_requests" rows="5" maxlength="500" placeholder="Any special dietary requirements, celebrations, or other requests..." aria-describedby="special-error" class="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300">{{ reservation.special_requests|default:'' }}</textarea>
+            <p id="special-error" class="text-sm text-red-600 hidden mt-1">Special requests may not contain HTML or script content.</p>
             <p class="text-xs text-gray-500 mt-1">0/500 characters</p>
           </div>
 
@@ -118,6 +122,98 @@
     </div>
   </div>
 </div>
+
+<!-- Inline client-side validation for phone number (7-15 digits) -->
+<script>
+(function () {
+  try {
+    const form = document.querySelector('form[method="post"]');
+    if (!form) return;
+
+    const phoneInput = form.querySelector('input[name="phone"]');
+    const phoneErr = document.getElementById('phone-error');
+
+    const nameInput = form.querySelector('input[name="full_name"]');
+    const nameErr = document.getElementById('full-name-error');
+
+    const emailInput = form.querySelector('input[name="email"]');
+    const emailErr = document.getElementById('email-error');
+
+    const specialInput = form.querySelector('textarea[name="special_requests"]');
+    const specialErr = document.getElementById('special-error');
+
+    function containsForbidden(value) {
+      if (!value) return false;
+      const lower = String(value).toLowerCase();
+      if (/\<\s*script/i.test(lower)) return true;
+      if (/\<|\>/.test(value)) return true; // basic HTML tag prevention
+      if (/javascript:\s*/i.test(lower)) return true;
+      return false;
+    }
+
+    form.addEventListener('submit', function (e) {
+      // Reset errors
+      if (phoneErr) phoneErr.classList.add('hidden');
+      if (nameErr) nameErr.classList.add('hidden');
+      if (emailErr) emailErr.classList.add('hidden');
+      if (specialErr) specialErr.classList.add('hidden');
+
+      // Full name validation (simple allowed-chars check)
+      if (nameInput) {
+        const nameVal = (nameInput.value || '').trim();
+        const nameOk = /^[A-Za-zÀ-ÖØ-öø-ÿ'’\-\s]{1,100}$/.test(nameVal);
+        if (!nameOk) {
+          e.preventDefault();
+          if (nameErr) { nameErr.classList.remove('hidden'); }
+          try { nameInput.focus(); } catch (ex) { }
+          return false;
+        }
+        if (containsForbidden(nameVal)) {
+          e.preventDefault();
+          if (nameErr) { nameErr.textContent = 'Invalid characters detected in name.'; nameErr.classList.remove('hidden'); }
+          try { nameInput.focus(); } catch (ex) { }
+          return false;
+        }
+      }
+
+      // Phone validation (7-15 digits)
+      if (phoneInput) {
+        const digits = (phoneInput.value || '').replace(/\D/g, '');
+        if (digits.length < 7 || digits.length > 15) {
+          e.preventDefault();
+          if (phoneErr) { phoneErr.classList.remove('hidden'); phoneErr.textContent = 'Please enter a valid phone number (7–15 digits).'; }
+          try { phoneInput.focus(); } catch (ex) { }
+          return false;
+        }
+      }
+
+      // Email basic check and forbid HTML/script
+      if (emailInput) {
+        const emailVal = (emailInput.value || '').trim();
+        if (!emailVal || containsForbidden(emailVal)) {
+          e.preventDefault();
+          if (emailErr) { emailErr.classList.remove('hidden'); emailErr.textContent = 'Please enter a valid email address.'; }
+          try { emailInput.focus(); } catch (ex) { }
+          return false;
+        }
+      }
+
+      // Special requests: forbid HTML and script content
+      if (specialInput) {
+        const sVal = specialInput.value || '';
+        if (containsForbidden(sVal)) {
+          e.preventDefault();
+          if (specialErr) { specialErr.classList.remove('hidden'); }
+          try { specialInput.focus(); } catch (ex) { }
+          return false;
+        }
+      }
+
+      return true;
+    });
+  } catch (e) { /* non-fatal */ }
+})();
+</script>
 
 <!-- Load the main JavaScript file -->
 <script>const CURRENT_STEP = "{{ step_number }}";</script>

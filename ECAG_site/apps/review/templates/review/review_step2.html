@@ -189,5 +189,115 @@
                         });
                     });
                 </script>
+                                <script>
+                                        // Client-side validation to prevent HTML/script content in review fields
+                                        (function () {
+                                            function containsForbidden(value) {
+                                                if (!value) return false;
+                                                const v = String(value);
+                                                const lower = v.toLowerCase();
+                                                if (/\<\s*script/i.test(lower)) return true;
+                                                if (/javascript:\s*/i.test(lower)) return true;
+                                                if (/\<|\>/.test(v)) return true; // basic HTML tag prevention
+                                                return false;
+                                            }
+
+                                            function ensureErrorEl(el, id, message) {
+                                                let err = document.getElementById(id);
+                                                if (!err) {
+                                                    err = document.createElement('p');
+                                                    err.id = id;
+                                                    err.className = 'text-sm text-red-600 mt-1';
+                                                    el.insertAdjacentElement('afterend', err);
+                                                }
+                                                err.textContent = message;
+                                                return err;
+                                            }
+
+                                            document.addEventListener('DOMContentLoaded', function () {
+                                                const form = document.querySelector('form[method="post"]');
+                                                if (!form) return;
+
+                                                const fields = {
+                                                    user_name: { name: 'user_name', max: 100, pattern: /^[A-Za-zÀ-ÖØ-öø-ÿ'’\-\s]{1,100}$/ },
+                                                    email: { name: 'email' },
+                                                    review_title: { name: 'review_title', max: 150 },
+                                                    review_text: { name: 'review_text', max: 2000 },
+                                                    dishes_ordered: { name: 'dishes_ordered', max: 200 }
+                                                };
+
+                                                form.addEventListener('submit', function (e) {
+                                                    // Clear previous client errors
+                                                    Object.keys(fields).forEach(k => {
+                                                        const node = document.getElementById(k + '-client-error');
+                                                        if (node) node.remove();
+                                                    });
+
+                                                    // Validate each field
+                                                    // user_name
+                                                    const userEl = form.querySelector('[name="' + fields.user_name.name + '"]');
+                                                    if (userEl) {
+                                                        const v = (userEl.value || '').trim();
+                                                        if (!fields.user_name.pattern.test(v) || containsForbidden(v)) {
+                                                            e.preventDefault();
+                                                            ensureErrorEl(userEl, 'user_name-client-error', 'Please enter a valid name (letters, spaces, apostrophes, hyphens).');
+                                                            try { userEl.focus(); } catch (ex) {}
+                                                            return false;
+                                                        }
+                                                    }
+
+                                                    // phone/email provided by form widgets — email basic check
+                                                    const emailEl = form.querySelector('[name="' + fields.email.name + '"]');
+                                                    if (emailEl) {
+                                                        const ev = (emailEl.value || '').trim();
+                                                        if (!ev || containsForbidden(ev) || ev.indexOf('@') === -1) {
+                                                            e.preventDefault();
+                                                            ensureErrorEl(emailEl, 'email-client-error', 'Please enter a valid email address.');
+                                                            try { emailEl.focus(); } catch (ex) {}
+                                                            return false;
+                                                        }
+                                                    }
+
+                                                    // review_title
+                                                    const titleEl = form.querySelector('[name="' + fields.review_title.name + '"]');
+                                                    if (titleEl) {
+                                                        const tv = (titleEl.value || '').trim();
+                                                        if (tv.length === 0 || tv.length > fields.review_title.max || containsForbidden(tv)) {
+                                                            e.preventDefault();
+                                                            ensureErrorEl(titleEl, 'review_title-client-error', 'Please enter a valid short title (max ' + fields.review_title.max + ' chars).');
+                                                            try { titleEl.focus(); } catch (ex) {}
+                                                            return false;
+                                                        }
+                                                    }
+
+                                                    // review_text
+                                                    const textEl = form.querySelector('[name="' + fields.review_text.name + '"]');
+                                                    if (textEl) {
+                                                        const tv = (textEl.value || '').trim();
+                                                        if (tv.length === 0 || tv.length > fields.review_text.max || containsForbidden(tv)) {
+                                                            e.preventDefault();
+                                                            ensureErrorEl(textEl, 'review_text-client-error', 'Please enter your review (no HTML or scripts; max ' + fields.review_text.max + ' chars).');
+                                                            try { textEl.focus(); } catch (ex) {}
+                                                            return false;
+                                                        }
+                                                    }
+
+                                                    // dishes_ordered (optional but prevent scripts)
+                                                    const dishesEl = form.querySelector('[name="' + fields.dishes_ordered.name + '"]');
+                                                    if (dishesEl) {
+                                                        const dv = (dishesEl.value || '').trim();
+                                                        if (dv.length > fields.dishes_ordered.max || containsForbidden(dv)) {
+                                                            e.preventDefault();
+                                                            ensureErrorEl(dishesEl, 'dishes_ordered-client-error', 'Invalid characters in dishes ordered.');
+                                                            try { dishesEl.focus(); } catch (ex) {}
+                                                            return false;
+                                                        }
+                                                    }
+
+                                                    return true;
+                                                });
+                                            });
+                                        })();
+                                </script>
     </div>
 {% endblock %}
