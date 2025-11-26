@@ -56,7 +56,8 @@ class Promotion(models.Model):
         return self.title
     
 class Order(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    # allow anonymous orders by permitting a NULL user
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     order_date = models.DateTimeField(auto_now_add=True, editable=False)
     order_id_str = models.CharField(max_length=20, unique=True, blank=True) #This a unique, human-readable ID
     #table_id = models.ForeignKey(Table, on_delete=models.PROTECT) not yet created models.py for Table
@@ -89,7 +90,10 @@ class Order(models.Model):
             super(Order, self).save(update_fields=['order_id_str'])
 
 
-    def __str__(self): #this is so only the user's name appears on the admin page when an order is added
+    def __str__(self): # readable representation for admin
+        # prefer the generated order id when available
+        if self.order_id_str:
+            return self.order_id_str
         return f"{self.user}'s Order"
 
     def update_total(self, save=True):
@@ -104,6 +108,119 @@ class Order(models.Model):
             self.save(update_fields=["total"])
         return self.total
 
+    @property
+    def subtotal(self):
+        """Sum of order item subtotals (without delivery)."""
+        return self.items.aggregate(s=Sum("subtotal"))["s"] or Decimal("0.00")
+
+    @property
+    def items_count(self):
+        """Total quantity across all order items."""
+        return self.items.aggregate(c=Sum("quantity"))["c"] or 0
+
+    @property
+    def delivery_fee(self):
+        try:
+            return self.delivery.fee
+        except Delivery.DoesNotExist:
+            return Decimal("0.00")
+
+    def sync_items_from_cart(self, cart_items, save=True):
+        """Sync OrderItems to match a cart_items list.
+
+        cart_items: list of dicts [{'item_id': int, 'quantity': int, 'meat_topping': str, 'extra_toppings': [..]}, ...]
+        Items are keyed by (item_id, meat_topping, sorted extras signature) so the same dish with different
+        toppings becomes distinct OrderItem rows.
+        Returns a tuple (created_count, updated_count, removed_count).
+        """
+        created = 0
+        updated = 0
+        removed = 0
+
+        def signature(item_id, meat, extras):
+            extras_sig = ",".join(sorted([e for e in extras if e]))
+            meat_sig = meat or ""
+            return f"{item_id}|{meat_sig}|{extras_sig}"
+
+        incoming_structs = []
+        for x in cart_items:
+            if not x.get('item_id'):
+                continue
+            iid = int(x['item_id'])
+            qty = int(x.get('quantity', 1) or 1)
+            meat = x.get('meat_topping') or ''
+            extras = x.get('extra_toppings') or []
+            if not isinstance(extras, list):
+                extras = []
+            incoming_structs.append({'item_id': iid, 'quantity': qty, 'meat': meat, 'extras': extras})
+
+        incoming_map = {signature(s['item_id'], s['meat'], s['extras']): s for s in incoming_structs}
+
+        existing_items = list(self.items.select_related('item').all())
+        existing_map = {signature(oi.item_id, oi.meat_topping, [e.strip() for e in oi.extra_toppings.split(',') if e.strip()]): oi for oi in existing_items}
+
+        # create or update
+        for sig, data in incoming_map.items():
+            iid = data['item_id']
+            qty = data['quantity']
+            meat = data['meat']
+            extras_list = data['extras']
+            extras_text = ",".join([e for e in extras_list if e])
+            if sig in existing_map:
+                oi = existing_map[sig]
+                if oi.quantity != qty:
+                    oi.quantity = qty
+                    oi.save()
+                    updated += 1
+            else:
+                try:
+                    menu_item = MenuItem.objects.get(pk=iid)
+                except MenuItem.DoesNotExist:
+                    continue
+                OrderItem.objects.create(
+                    order=self,
+                    item=menu_item,
+                    quantity=qty,
+                    meat_topping=meat,
+                    extra_toppings=extras_text,
+                )
+                created += 1
+
+        # remove items not present anymore
+        for sig, oi in existing_map.items():
+            if sig not in incoming_map:
+                oi.delete()
+                removed += 1
+
+        if save:
+            self.update_total()
+
+        return (created, updated, removed)
+
+    @classmethod
+    def get_or_create_cart(cls, request_user, session):
+        """Return an IN_PROGRESS Order for the session/user, creating one if needed.
+
+        If `session` contains 'cart_order_id' that order will be returned when valid.
+        Otherwise a new Order is created and its id saved into `session['cart_order_id']`.
+        """
+        order = None
+        cart_order_id = session.get('cart_order_id')
+        if cart_order_id:
+            try:
+                order = cls.objects.get(pk=cart_order_id)
+            except cls.DoesNotExist:
+                order = None
+
+        if not order:
+            order = cls.objects.create(user=request_user if request_user and request_user.is_authenticated else None,
+                                       order_type=cls.Ordertype.DELIVERY,
+                                       status=cls.Status.IN_PROGRESS)
+            session['cart_order_id'] = order.id
+            session.modified = True
+
+        return order
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
@@ -117,6 +234,8 @@ class OrderItem(models.Model):
         blank=True,          # forms/admin can leave it empty
         on_delete=models.SET_NULL,  # keep the order item if promo is deleted
     )
+    meat_topping = models.CharField(max_length=50, blank=True, help_text="Selected meat topping if applicable.")
+    extra_toppings = models.TextField(blank=True, help_text="Comma-separated list of extra toppings.")
 
     def save(self, *args, **kwargs):
         unit = self.item.price
@@ -185,11 +304,17 @@ class Transaction(models.Model):
         CREDIT_CARD = "credit_card" , "Credit_Card"
         JUICE = "juice", "Juice"
         MYT_MOB   = "mytmob",   "MyTMob"
+        PAYPAL = "paypal" , "PayPal"
     payment_method = models.CharField(
         max_length=20,
         choices=Method.choices,
         default=Method.CREDIT_CARD,
     )
+    # Card details (only required/used when payment_method == CREDIT_CARD)
+    card_name = models.CharField(max_length=100, blank=True)
+    card_number = models.CharField(max_length=19, blank=True, help_text="PAN without spaces, typically 13-19 digits")
+    exp_date = models.DateField(null=True, blank=True)
+    cvv = models.CharField(max_length=4, blank=True)
     transaction_date = models.DateTimeField(auto_now_add=True, editable=False)  
     class Status(models.TextChoices): #enum data type
         IN_PROGRESS = "in_progress", "In Progress"
@@ -200,7 +325,12 @@ class Transaction(models.Model):
         choices=Status.choices,
         default=Status.IN_PROGRESS,
     )
+    def clean(self):
+        """Validation intentionally disabled (all inputs accepted)."""
+        return
+
     def save(self, *args, **kwargs):
+        # Skip full_clean to avoid any validation; just copy order total.
         self.amount = roundup(self.order.total)
         super().save(*args, **kwargs)
 
