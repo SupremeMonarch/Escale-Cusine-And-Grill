@@ -14,15 +14,15 @@
     <!-- Category Tabs (unchanged) -->
     <div class="flex justify-center items-center w-full max-w-2xl mx-auto mb-8">
       <div class="flex w-full rounded-full bg-white border border-[#969696] overflow-hidden shadow-md">
-        <a href="{% url 'menu:menu_starters' %}" class="flex-1 flex justify-center items-center px-8 py-4 bg-gradient-to-r from-[#ff8e47] to-[#ff4747]"
-        style="background: linear-gradient(to right, #e97820, #ef4444) !important; box-shadow: 0 4px 8px rgba(0,0,0,0.12);"
+        <a href="{% url 'menu:menu_starters' %}" class="flex-1 flex justify-center items-center px-8 py-4 bg-gradient-to-r from-[#ff8e47] to-[#ff4747] rounded-full"
+        style="background: linear-gradient(to right, #e97820, #ef4444) !important;"
         >
           <p class="text-lg font-medium text-white">Starters</p>
         </a>
-        <a href="{% url 'menu:menu_main_course' %}" class="flex-1 flex justify-center items-center px-8 py-4 hover:bg-gray-50">
+        <a href="{% url 'menu:menu_main_course' %}" class="flex-1 flex justify-center items-center px-8 py-4 hover:bg-gray-50 rounded-full">
           <p class="text-lg font-medium text-black">Main Course</p>
         </a>
-        <a href="{% url 'menu:menu_beverages' %}" class="flex-1 flex justify-center items-center px-8 py-4 hover:bg-gray-50">
+        <a href="{% url 'menu:menu_beverages' %}" class="flex-1 flex justify-center items-center px-8 py-4 hover:bg-gray-50 rounded-full">
           <p class="text-lg font-medium text-black">Beverages</p>
         </a>
       </div>
@@ -39,28 +39,29 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {% for item in items %}
             <div class="p-4">
-              <div class="flex flex-col bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300 menu-card">
+              <div class="flex flex-col h-full bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_16px_rgba(0,0,0,0.18)] hover:border-gray-300 transition-all duration-300 menu-card">
                 
                 {% if item.menu_img %}
                   <img src="{{ item.menu_img.url }}" alt="{{ item.name }}" class="w-full h-64 object-cover" />
                 {% endif %}
 
-                <div class="p-6">
+                <div class="p-6 flex-1 flex flex-col">
                   <div class="flex justify-between items-start mb-3">
                     <p class="text-xl font-bold text-gray-900 menu-name">{{ item.name }}</p>
                     <p class="text-2xl font-bold text-amber-600 menu-price">Rs {{ item.price }}</p>
                   </div>
 
-                  <p class="text-sm text-gray-600 mb-4">{{ item.desc }}</p>
+                  <p class="text-sm text-gray-600 mb-4 flex-1">{{ item.desc }}</p>
 
-                  <button
-                      class="order-now-btn"
+                    <button
+                      class="order-now-btn mt-2"
+                      data-item-id="{{ item.pk }}"
                       data-item-name="{{ item.name }}"
                       data-item-price="{{ item.price }}"
                       style="width: 100%; padding: 8px 16px; border-radius: 8px; border: none; color: #fff;
                             font-size: 16px; font-weight: 500; cursor: pointer;
-                            background: linear-gradient(to right, #e97820, #ef4444); box-shadow: 0 4px 8px rgba(0,0,0,.12);">
-                      Order Now
+                            background: linear-gradient(to right, #e97820, #ef4444);">
+                      Add to Order
                   </button>
                 </div>
 

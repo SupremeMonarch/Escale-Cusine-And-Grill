@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Checkout | Escale Cuisine{% endblock %}
+
+{% block content %}
+
+<div class="pb-12 w-full" style="background-color: #111827;">
+
+  <!-- Hero header, matching review page style -->
+  <section aria-label="Checkout hero" class="w-full -mt-[calc(5rem+1px)] bg-gradient-to-r from-[#f65e00] to-[#ff3737] hero-gradient" style="background: linear-gradient(90deg,#f65e00 0%,#ff3737 100%);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(5rem+1px)] py-8 md:py-20">
+      <div class="flex flex-col items-center justify-center text-center gap-1">
+        <h1 class="mt-12 sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">Checkout</h1>
+        <p class="mt-0.5 text-sm sm:text-base md:text-lg text-white max-w-xxl mx-auto md:mx-0">
+          Review your order and pay.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main content cards -->
+  <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 grid grid-cols-1 lg:grid-cols-[1.2fr,1.1fr] gap-6 lg:gap-10 items-start">
+
+    <!-- Payment card -->
+    <section class="flex flex-col justify-between items-stretch w-full overflow-hidden p-4 sm:p-6 md:p-8 rounded-lg bg-white shadow-lg min-h-[20rem]">
+      <div class="w-full pb-4 border-b border-gray-200 mb-4">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Payment Info</h2>
+        <p class="mt-1 text-sm text-gray-600">Choose how you would like to pay.</p>
+      </div>
+
+      <!-- Payment methods list -->
+      <div class="space-y-4 mb-6">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Payment Method</p>
+        <div class="flex flex-col gap-3">
+          <!-- Card -->
+          <label class="flex items-center justify-between w-full h-12 px-3 rounded-lg border cursor-pointer bg-gray-50 hover:bg-gray-100 border-gray-200">
+            <div class="flex items-center gap-3">
+              <input type="radio" name="payment_method" value="card" class="h-4 w-4 text-amber-500 accent-amber-500" {% if payment_method == 'credit_card' or not payment_method %}checked{% endif %} />
+              <img src="{% static 'img/Menu/Checkout/creditcardlogo.png' %}" alt="Credit Card" class="h-6 w-auto object-contain" />
+              <span class="text-sm font-medium text-gray-900">Credit Card</span>
+            </div>
+          </label>
+
+          <!-- PayPal -->
+          <label class="flex items-center justify-between w-full h-12 px-3 rounded-lg border cursor-pointer bg-gray-50 hover:bg-gray-100 border-gray-200">
+            <div class="flex items-center gap-1.5">
+              <input type="radio" name="payment_method" value="paypal" class="h-4 w-4 text-amber-500 accent-amber-500" {% if payment_method == 'paypal' %}checked{% endif %} />
+              <img src="{% static 'img/Menu/Checkout/PayPal.png' %}" alt="PayPal" class="h-8 w-auto object-contain -ml-1" />
+              <span class="text-sm font-medium text-gray-900">PayPal</span>
+            </div>
+          </label>
+
+          <!-- Juice -->
+          <label class="flex items-center justify-between w-full h-12 px-3 rounded-lg border cursor-pointer bg-gray-50 hover:bg-gray-100 border-gray-200">
+            <div class="flex items-center gap-3">
+              <input type="radio" name="payment_method" value="juice" class="h-4 w-4 text-amber-500 accent-amber-500" {% if payment_method == 'juice' %}checked{% endif %} />
+              <img src="{% static 'img/Menu/Checkout/juice.png' %}" alt="Juice" class="h-6 w-auto object-contain" />
+              <span class="text-sm font-medium text-gray-900">Juice</span>
+            </div>
+          </label>
+
+          <!-- My.T Mobile -->
+          <label class="flex items-center justify-between w-full h-12 px-3 rounded-lg border cursor-pointer bg-gray-50 hover:bg-gray-100 border-gray-200">
+            <div class="flex items-center gap-3">
+              <input type="radio" name="payment_method" value="myt" class="h-4 w-4 text-amber-500 accent-amber-500" {% if payment_method == 'myt' %}checked{% endif %} />
+              <img src="{% static 'img/Menu/Checkout/my.t.png' %}" alt="My.T Mobile" class="h-6 w-auto object-contain" />
+              <span class="text-sm font-medium text-gray-900">My.T Mobile</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Card details form -->
+      <form method="post" action="" class="mt-4 space-y-4" id="card-form">
+        {% csrf_token %}
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Name on Card</label>
+          <input type="text" name="card_name" value="{{ card_name|default:'' }}" class="w-full h-12 rounded-lg px-3 text-sm bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors" />
+          {% if form_errors.card_name %}
+            <p class="mt-1 text-xs text-red-600">{{ form_errors.card_name }}</p>
+          {% endif %}
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Credit Card Number</label>
+          <input type="text" name="card_number" value="{{ card_number|default:'' }}" class="w-full h-12 rounded-lg px-3 text-sm bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors" />
+          {% if form_errors.card_number %}
+            <p class="mt-1 text-xs text-red-600">{{ form_errors.card_number }}</p>
+          {% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">Expiration Date</label>
+            <input type="date" name="exp_date" value="{{ exp_date|default:'' }}" class="w-full h-12 rounded-lg px-3 text-sm bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors" />
+            {% if form_errors.exp_date %}
+              <p class="mt-1 text-xs text-red-600">{{ form_errors.exp_date }}</p>
+            {% endif %}
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">CVV</label>
+            <input type="text" name="cvv" value="{{ cvv|default:'' }}" class="w-full h-12 rounded-lg px-3 text-sm bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors" />
+            {% if form_errors.cvv %}
+              <p class="mt-1 text-xs text-red-600">{{ form_errors.cvv }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="pt-2 flex justify-end">
+          <!-- primary proceed button is in the Your Order card -->
+        </div>
+      </form>
+    </section>
+
+    <!-- Order summary card -->
+    <aside class="flex flex-col justify-between items-start w-full lg:ml-0 overflow-hidden p-4 sm:p-6 md:p-8 rounded-lg bg-white shadow-lg min-h-[20rem] max-h-[32rem]">
+      <div class="w-full pb-4 border-b border-gray-200 mb-4">
+        <h2 class="text-xl font-semibold text-gray-900">Your Order</h2>
+      </div>
+
+      <!-- Order summary numbers -->
+      <div class="w-full space-y-3 text-sm text-gray-700 mb-4">
+        <div class="flex justify-between">
+          <span class="font-medium">Order Type</span>
+          <span>
+            {% if order.get_order_type_display %}
+              {{ order.get_order_type_display }}
+            {% else %}
+              {{ order.order_type|default:"Delivery"|title }}
+            {% endif %}
+          </span>
+        </div>
+        <div class="flex justify-between">
+          <span class="font-medium">No of Items</span>
+          <span>{{ order.items_count|default:0 }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="font-medium">Delivery</span>
+          <span>Rs {{ order.delivery|default:0 }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="font-medium">Subtotal</span>
+          <span>Rs {{ order.subtotal|default:0 }}</span>
+        </div>
+        <div class="flex justify-between text-base font-semibold text-gray-900 pt-1 border-t border-gray-200 mt-1">
+          <span>Total</span>
+          <span>Rs {{ order.total|default:0 }}</span>
+        </div>
+      </div>
+
+      <!-- Scrollable list of items -->
+      <div class="w-full flex-1 mb-4 overflow-y-auto pr-1 space-y-3" style="scrollbar-width: thin;">
+        {% if cart_items %}
+          {% for ci in cart_items %}
+            <div class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 bg-gray-50">
+              {% if ci.image_url %}
+              <div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                  <img src="{{ ci.image_url }}" alt="{{ ci.name }}" class="w-full h-full object-cover" />
+              </div>
+              {% endif %}
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="min-w-0">
+                    <p class="text-sm font-semibold text-gray-900 truncate">{{ ci.name }}</p>
+                    <p class="text-xs text-gray-500">Qty: {{ ci.quantity }} · Rs {{ ci.price }}</p>
+                  </div>
+                  <div class="flex items-center gap-2 flex-shrink-0">
+                    {% if ci.toppings %}
+                      <div class="flex flex-wrap gap-1 max-w-[160px] justify-end">
+                        {% for top in ci.toppings %}
+                          <span class="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-amber-50 border border-amber-200 text-amber-700 shadow-sm">
+                            {{ top }}
+                          </span>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                    <p class="text-sm font-semibold text-gray-900 whitespace-nowrap">Rs {{ ci.subtotal }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-xs text-gray-400">Your cart is currently empty.</p>
+        {% endif %}
+      </div>
+
+      <button form="card-form" type="submit" class="w-full mt-2 mb-1 inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#f65e00] to-[#ff3737] text-white text-sm font-semibold shadow hover:opacity-95 transition">
+        Proceed to Payment
+      </button>
+    </aside>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const methodRadios = document.querySelectorAll('input[name="payment_method"]');
+    const cardInputs = document.querySelectorAll('#card-form input[name="card_name"], #card-form input[name="card_number"], #card-form input[name="exp_date"], #card-form input[name="cvv"]');
+
+    function updateCardInputs() {
+      const selected = document.querySelector('input[name="payment_method"]:checked');
+      const isCard = selected && selected.value === 'card';
+
+      cardInputs.forEach(input => {
+        if (isCard) {
+          input.disabled = false;
+          input.classList.remove('bg-blue-50', 'text-blue-900');
+          input.classList.add('bg-gray-50', 'text-gray-900');
+        } else {
+          input.disabled = true;
+          input.value = '';
+          input.classList.remove('bg-gray-50', 'text-gray-900');
+          input.classList.add('bg-blue-50', 'text-blue-900');
+        }
+      });
+    }
+
+    methodRadios.forEach(r => r.addEventListener('change', updateCardInputs));
+    updateCardInputs();
+  });
+</script>
+{% endblock %}
