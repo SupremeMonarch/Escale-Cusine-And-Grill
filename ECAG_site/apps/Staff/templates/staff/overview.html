@@ -93,15 +93,15 @@
                      <p class="text-sm text-gray-600">Table {{ res.table_id.table_number|default:"N/A" }}</p>
                     <div class="flex justify-between items-center w-full pt-1">
 
-                        <button class="text-sm font-medium text-green-600 hover:text-green-500 z-10" onclick="event.stopPropagation()">Update Status</button>
+                        <button class="text-sm font-medium text-green-600 hover:text-green-500 z-10" >Update Status</button>
                         {% if res.status == 'confirmed' %}
                         <div class="px-2 py-1 rounded-lg bg-green-100 text-xs font-medium text-green-800">Confirmed</div>
                         {% elif res.status == 'pending' %}
                         <div class="px-2 py-1 rounded-lg bg-yellow-100 text-xs font-medium text-yellow-800">Pending</div>
                         {% elif res.status == 'seated' %}
-                        <div class="px-2 py-1 rounded-lg bg-blue-100 text-xs font-medium text-blue-800">Seated</div>
+                        <div class="px-2 py-1 rounded-lg bg-purple-100 text-xs font-medium text-purple-800">Seated</div>
                         {% elif res.status == 'completed' %}
-                        <div class="px-2 py-1 rounded-lg bg-gray-200 text-xs font-medium text-gray-800">Completed</div>
+                        <div class="px-2 py-1 rounded-lg bg-blue-200 text-xs font-medium text-blue-800">Completed</div>
                         {% elif res.status == 'cancelled' %}
                         <div class="px-2 py-1 rounded-lg bg-red-100 text-xs font-medium text-red-800">Cancelled</div>
                         {% else %}

@@ -17,7 +17,7 @@
             {% else %}
                 hover:bg-gray-100
             {% endif %}">
-            <span>Today's Orders</span>
+            <span>Active Orders</span>
         </a>
         <a href="{% url 'staff_reservations' %}" class="flex items-center gap-2 px-3 py-2 rounded-md
             {% if active_page == 'staff_reservations' %}
@@ -25,7 +25,7 @@
             {% else %}
                 hover:bg-gray-100
             {% endif %}">
-            <span>Today's Reservations</span>
+            <span>Upcoming Reservations</span>
         </a>
     </nav>
 </aside>
