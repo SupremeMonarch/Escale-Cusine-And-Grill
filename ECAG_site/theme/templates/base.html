@@ -37,10 +37,10 @@
             </a>
         </li>
         <li>
-            <a href="{% url 'menu:menu_starters' %}" 
-            class="px-3 py-1 border-b {% if request.resolver_match.url_name == 'menu' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
-            Menu
-            </a>
+          <a href="{% url 'menu:menu_starters' %}" 
+          class="px-3 py-1 border-b {% if request.resolver_match.namespace == 'menu' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
+          Menu
+          </a>
         </li>
         <li>
             <a href="{% url 'reservations:reservations' %}" 
@@ -55,10 +55,10 @@
             </a>
         </li>
         <li>
-            <a href="{% url 'review:review' %}" 
-            class="px-3 py-1 border-b {% if request.resolver_match.url_name == 'reviews' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
-            Reviews
-            </a>
+          <a href="{% url 'review:review' %}" 
+          class="px-3 py-1 border-b {% if request.resolver_match.namespace == 'review' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
+          Reviews
+          </a>
         </li>
         </ul>
 
