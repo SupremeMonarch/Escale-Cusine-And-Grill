@@ -6,6 +6,13 @@ from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseNotAll
 from django.views.decorators.http import require_POST
 from django.db.models import F, Sum
 from django.middleware.csrf import get_token
+from django.http import HttpResponseForbidden
+
+def _is_staff_user(user):
+    try:
+        return user.is_active and user.is_staff
+    except Exception:
+        return False
 
 
 # Create your views here.
@@ -154,3 +161,22 @@ def review_step2(request):
         form = forms.ReviewForm()
 
     return render(request, 'review/review_step2.html', {'form': form})
+
+
+@require_POST
+def review_verify(request, pk):
+    """Mark a review as verified. Staff only. Returns JSON with new `is_verified` value."""
+    # simple staff check
+    if not _is_staff_user(getattr(request, 'user', None)):
+        return HttpResponseForbidden('Staff access required')
+
+    try:
+        review = Review.objects.get(pk=pk)
+    except Review.DoesNotExist:
+        return HttpResponseBadRequest('Invalid review id')
+
+    if not review.is_verified:
+        review.is_verified = True
+        review.save()
+
+    return JsonResponse({'is_verified': review.is_verified})

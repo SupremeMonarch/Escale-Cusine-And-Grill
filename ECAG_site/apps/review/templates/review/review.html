@@ -178,7 +178,7 @@
             <path d="M8.32816 0.666707L13.8047 1.88004C13.9558 1.9156 14.0801 1.9956 14.1778 2.12004C14.2756 2.24448 14.3244 2.38226 14.3244 2.53337V9.18671C14.3244 9.86226 14.1667 10.4934 13.8514 11.08C13.536 11.6667 13.0985 12.1467 12.5389 12.52L8.32816 15.3334L4.11746 12.52C3.55781 12.1467 3.12031 11.6667 2.80495 11.08C2.48959 10.4934 2.33191 9.86226 2.33191 9.18671V2.53337C2.33191 2.38226 2.38077 2.24448 2.47848 2.12004C2.5762 1.9956 2.70057 1.9156 2.85158 1.88004L8.32816 0.666707ZM8.32816 2.02671L3.66441 3.06671V9.18671C3.66441 9.64004 3.76879 10.0623 3.97755 10.4534C4.18631 10.8445 4.47723 11.1645 4.85033 11.4134L8.32816 13.7334L11.806 11.4134C12.1791 11.1645 12.47 10.8445 12.6788 10.4534C12.8875 10.0623 12.9919 9.64004 12.9919 9.18671V3.06671L8.32816 2.02671ZM11.2996 5.48004L12.2324 6.42671L7.99503 10.6667L5.17013 7.84004L6.11621 6.89337L7.99503 8.78671L11.2996 5.48004Z" fill="#22C55E"></path>
           </svg>
           <div class="flex-1 min-w-0">
-            <p class="text-base font-medium text-gray-900 truncate">{{ verified_count }} Verified Reviews</p>
+            <p class="text-base font-medium text-gray-900 truncate"><span id="verified-count">{{ verified_count }}</span> Verified Reviews</p>
             <p class="text-sm text-gray-600 truncate">From confirmed diners</p>
           </div>
         </div>
@@ -322,9 +322,17 @@
                 </div>
 
                 <div class="flex items-center gap-4">
-                  <a class="text-gray-400 hover:text-gray-600" href="#" aria-label="Share review">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 6l-4-4-4 4" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 2v14" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </a>
+                  {% if request.user.is_staff %}
+                    {% if not r.is_verified %}
+                      <button class="verify-btn inline-flex items-center gap-2 text-sm text-white bg-amber-600 hover:opacity-90 px-3 py-1 rounded" data-review-id="{{ r.id }}">Verify</button>
+                    {% else %}
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">Verified</span>
+                    {% endif %}
+                  {% else %}
+                    <a class="text-gray-400 hover:text-gray-600" href="#" aria-label="Share review">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 6l-4-4-4 4" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 2v14" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                  {% endif %}
                 </div>
               </div>
             </div>
@@ -425,6 +433,49 @@
           }
         });
       }
+    });
+    </script>
+    <script>
+    // Staff verify button handler
+    document.addEventListener('DOMContentLoaded', function () {
+      const csrftoken = getCookie('csrftoken');
+      document.querySelectorAll('.verify-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const id = btn.getAttribute('data-review-id');
+          if (!id) return;
+          const verifyTemplate = '{% url "review:review_verify" 0 %}';
+          const verifyUrl = verifyTemplate.replace('0/', id + '/');
+          try {
+            const resp = await fetch(verifyUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+              body: JSON.stringify({}),
+            });
+            if (!resp.ok) throw new Error('Network response was not ok');
+            const data = await resp.json();
+            if (data.is_verified) {
+              // replace button with Verified badge
+              const span = document.createElement('span');
+              span.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100';
+              span.textContent = 'Verified';
+              btn.replaceWith(span);
+              // increment the verified count in the highlights card if present
+              try {
+                const vc = document.getElementById('verified-count');
+                if (vc) {
+                  const current = parseInt(vc.textContent.replace(/[^0-9]/g, '') || '0', 10);
+                  vc.textContent = String(current + 1);
+                }
+              } catch (e) {
+                // noop
+              }
+            }
+          } catch (err) {
+            console.error('Error verifying review:', err);
+            btn.classList.add('opacity-60');
+          }
+        });
+      });
     });
     </script>
     {% endblock %}
