@@ -5,12 +5,32 @@ from django.db.models import Sum
 from decimal import Decimal, ROUND_HALF_UP
 from django.utils import timezone
 from datetime import timedelta
-
+    
 def default_arrival_time():
     return (timezone.now() + timedelta(minutes=15)).time() #adds 15 min to current time when entering a default arrival time for delivery
 
 def roundup(val):
     return Decimal(val).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) #makes 1.555 become 1.56
+
+# Server-side topping pricing to mirror frontend sidebar.js
+TOPPING_PRICES = {
+    "Eggs": Decimal("25"),
+    "Chicken": Decimal("0"),
+    "Shrimps": Decimal("30"),
+    "Beef": Decimal("15"),
+    "Lamb": Decimal("30"),
+    "Mushrooms": Decimal("20"),
+}
+
+def eligible_for_toppings(item_name: str) -> bool:
+    if not item_name:
+        return False
+    name = str(item_name).lower()
+    return (
+        "fried rice" in name
+        or "fried noodles" in name
+        or "magic bowl" in name
+    )
 
 class MenuCategory(models.Model):
     category = models.CharField(max_length=100)
@@ -37,7 +57,7 @@ class MenuItem(models.Model):
     subcategory_id = models.ForeignKey(MenuSubCategory, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.name
+        return self.name    
 
 class Promotion(models.Model):
     item = models.ForeignKey(MenuItem, on_delete=models.CASCADE, related_name="promotions")
@@ -50,11 +70,20 @@ class Promotion(models.Model):
         # ensure start_date <= end_date
         if self.end_date and self.start_date and self.end_date < self.start_date:
             raise ValueError("end date cannot be before start date")
+        # clamp discount to [0, 100]
+        try:
+            if self.discountpercent is not None:
+                if self.discountpercent < 0:
+                    self.discountpercent = Decimal("0")
+                if self.discountpercent > 100:
+                    self.discountpercent = Decimal("100")
+        except Exception:
+            pass
         super().save(*args, **kwargs)
-
+    
     def __str__(self): #this is so only the user's name appears on the admin page when an order is added
         return self.title
-
+    
 class Order(models.Model):
     # allow anonymous orders by permitting a NULL user
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
@@ -63,24 +92,25 @@ class Order(models.Model):
     #table_id = models.ForeignKey(Table, on_delete=models.PROTECT) not yet created models.py for Table
 
     class Ordertype(models.TextChoices): #enum data type
-        DELIVERY = "Delivery", "Delivery"
-        TAKEOUT = "Takeout", "Takeout"
-        DINE_IN = "Dine-in", "Dine-in"
+        DELIVERY =  "delivery", "Delivery"
+        CARRY_OUT   =   "pick up", "Pick Up"
+        DINE_IN =  "dine in", "Dine In",
+
     order_type = models.CharField(
         max_length=20,
         choices=Ordertype.choices,
     )
     class Status(models.TextChoices): #enum data type
-        PENDING = "Pending", "Pending"
-        PREPARING = "Preparing", "Preparing"
-        COMPLETED = "Completed", "Completed"
-        CANCELLED = "Cancelled", "Cancelled"
+        IN_PROGRESS = "in_progress", "In Progress"
+        COMPLETED   = "completed",   "Completed"
 
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
-        default=Status.PREPARING,
+        default=Status.IN_PROGRESS,
     )
+    # Persisted monetary fields
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), validators=[MinValueValidator(Decimal("0.00"))])
     total = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), validators=[MinValueValidator(Decimal("0.00"))])
 
     # Auto-generate the human-readable order_id_str on save
@@ -98,21 +128,26 @@ class Order(models.Model):
         return f"{self.user}'s Order"
 
     def update_total(self, save=True):
-        sumofitems = self.items.aggregate(s=Sum("subtotal"))["s"] or Decimal("0.00") #sums up all subtotals for an order
+        sumofitems = self.items.aggregate(s=Sum("subtotal"))["s"] or Decimal("0.00")  # sums up all subtotals for an order
         try:
             delivery_fee = self.delivery.fee
         except Delivery.DoesNotExist:
             delivery_fee = Decimal("0.00")
-        new_total = roundup(sumofitems + delivery_fee) #adds delivery fee if there is one
+        # include takeout fee when applicable (mutually exclusive with delivery)
+        try:
+            takeout_fee = self.takeout.fee
+        except Exception:
+            takeout_fee = Decimal("0.00")
+        applied_fee = delivery_fee if delivery_fee else takeout_fee
+        # update persisted fields
+        self.subtotal = roundup(sumofitems)
+        new_total = roundup(sumofitems + applied_fee)  # adds service fee if there is one
         self.total = new_total
         if save:
-            self.save(update_fields=["total"])
+            self.save(update_fields=["subtotal", "total"])
         return self.total
 
-    @property
-    def subtotal(self):
-        """Sum of order item subtotals (without delivery)."""
-        return self.items.aggregate(s=Sum("subtotal"))["s"] or Decimal("0.00")
+    # NOTE: subtotal is now a stored field on the model
 
     @property
     def items_count(self):
@@ -124,6 +159,13 @@ class Order(models.Model):
         try:
             return self.delivery.fee
         except Delivery.DoesNotExist:
+            return Decimal("0.00")
+
+    @property
+    def takeout_fee(self):
+        try:
+            return self.takeout.fee
+        except Exception:
             return Decimal("0.00")
 
     def sync_items_from_cart(self, cart_items, save=True):
@@ -216,18 +258,11 @@ class Order(models.Model):
         if not order:
             order = cls.objects.create(user=request_user if request_user and request_user.is_authenticated else None,
                                        order_type=cls.Ordertype.DELIVERY,
-                                       status=cls.Status.PENDING)
+                                       status=cls.Status.IN_PROGRESS)
             session['cart_order_id'] = order.id
             session.modified = True
 
         return order
-
-    @property
-    def get_item_summary(self):
-        items = self.items.all()
-        if not items:
-            return "No items"
-        return ", ".join([f"{item.quantity}x {item.item.name}" for item in items])
 
 
 class OrderItem(models.Model):
@@ -246,16 +281,38 @@ class OrderItem(models.Model):
     extra_toppings = models.TextField(blank=True, help_text="Comma-separated list of extra toppings.")
 
     def save(self, *args, **kwargs):
+        # allow callers to disable immediate order.total recompute for bulk ops
+        recalc = kwargs.pop('recalc', True)
         unit = self.item.price
         if self.promo:
             # only apply if promo is active AND for this item
             now = timezone.now()
             if self.promo.item_id == self.item_id and self.promo.start_date <= now <= self.promo.end_date:
-                unit = unit * (Decimal("1") - self.promo.discountpercent)
-        self.price = roundup(unit)
+                try:
+                    rate = (self.promo.discountpercent or Decimal("0")) / Decimal("100")
+                    if rate < 0:
+                        rate = Decimal("0")
+                    if rate > 1:
+                        rate = Decimal("1")
+                    unit = unit * (Decimal("1") - rate)
+                except Exception:
+                    pass
+        # add topping prices if applicable
+        extra_charge = Decimal("0.00")
+        if eligible_for_toppings(getattr(self.item, "name", "")):
+            # meat topping
+            if self.meat_topping:
+                extra_charge += TOPPING_PRICES.get(self.meat_topping, Decimal("0.00"))
+            # extra toppings (comma-separated)
+            if self.extra_toppings:
+                for t in [x.strip() for x in self.extra_toppings.split(',') if x.strip()]:
+                    extra_charge += TOPPING_PRICES.get(t, Decimal("0.00"))
+
+        self.price = roundup(unit + extra_charge)
         self.subtotal = roundup(self.price * self.quantity)
         super().save(*args, **kwargs)
-        self.order.update_total()
+        if recalc:
+            self.order.update_total()
 
     def delete(self, *args, **kwargs):
         order = self.order
@@ -264,7 +321,7 @@ class OrderItem(models.Model):
 
     def __str__(self): #this is so only the user's name appears on the admin page when an order is added
         return f"{self.quantity} x {self.item.name}(s)"
-
+    
     @property
     def discounted_price(self):
         """
@@ -272,8 +329,16 @@ class OrderItem(models.Model):
         """
         if not self.promo:
             return self.item.price
-        discounted = self.item.price * (Decimal("1") - self.promo.discountpercent)
-        return roundup(discounted)
+        try:
+            rate = (self.promo.discountpercent or Decimal("0")) / Decimal("100")
+            if rate < 0:
+                rate = Decimal("0")
+            if rate > 1:
+                rate = Decimal("1")
+            discounted = self.item.price * (Decimal("1") - rate)
+            return roundup(discounted)
+        except Exception:
+            return roundup(self.item.price)
 
 class Delivery(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="delivery")
@@ -283,7 +348,7 @@ class Delivery(models.Model):
         PREPARING_ORDER = "preparing_order" , "Preparing Order"
         IN_PROGRESS = "in_progress", "In Progress"
         DELIVERED   = "delivered",   "Delivered"
-
+    
     delivery_status = models.CharField(
         max_length=20,
         choices=Status.choices,
@@ -305,6 +370,23 @@ class Delivery(models.Model):
     def __str__(self): #this is so only the user's name appears on the admin page when an order is added
         return f"{self.order.user}'s Delivery"
 
+class Takeout(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="takeout")
+    fee = models.DecimalField(max_digits=8, decimal_places=2, validators=[MinValueValidator(Decimal("0.00"))], default=Decimal("50.00"))
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.order_id:
+            self.order.update_total()
+
+    def delete(self, *args, **kwargs):
+        order = self.order
+        super().delete(*args, **kwargs)
+        order.update_total()
+
+    def __str__(self):
+        return f"{self.order.user}'s Takeout"
+
 class Transaction(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="transactions")
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"))
@@ -323,7 +405,7 @@ class Transaction(models.Model):
     card_number = models.CharField(max_length=19, blank=True, help_text="PAN without spaces, typically 13-19 digits")
     exp_date = models.DateField(null=True, blank=True)
     cvv = models.CharField(max_length=4, blank=True)
-    transaction_date = models.DateTimeField(auto_now_add=True, editable=False)
+    transaction_date = models.DateTimeField(auto_now_add=True, editable=False)  
     class Status(models.TextChoices): #enum data type
         IN_PROGRESS = "in_progress", "In Progress"
         COMPLETED   = "completed",   "Completed"

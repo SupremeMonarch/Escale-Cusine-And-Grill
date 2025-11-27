@@ -126,8 +126,10 @@
           <span>
             {% if order.get_order_type_display %}
               {{ order.get_order_type_display }}
+            {% elif order.order_type_display %}
+              {{ order.order_type_display }}
             {% else %}
-              {{ order.order_type|default:"Delivery"|title }}
+              {{ order.order_type|default:"delivery"|cut:"_"|title }}
             {% endif %}
           </span>
         </div>
@@ -136,7 +138,7 @@
           <span>{{ order.items_count|default:0 }}</span>
         </div>
         <div class="flex justify-between">
-          <span class="font-medium">Delivery</span>
+          <span class="font-medium">{{ order.fee_label|default:"Service Fee" }}</span>
           <span>Rs {{ order.delivery|default:0 }}</span>
         </div>
         <div class="flex justify-between">
