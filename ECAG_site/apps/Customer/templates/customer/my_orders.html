@@ -41,7 +41,7 @@
 {% endblock styles %}
 
 {% block dashboard_content %}
-    <div class="p-4 sm:p-6 lg:p-8 w-full max-w-[850px] mx-auto space-y-6">
+    <div class="p-4 sm:p-6 lg:p-8 w-full max-w-[900px] mx-auto space-y-6">
         {% csrf_token %}
 
         <header class="flex justify-between items-center w-full w-full h-14 mx-auto mb-6 pl-4 pr-4 pt-4">
@@ -92,7 +92,7 @@
                         {% for item in order.items.all %}
                             <div class="flex justify-between items-center px-6">
                                 <p class="text-sm text-left text-gray-700">{{ item.quantity }}x {{ item.item.name }}</p>
-                                <p class="text-sm font-medium text-left text-gray-900">Rs {{ item.get_cost|floatformat:2 }}</p>
+                                <p class="text-sm font-medium text-left text-gray-900">Rs {{ item.subtotal|floatformat:2 }}</p>
                             </div>
                         {% endfor %}
                     </div>
@@ -107,7 +107,7 @@
                         </button>
                         {% endif %}
                     </div>
-                    <p class="text-lg font-bold text-gray-900">Rs {{ order.get_total_cost|floatformat:2 }}</p>
+                    <p class="text-lg font-bold text-gray-900">Rs {{ order.total|floatformat:2 }}</p>
                 </div>
             </div>
 

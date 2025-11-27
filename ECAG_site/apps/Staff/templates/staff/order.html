@@ -163,7 +163,7 @@
                     {% for item in order.items.all %}
                     <div class="flex justify-between items-center px-6">
                         <p class="text-sm text-gray-700">{{ item.quantity }}x {{ item.item.name }}</p>
-                        <p class="text-sm font-medium text-gray-900">Rs {{ item.get_cost|floatformat:2 }}</p>
+                        <p class="text-sm font-medium text-gray-900">Rs {{ item.subtotal|floatformat:2 }}</p>
                     </div>
                     {% endfor %}
                 </div>
@@ -191,7 +191,7 @@
                         class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors">
                         View Receipt</button>
                 </div>
-                <p class="text-xl font-bold text-right text-gray-900">Rs {{ order.get_total_cost|floatformat:2 }}</p>
+                <p class="text-xl font-bold text-right text-gray-900">Rs {{ order.total|floatformat:2 }}</p>
             </div>
 
             <!-- STATUS UPDATE OVERLAY -->
@@ -241,21 +241,21 @@
                         <span>Time: {{ order.order_date|time:"H:i" }}</span>
                     </div>
                     <div class="text-xs text-gray-600 border-b border-dashed border-gray-300 pb-4">
-                        <p>Customer: {{ order.user.get_full_name|default:order.user.username }}</p>
+                        <p>Customer:</p>
                         <p>Type: {{ order.order_type }}</p>
                     </div>
                     <div class="space-y-2">
                         {% for item in order.items.all %}
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-800">{{ item.quantity }} x {{ item.item.name }}</span>
-                            <span class="text-gray-900 font-medium">{{ item.get_cost|floatformat:2 }}</span>
+                            <span class="text-gray-900 font-medium">{{ item.subtotal|floatformat:2 }}</span>
                         </div>
                         {% endfor %}
                     </div>
                     <div class="border-t border-dashed border-gray-300 pt-4 mt-4 space-y-1">
                         <div class="flex justify-between text-base font-bold text-gray-900 pt-2">
                             <span>TOTAL</span>
-                            <span>Rs {{ order.get_total_cost|floatformat:2 }}</span>
+                            <span>Rs {{ order.total|floatformat:2 }}</span>
                         </div>
                     </div>
                 </div>

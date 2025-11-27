@@ -58,7 +58,7 @@ def staff_orders(request):
     completed_orders = orders.filter(status__in=['Completed']).count()
     dine_in_orders = orders.filter(order_type__in=['Dine-in']).count()
     delivery_orders = orders.filter(order_type__in=['Delivery']).count()
-    take_out_orders = orders.filter(order_type__in=['Take-out']).count()
+    take_out_orders = orders.filter(order_type__in=['Takeout']).count()
     context = {
         'orders': orders,
         'today_date': today,

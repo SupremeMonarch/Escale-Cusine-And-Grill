@@ -28,8 +28,8 @@ def overview(request):
 
     upcoming_reservations_count = all_reservations.filter(status='confirmed').count()
 
-    recent_orders = all_orders.order_by('-order_date')[:3]
-    recent_reservations = all_reservations.order_by('-date', '-time')[:3]
+    recent_orders = all_orders.order_by('-order_date')
+    recent_reservations = all_reservations.order_by('-date', '-time')
 
     context = {
         'user': customer,
@@ -48,7 +48,7 @@ def overview(request):
 @login_required
 def my_orders(request):
     customer = get_current_user(request)
-    orders = Order.objects.filter(user=customer)
+    orders = Order.objects.filter(user=customer).order_by('-order_date')
     context = {'orders': orders, 'active_page': 'my_orders'}
     return render(request, 'customer/my_orders.html', context)
 

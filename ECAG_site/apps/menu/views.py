@@ -73,7 +73,7 @@ def checkout(request):
                 if raw_type:
                     ORDER_TYPE_MAP = {
                         'dine_in': Order.Ordertype.DINE_IN,
-                        'pick_up': Order.Ordertype.CARRY_OUT,
+                        'pick_up': Order.Ordertype.TAKEOUT,
                         'delivery': Order.Ordertype.DELIVERY,
                     }
                     mapped_ot = ORDER_TYPE_MAP.get(raw_type)
@@ -85,7 +85,7 @@ def checkout(request):
                 if raw_type:
                     ORDER_TYPE_MAP = {
                         'dine_in': Order.Ordertype.DINE_IN,
-                        'pick_up': Order.Ordertype.CARRY_OUT,
+                        'pick_up': Order.Ordertype.TAKEOUT,
                         'delivery': Order.Ordertype.DELIVERY,
                     }
                     mapped_ot = ORDER_TYPE_MAP.get(raw_type)
@@ -114,7 +114,7 @@ def checkout(request):
                     cvv=cvv,
                 )
                 txn.save()
-                order.status = Order.Status.COMPLETED
+                order.status = Order.Status.PENDING
                 order.save()
                 # Fully clear cart-related session state so sidebar resets.
                 _reset_cart_session(request.session)
@@ -138,7 +138,7 @@ def checkout(request):
             if raw_type:
                 ORDER_TYPE_MAP = {
                     'dine_in': Order.Ordertype.DINE_IN,
-                    'pick_up': Order.Ordertype.CARRY_OUT,
+                    'pick_up': Order.Ordertype.TAKEOUT,
                     'delivery': Order.Ordertype.DELIVERY,
                 }
                 mapped_ot = ORDER_TYPE_MAP.get(raw_type)
@@ -234,7 +234,7 @@ def save_cart(request):
     # Map frontend order type (dine_in | pick_up | delivery) to model choices ("dine in" | "carry out" | "delivery")
     ORDER_TYPE_MAP = {
         'dine_in': Order.Ordertype.DINE_IN,
-        'pick_up': Order.Ordertype.CARRY_OUT,
+        'pick_up': Order.Ordertype.TAKEOUT,
         'delivery': Order.Ordertype.DELIVERY,
     }
     mapped = ORDER_TYPE_MAP.get(raw_order_type)

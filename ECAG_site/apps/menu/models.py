@@ -5,7 +5,7 @@ from django.db.models import Sum
 from decimal import Decimal, ROUND_HALF_UP
 from django.utils import timezone
 from datetime import timedelta
-    
+
 def default_arrival_time():
     return (timezone.now() + timedelta(minutes=15)).time() #adds 15 min to current time when entering a default arrival time for delivery
 
@@ -37,7 +37,7 @@ class MenuItem(models.Model):
     subcategory_id = models.ForeignKey(MenuSubCategory, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.name    
+        return self.name
 
 class Promotion(models.Model):
     item = models.ForeignKey(MenuItem, on_delete=models.CASCADE, related_name="promotions")
@@ -51,10 +51,10 @@ class Promotion(models.Model):
         if self.end_date and self.start_date and self.end_date < self.start_date:
             raise ValueError("end date cannot be before start date")
         super().save(*args, **kwargs)
-    
+
     def __str__(self): #this is so only the user's name appears on the admin page when an order is added
         return self.title
-    
+
 class Order(models.Model):
     # allow anonymous orders by permitting a NULL user
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
@@ -63,22 +63,23 @@ class Order(models.Model):
     #table_id = models.ForeignKey(Table, on_delete=models.PROTECT) not yet created models.py for Table
 
     class Ordertype(models.TextChoices): #enum data type
-        DELIVERY =  "delivery", "Delivery"
-        CARRY_OUT   =   "carry out", "Carry Out"
-        DINE_IN =  "dine in", "Dine In",
-
+        DELIVERY = "Delivery", "Delivery"
+        TAKEOUT = "Takeout", "Takeout"
+        DINE_IN = "Dine-in", "Dine-in"
     order_type = models.CharField(
         max_length=20,
         choices=Ordertype.choices,
     )
     class Status(models.TextChoices): #enum data type
-        IN_PROGRESS = "in_progress", "In Progress"
-        COMPLETED   = "completed",   "Completed"
+        PENDING = "Pending", "Pending"
+        PREPARING = "Preparing", "Preparing"
+        COMPLETED = "Completed", "Completed"
+        CANCELLED = "Cancelled", "Cancelled"
 
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
-        default=Status.IN_PROGRESS,
+        default=Status.PREPARING,
     )
     total = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"), validators=[MinValueValidator(Decimal("0.00"))])
 
@@ -215,11 +216,18 @@ class Order(models.Model):
         if not order:
             order = cls.objects.create(user=request_user if request_user and request_user.is_authenticated else None,
                                        order_type=cls.Ordertype.DELIVERY,
-                                       status=cls.Status.IN_PROGRESS)
+                                       status=cls.Status.PENDING)
             session['cart_order_id'] = order.id
             session.modified = True
 
         return order
+
+    @property
+    def get_item_summary(self):
+        items = self.items.all()
+        if not items:
+            return "No items"
+        return ", ".join([f"{item.quantity}x {item.item.name}" for item in items])
 
 
 class OrderItem(models.Model):
@@ -256,7 +264,7 @@ class OrderItem(models.Model):
 
     def __str__(self): #this is so only the user's name appears on the admin page when an order is added
         return f"{self.quantity} x {self.item.name}(s)"
-    
+
     @property
     def discounted_price(self):
         """
@@ -275,7 +283,7 @@ class Delivery(models.Model):
         PREPARING_ORDER = "preparing_order" , "Preparing Order"
         IN_PROGRESS = "in_progress", "In Progress"
         DELIVERED   = "delivered",   "Delivered"
-    
+
     delivery_status = models.CharField(
         max_length=20,
         choices=Status.choices,
@@ -315,7 +323,7 @@ class Transaction(models.Model):
     card_number = models.CharField(max_length=19, blank=True, help_text="PAN without spaces, typically 13-19 digits")
     exp_date = models.DateField(null=True, blank=True)
     cvv = models.CharField(max_length=4, blank=True)
-    transaction_date = models.DateTimeField(auto_now_add=True, editable=False)  
+    transaction_date = models.DateTimeField(auto_now_add=True, editable=False)
     class Status(models.TextChoices): #enum data type
         IN_PROGRESS = "in_progress", "In Progress"
         COMPLETED   = "completed",   "Completed"
