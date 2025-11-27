@@ -285,7 +285,7 @@
   let currentOrderType =
     localStorage.getItem("ecag_order_type") || "dine_in";
   let currentDeliveryFee =
-    currentOrderType === "delivery" ? 100 : 0;
+    currentOrderType === "delivery" ? 100 : currentOrderType === "pick_up" ? 50 : 0;
 
   function saveOrderType() {
     try {
@@ -306,8 +306,16 @@
     const total = subtotal + currentDeliveryFee;
 
     if (orderCountEl) orderCountEl.textContent = String(itemsCount);
-    if (orderDeliveryEl)
-      orderDeliveryEl.textContent = String(currentDeliveryFee);
+    if (orderDeliveryEl) orderDeliveryEl.textContent = String(currentDeliveryFee);
+    // keep fee label in sync even if setOrderType wasn't called (cache, race, etc.)
+    try {
+      const feeLabelEl = document.getElementById('order-fee-label');
+      if (feeLabelEl) {
+        if (currentOrderType === 'delivery') feeLabelEl.textContent = 'Delivery';
+        else if (currentOrderType === 'pick_up') feeLabelEl.textContent = 'Take Out';
+        else feeLabelEl.textContent = 'Dine In';
+      }
+    } catch (e) {}
     if (orderTotalEl) orderTotalEl.textContent = String(total);
   }
 
@@ -708,7 +716,7 @@
       let activeBtn = null;
       let activeIndex = 0;
       if (type === 'dine_in') { activeBtn = dineInBtn; activeIndex = 0; currentDeliveryFee = 0; }
-      else if (type === 'pick_up') { activeBtn = pickUpBtn; activeIndex = 1; currentDeliveryFee = 0; }
+      else if (type === 'pick_up') { activeBtn = pickUpBtn; activeIndex = 1; currentDeliveryFee = 50; }
       else if (type === 'delivery') { activeBtn = deliveryBtn; activeIndex = 2; currentDeliveryFee = 100; }
 
       // mark the active button with the class so CSS rules (hover:not(.active)) won't affect it
@@ -718,6 +726,16 @@
       }
 
       updateOrderTypeSlider(activeIndex);
+    } catch (e) {}
+
+    // Update fee label dynamically
+    try {
+      const feeLabelEl = document.getElementById('order-fee-label');
+      if (feeLabelEl) {
+        if (type === 'delivery') feeLabelEl.textContent = 'Delivery';
+        else if (type === 'pick_up') feeLabelEl.textContent = 'Take Out';
+        else feeLabelEl.textContent = 'Dine In';
+      }
     } catch (e) {}
 
     saveOrderType();
