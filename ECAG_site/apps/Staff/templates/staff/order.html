@@ -166,12 +166,12 @@
                         <p class="text-sm font-medium text-gray-900">Rs {{ item.subtotal|floatformat:2 }}</p>
                     </div>
                     {% endfor %}
-                    {% if order.order_type == 'pick up' or order.order_type == 'Takeout' %}
+                    {% if order.order_type == 'pick up'%}
                     <div  class="flex justify-between items-start px-6">
                         <p class="text-sm text-gray-700">Takeout Fee: </p>
                         <p class="text-sm font-medium text-gray-900">Rs {{ order.takeout_fee|floatformat:2 }}</p>
                     </div>
-                    {% elif order.order_type == 'Delivery' or order.order_type == 'delivery' %}
+                    {% elif order.order_type == 'delivery' %}
                     <div  class="flex justify-between items-start px-6">
                         <p class="text-sm text-gray-700">Delivery Fee: </p>
                         <p class="text-sm font-medium text-gray-900">Rs {{ order.delivery_fee|floatformat:2 }}</p>
@@ -192,7 +192,7 @@
             <div class="flex flex-wrap justify-between items-center w-full pt-4 gap-3 border-t border-gray-200 pr-4">
                 <div class="flex gap-3">
                     <!-- Update Status Button (ONLY FOR DELIVERY) -->
-                    {% if order.order_type == 'Delivery' or order.order_type == 'delivery' %}
+                    {% if order.order_type == 'delivery' %}
                     <button onclick="toggleStatusModal('status-overlay-{{ order.order_id_str }}', '{{ order.delivery.delivery_status }}')"
                         class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-green-600 text-sm font-medium text-white hover:bg-green-700"
                         data-current-status="{{ order.delivery.delivery_status }}">
@@ -208,7 +208,7 @@
             </div>
 
             <!-- STATUS UPDATE OVERLAY (ONLY FOR DELIVERY) -->
-            {% if order.order_type == 'Delivery' or order.order_type == 'delivery' %}
+            {% if order.order_type == 'delivery'%}
             <div id="status-overlay-{{ order.order_id_str }}"
                  class="hidden absolute bottom-0 left-0 w-full bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-10 p-4 animate-slide-up">
                 <div class="flex justify-between items-center mb-3">
@@ -256,7 +256,6 @@
                         <span>Time: {{ order.order_date|time:"H:i" }}</span>
                     </div>
                     <div class="text-xs text-gray-600 border-b border-dashed border-gray-300 pb-4">
-                        <p>Customer:</p>
                         <p>Type: {{ order.order_type }}</p>
                     </div>
                     <div class="space-y-2">
@@ -284,7 +283,7 @@
                         <p class="text-sm text-gray-700">Takeout Fee: </p>
                         <p class="text-sm font-medium text-gray-900">Rs {{ order.takeout_fee|floatformat:2 }}</p>
                     </div>
-                    {% elif order.order_type == 'delivery' or order.order_type == 'Delivery' %}
+                    {% elif order.order_type == 'delivery' %}
                     <div  class="flex justify-between items-start px-6">
                         <p class="text-sm text-gray-700">Delivery Fee: </p>
                         <p class="text-sm font-medium text-gray-900">Rs {{ order.delivery_fee|floatformat:2 }}</p>
