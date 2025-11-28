@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST
 import json
 import datetime
 
-from apps.menu.models import Order
+from apps.menu.models import Order, Delivery
 from apps.reservations.models import Reservation, Table
 
 def is_staff_user(user):
@@ -22,26 +22,30 @@ def staff_overview(request):
     todays_orders = Order.objects.filter(order_date__date=today)
     todays_orders_count = todays_orders.count()
 
-    orders_in_progress_count = Order.objects.filter(status__in=['Preparing']).count()
-    pending_orders_count = Order.objects.filter(status__in=['Pending']).count()
+    active_deliveries_count = todays_orders.filter(
+        order_type__in=['Delivery', 'delivery'],
+        delivery__delivery_status__in=['preparing_order', 'in_progress']
+    ).count()
 
+    recent_orders = todays_orders.order_by('-order_date')
+
+    todays_reservations_count = Reservation.objects.filter(date=today).count()
     active_reservations = Reservation.objects.filter(date__gte=today)
     active_reservations_count = active_reservations.count()
     upcoming_reservations_count = active_reservations.filter(status='confirmed').count()
-    pending_reservations_count = active_reservations.filter(status='pending').count()
-
-    active_orders = Order.objects.filter(status__in=['Pending', 'Preparing']).order_by('-order_date')[:5]
-    reservations_active_list = active_reservations.order_by('time')[:5]
+    reservations_active_list = active_reservations.order_by('time')
 
     context = {
         'todays_orders_count': todays_orders_count,
-        'orders_in_progress_count': orders_in_progress_count,
-        'pending_orders_count': pending_orders_count,
+        'active_deliveries_count': active_deliveries_count, # New Stat
+
         'active_reservations_count': active_reservations_count,
         'upcoming_reservations_count': upcoming_reservations_count,
-        'pending_reservations_count': pending_reservations_count,
-        'active_orders': active_orders,
+
+
+        'active_orders': recent_orders,
         'reservations_active': reservations_active_list,
+        'todays_reservations_count': todays_reservations_count,
         'today_date': today,
         'active_page': 'staff_overview'
     }
@@ -51,21 +55,18 @@ def staff_overview(request):
 @user_passes_test(is_staff_user)
 def staff_orders(request):
     today = timezone.now().date()
-    orders = Order.objects.filter(order_date__date=today).order_by('-order_date')
+    orders = Order.objects.filter(order_date__date=today).select_related('delivery').order_by('-order_date')
+
     total_orders = orders.count()
-    pending_orders = orders.filter(status__in=['Pending']).count()
-    preparing_orders = orders.filter(status__in=['Preparing']).count()
-    completed_orders = orders.filter(status__in=['Completed']).count()
-    dine_in_orders = orders.filter(order_type__in=['Dine-in']).count()
-    delivery_orders = orders.filter(order_type__in=['Delivery']).count()
-    take_out_orders = orders.filter(order_type__in=['Takeout']).count()
+
+    dine_in_orders = orders.filter(order_type__in=['Dine in', 'dine in']).count()
+    delivery_orders = orders.filter(order_type__in=['Delivery', 'delivery']).count()
+    take_out_orders = orders.filter(order_type__in=['pick up', 'Pick Up']).count()
+
     context = {
         'orders': orders,
         'today_date': today,
         'total_orders': total_orders,
-        'pending_orders': pending_orders,
-        'preparing_orders': preparing_orders,
-        'completed_orders': completed_orders,
         'dine_in_orders': dine_in_orders,
         'delivery_orders': delivery_orders,
         'take_out_orders': take_out_orders,
@@ -78,25 +79,20 @@ def staff_orders(request):
 def staff_reservations(request):
     today = timezone.now().date()
 
-    # Check if a specific date was requested via GET parameter
     selected_date_str = request.GET.get('date')
     selected_date = None
 
     if selected_date_str:
         try:
-            # Parse the date string (YYYY-MM-DD)
             selected_date = datetime.datetime.strptime(selected_date_str, '%Y-%m-%d').date()
-            # Filter exactly by this date
             reservations = Reservation.objects.filter(date=selected_date).order_by('time')
             view_title = f"Reservations for {selected_date.strftime('%b %d, %Y')}"
             view_subtitle = "Viewing specific date"
         except ValueError:
-            # If date format is invalid, fallback to default
             reservations = Reservation.objects.filter(date__gte=today).order_by('date', 'time')
             view_title = "Upcoming Reservations"
             view_subtitle = f"Manage dining reservations from {today.strftime('%b %d, %Y')} onwards"
     else:
-        # Default: Show today and future reservations
         reservations = Reservation.objects.filter(date__gte=today).order_by('date', 'time')
         view_title = "Upcoming Reservations"
         view_subtitle = f"Manage dining reservations from {today.strftime('%b %d, %Y')} onwards"
@@ -113,7 +109,7 @@ def staff_reservations(request):
     context = {
         'reservations': reservations,
         'today_date': today,
-        'selected_date': selected_date_str, # Pass back string for input value
+        'selected_date': selected_date_str,
         'view_title': view_title,
         'view_subtitle': view_subtitle,
         'total_reservations': total_reservations,
@@ -129,19 +125,29 @@ def staff_reservations(request):
 
 @require_POST
 def update_order_status(request, order_id):
+    """
+    Updates status ONLY for Delivery orders using the Delivery model status.
+    """
     try:
         data = json.loads(request.body)
         new_status = data.get('status')
-
         order = Order.objects.get(id=order_id)
 
-        # Validate status if necessary
-        if new_status in ['Pending', 'Preparing', 'Completed', 'Cancelled']:
-            order.status = new_status
-            order.save()
-            return JsonResponse({'success': True, 'status': new_status})
+        # Check if it is a delivery order
+        if order.order_type.lower() == 'delivery':
+            if hasattr(order, 'delivery'):
+                valid_statuses = [choice[0] for choice in Delivery.Status.choices]
+
+                if new_status in valid_statuses:
+                    order.delivery.delivery_status = new_status
+                    order.delivery.save()
+                    return JsonResponse({'success': True, 'status': new_status})
+                else:
+                    return JsonResponse({'success': False, 'error': f'Invalid delivery status. Allowed: {valid_statuses}'}, status=400)
+            else:
+                 return JsonResponse({'success': False, 'error': 'Delivery details missing for this order'}, status=400)
         else:
-            return JsonResponse({'success': False, 'error': 'Invalid status provided'}, status=400)
+            return JsonResponse({'success': False, 'error': 'Status updates are only available for Delivery orders'}, status=400)
 
     except Order.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Order not found'}, status=404)

@@ -12,12 +12,12 @@
             </div>
             <!-- Stats Section -->
             <div class="flex flex-wrap gap-3 justify-start sm:justify-end w-full sm:w-auto">
-                <!-- Pending Orders -->
+                <!-- Orders-->
                 <div class="flex items-center gap-2 bg-amber-50 text-amber-800 px-3 py-1 border rounded-lg">
-                    <p class="text-lg font-bold">{{ preparing_orders }}</p>
-                    <p class="text-sm font-medium truncate">Orders in Progress</p>
+                    <p class="text-lg font-bold">{{ active_deliveries_count }}</p>
+                    <p class="text-sm font-medium truncate">Active Delivery</p>
                 </div>
-                <!-- Upcoming Reservations -->
+                <!-- Reservations -->
                 <div class="flex items-center gap-2 bg-purple-50 text-purple-800 px-3 py-1 border rounded-lg">
                     <p class="text-lg font-bold">{{ upcoming_reservations }}</p>
                     <p class="text-sm font-medium truncate">Upcoming Reservations</p>
@@ -48,12 +48,12 @@
                                 <div class="flex justify-between items-center">
                                     <p class="text-base text-green-600">Rs {{ order.total|floatformat:2 }}</p>
                                     <div>
-                                    <span class="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-lg">{{order.order_type}}</span>
-                                    {% if order.status == 'Completed' %}<span class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-lg">Completed</span>
-                                    {% elif order.status == 'Pending' %}<span class="text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded-lg">Pending</span>
-                                    {% elif order.status == 'Preparing' %}<span class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-lg">Preparing</span>
-                                    {% elif order.status == 'Cancelled' %}<span class="text-xs text-red-600 bg-red-100 px-2 py-1 rounded-lg">Cancelled</span>
-                                    {% else %}<span class="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-lg">{{ order.status }}</span>
+                                    {% if order.order_type == 'Dine in' or order.order_type == 'dine in' %}
+                                        <div class="px-3 py-1 rounded-lg bg-yellow-100 text-xs font-medium text-yellow-800">Dine-in</div>
+                                    {% elif order.order_type == 'Pick up' or order.order_type == 'pick up' %}
+                                        <div class="px-3 py-1 rounded-lg bg-green-100 text-xs font-medium text-green-800">Takeout</div>
+                                    {% elif order.order_type == 'Delivery' or order.order_type == 'delivery' %}
+                                        <div class="px-3 py-1 rounded-lg bg-blue-100 text-xs font-medium text-blue-800">Delivery</div>
                                     {% endif %}
                                     </div>
 

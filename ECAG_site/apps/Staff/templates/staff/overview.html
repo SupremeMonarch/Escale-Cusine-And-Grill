@@ -11,26 +11,26 @@
         </div>
         <!-- Stats Section -->
         <div class="flex gap-3 justify-start sm:justify-end w-full sm:w-auto over">
-            <!-- Preparing Orders -->
+            <!-- Orders-->
             <div class=" items-center gap-2 bg-amber-50 text-amber-800 px-3 py-1 border rounded-lg shadow-sm">
                 <div class="flex items-center gap-2">
-                    <p class="text-lg font-bold">{{ orders_in_progress_count }}</p>
-                    <p class="text-sm font-medium truncate">Orders in Progress</p>
+                    <p class="text-lg font-bold">{{ todays_orders_count }}</p>
+                    <p class="text-sm font-medium truncate">Orders for Today</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <p class="text-lg font-bold">{{ pending_orders_count }}</p>
-                    <p class="text-sm font-medium truncate">Orders Pending</p>
+                    <p class="text-lg font-bold">{{ active_deliveries_count }}</p>
+                    <p class="text-sm font-medium truncate">Delivery for Today</p>
                 </div>
             </div>
-            <!-- Upcoming Reservations -->
+            <!-- Reservations -->
             <div class="items-center gap-2 bg-purple-50 text-purple-800 px-3 py-1 border rounded-lg shadow-sm">
                 <div class="flex items-center gap-2">
                     <p class="text-lg font-bold">{{ upcoming_reservations_count }}</p>
                     <p class="text-sm font-medium truncate">Upcoming Reservations</p>
                 </div>
-                <div class="flex items-center gap-2">
-                    <p class="text-lg font-bold">{{ pending_reservations_count }}</p>
-                    <p class="text-sm font-medium truncate">Pending Reservations</p>
+                 <div class="flex items-center gap-2">
+                    <p class="text-lg font-bold">{{ todays_reservations_count }}</p>
+                    <p class="text-sm font-medium truncate">Reservations Today</p>
                 </div>
             </div>
         </div>
@@ -56,11 +56,12 @@
                     <div class="flex justify-between items-center w-full pt-2">
                         <button class="text-sm font-medium text-green-600 hover:text-green-500 z-10" onclick="event.stopPropagation()">Update Status</button>
                         <div class="flex items-center gap-2">
-                            <div class="px-2 py-1 rounded-lg bg-purple-100 text-xs font-medium text-purple-800">{{ order.order_type }}</div>
-                            {% if order.status == 'Pending' %}
-                            <div class="px-2 py-1 rounded-lg bg-yellow-100 text-xs font-medium text-yellow-800">Pending</div>
-                            {% elif order.status == 'Preparing' %}
-                            <div class="px-2 py-1 rounded-lg bg-blue-100 text-xs font-medium text-blue-800">Preparing</div>
+                            {% if order.order_type == 'Dine in' or order.order_type == 'dine in' %}
+                                <div class="px-3 py-1 rounded-lg bg-yellow-100 text-xs font-medium text-yellow-800">Dine-in</div>
+                            {% elif order.order_type == 'Pick up' or order.order_type == 'pick up' %}
+                                <div class="px-3 py-1 rounded-lg bg-green-100 text-xs font-medium text-green-800">Takeout</div>
+                            {% elif order.order_type == 'Delivery' or order.order_type == 'delivery' %}
+                                <div class="px-3 py-1 rounded-lg bg-blue-100 text-xs font-medium text-blue-800">Delivery</div>
                             {% endif %}
                         </div>
                     </div>

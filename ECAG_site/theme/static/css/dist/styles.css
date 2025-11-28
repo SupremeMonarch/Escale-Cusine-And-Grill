@@ -35,11 +35,8 @@
     --color-amber-800: oklch(47.3% 0.137 46.201);
     --color-yellow-100: oklch(97.3% 0.071 103.193);
     --color-yellow-200: oklch(94.5% 0.129 101.54);
-    --color-yellow-300: oklch(90.5% 0.182 98.111);
     --color-yellow-600: oklch(68.1% 0.162 75.834);
-    --color-yellow-700: oklch(55.4% 0.135 66.442);
     --color-yellow-800: oklch(47.6% 0.114 61.907);
-    --color-yellow-900: oklch(42.1% 0.095 57.708);
     --color-green-50: oklch(98.2% 0.018 155.826);
     --color-green-100: oklch(96.2% 0.044 156.743);
     --color-green-200: oklch(92.5% 0.084 155.995);
@@ -52,6 +49,7 @@
     --color-blue-50: oklch(97% 0.014 254.604);
     --color-blue-100: oklch(93.2% 0.032 255.585);
     --color-blue-200: oklch(88.2% 0.059 254.128);
+    --color-blue-300: oklch(80.9% 0.105 251.813);
     --color-blue-500: oklch(62.3% 0.214 259.815);
     --color-blue-600: oklch(54.6% 0.245 262.881);
     --color-blue-700: oklch(48.8% 0.243 264.376);
@@ -2179,6 +2177,18 @@
   .w-64 {
     width: calc(var(--spacing) * 64);
   }
+  .w-\[1\.5px\] {
+    width: 1.5px;
+  }
+  .w-\[1px\] {
+    width: 1px;
+  }
+  .w-\[2px\] {
+    width: 2px;
+  }
+  .w-\[10px\] {
+    width: 10px;
+  }
   .w-\[15\%\] {
     width: 15%;
   }
@@ -2196,6 +2206,9 @@
   }
   .w-\[205\.77px\] {
     width: 205.77px;
+  }
+  .w-\[px\] {
+    width: px;
   }
   .w-auto {
     width: auto;
@@ -2302,6 +2315,9 @@
   }
   .grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
   .flex-col {
     flex-direction: column;
@@ -2545,9 +2561,6 @@
   }
   .border-white {
     border-color: var(--color-white);
-  }
-  .border-yellow-200 {
-    border-color: var(--color-yellow-200);
   }
   .bg-\[\#00843D\] {
     background-color: #00843D;
@@ -3086,14 +3099,14 @@
   .text-yellow-600 {
     color: var(--color-yellow-600);
   }
-  .text-yellow-700 {
-    color: var(--color-yellow-700);
-  }
   .text-yellow-800 {
     color: var(--color-yellow-800);
   }
   .uppercase {
     text-transform: uppercase;
+  }
+  .italic {
+    font-style: italic;
   }
   .placeholder-gray-400::placeholder {
     color: var(--color-gray-400);
@@ -3238,6 +3251,11 @@
     }
   }
   @media (hover: hover) {
+    .hover\:border-blue-300:hover {
+      border-color: var(--color-blue-300);
+    }
+  }
+  @media (hover: hover) {
     .hover\:border-gray-300:hover {
       border-color: var(--color-gray-300);
     }
@@ -3255,11 +3273,6 @@
   @media (hover: hover) {
     .hover\:border-orange-400:hover {
       border-color: var(--color-orange-400);
-    }
-  }
-  @media (hover: hover) {
-    .hover\:border-yellow-300:hover {
-      border-color: var(--color-yellow-300);
     }
   }
   @media (hover: hover) {
@@ -3338,11 +3351,6 @@
     }
   }
   @media (hover: hover) {
-    .hover\:bg-orange-200:hover {
-      background-color: var(--color-orange-200);
-    }
-  }
-  @media (hover: hover) {
     .hover\:bg-orange-500:hover {
       background-color: var(--color-orange-500);
     }
@@ -3383,11 +3391,6 @@
     }
   }
   @media (hover: hover) {
-    .hover\:bg-yellow-100:hover {
-      background-color: var(--color-yellow-100);
-    }
-  }
-  @media (hover: hover) {
     .hover\:bg-yellow-200:hover {
       background-color: var(--color-yellow-200);
     }
@@ -3400,6 +3403,11 @@
   @media (hover: hover) {
     .hover\:text-black:hover {
       color: var(--color-black);
+    }
+  }
+  @media (hover: hover) {
+    .hover\:text-blue-900:hover {
+      color: var(--color-blue-900);
     }
   }
   @media (hover: hover) {
@@ -3445,11 +3453,6 @@
   @media (hover: hover) {
     .hover\:text-yellow-200:hover {
       color: var(--color-yellow-200);
-    }
-  }
-  @media (hover: hover) {
-    .hover\:text-yellow-900:hover {
-      color: var(--color-yellow-900);
     }
   }
   @media (hover: hover) {
@@ -3578,11 +3581,6 @@
   @media (width >= 40rem) {
     .sm\:grid-cols-2 {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-  @media (width >= 40rem) {
-    .sm\:grid-cols-5 {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
     }
   }
   @media (width >= 40rem) {

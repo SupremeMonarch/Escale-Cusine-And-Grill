@@ -107,6 +107,7 @@
                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 date-input">
             </form>
         </div>
+
         <!-- Clear Date Button (Only visible if date selected) -->
         {% if selected_date %}
         <a href="{% url 'staff_reservations' %}" class="flex justify-center items-center h-9 w-9 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition" title="Clear Date Filter">
@@ -114,12 +115,12 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
         </a>
-        <div class="w-px h-6 bg-gray-300 mx-1"></div>
         {% endif %}
+
+        <div class="w-[1.5px] h-6 bg-gray-300 mx-1"></div>
 
         <!-- STATUS FILTERS -->
         <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-900 text-white hover:bg-gray-700 shadow-sm border" data-status="All">All ({{total_reservations}})</button>
-        <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border" data-status="pending">Pending ({{pending_count}})</button>
         <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border" data-status="confirmed">Confirmed ({{confirmed_count}})</button>
         <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border" data-status="seated">Seated ({{seated_count}})</button>
         <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border" data-status="completed">Completed ({{completed_count}})</button>
@@ -187,12 +188,7 @@
                     </svg>
                 </button>
             </div>
-            <div class="grid grid-cols-3 gap-2 sm:grid-cols-5">
-                <!-- Pending -->
-                <button onclick="updateReservationStatus('{{ res.reservation_id }}', 'pending')"
-                        class="flex justify-center items-center py-2 rounded-lg border border-yellow-200 text-yellow-700 hover:bg-yellow-100 transition-all duration-200 text-xs font-medium shadow-sm">
-                    Pending
-                </button>
+            <div class="grid grid-cols-4 gap-2">
                 <!-- Confirmed -->
                 <button onclick="updateReservationStatus('{{ res.reservation_id }}', 'confirmed')"
                         class="flex justify-center items-center py-2 rounded-lg border border-green-200 text-green-700 hover:bg-green-100 transition-all duration-200 text-xs font-medium shadow-sm">

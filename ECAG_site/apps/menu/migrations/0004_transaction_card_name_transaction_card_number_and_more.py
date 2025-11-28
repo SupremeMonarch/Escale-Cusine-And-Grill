@@ -10,29 +10,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='transaction',
-            name='card_name',
-            field=models.CharField(blank=True, max_length=100),
-        ),
-        migrations.AddField(
-            model_name='transaction',
-            name='card_number',
-            field=models.CharField(blank=True, help_text='PAN without spaces, typically 13-19 digits', max_length=19),
-        ),
-        migrations.AddField(
-            model_name='transaction',
-            name='cvv',
-            field=models.CharField(blank=True, max_length=4),
-        ),
-        migrations.AddField(
-            model_name='transaction',
-            name='exp_date',
-            field=models.DateField(blank=True, null=True),
-        ),
-        migrations.AlterField(
-            model_name='transaction',
-            name='payment_method',
-            field=models.CharField(choices=[('credit_card', 'Credit_Card'), ('juice', 'Juice'), ('mytmob', 'MyTMob'), ('paypal', 'PayPal')], default='credit_card', max_length=20),
-        ),
+
     ]
