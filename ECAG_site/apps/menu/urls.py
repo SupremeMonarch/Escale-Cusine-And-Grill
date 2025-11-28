@@ -15,4 +15,8 @@ urlpatterns = [
 
     # /menu/beverages/ → Beverages page
     path("beverages/", views.menu_beverages, name="menu_beverages"),
+    # Checkout page
+    path("checkout/", views.checkout, name="checkout"),
+    path("save_cart/", views.save_cart, name="save_cart"),
+    path("checkout/success/", views.checkout_success, name="checkout_success"),
 ]

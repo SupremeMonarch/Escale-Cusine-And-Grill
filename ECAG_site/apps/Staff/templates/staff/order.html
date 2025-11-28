@@ -1,5 +1,4 @@
 {% extends "staff/staff_base.html" %}
-
 {% block title %}Staff | Today's Orders{% endblock %}
 
 {% block styles %}
@@ -27,13 +26,11 @@
     }
 
     @keyframes highlight-fade {
-        /* Hold the highlight state for the first 50% (1 second) */
         0%, 50% {
             background-color:#fff7ed; /* orange-50 */
             border-color: #f54900;; /* orange-600 */
             box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
         }
-        /* Fade back to original styles by the end */
         100% {
             background-color: white;
             border-color: #e5e7eb;
@@ -41,19 +38,14 @@
         }
     }
 
-    /* Receipt Specific Styles */
     .receipt-font {
         font-family: 'Courier New', Courier, monospace;
     }
 
-    /* Custom Backdrop Class */
     .modal-backdrop {
         background-color: rgba(0, 0, 0, 0.2);
-        /*backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);*/
     }
 
-    /* Slide up animation for status modal */
     @keyframes slide-up {
         from { transform: translateY(10px); opacity: 0; }
         to { transform: translateY(0); opacity: 1; }
@@ -72,9 +64,9 @@
     <!-- Hidden fields to store dynamic filter counts -->
     <div id="filter-counts" class="hidden"
         data-total="{{ total_orders }}"
-        data-pending="{{ pending_orders }}"
-        data-preparing="{{ preparing_orders }}"
-        data-completed="{{ completed_orders }}">
+        data-dinein="{{ dine_in_orders }}"
+        data-delivery="{{ delivery_orders }}"
+        data-takeout="{{ take_out_orders }}">
     </div>
 
     <header class="flex justify-between items-center w-full w-full h-14 mx-auto mb-6 pl-4 pr-4 pt-4">
@@ -89,41 +81,24 @@
     </header>
 
     <!-- Filter Controls Container -->
-    <div class="mb-6 space-y-4  pl-4">
-        <div id="status-filters">
-
-            <div class="filter-group" data-filter-group="status">
-                <button
-                    id="filter-all-status"
-                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-900 text-white hover:bg-gray-700 shadow-sm border"
-                    data-filter-value="all" data-filter-group="status">All ({{total_orders}})</button>
-                <button
-                    id="filter-Pending-status"
-                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border"
-                    data-filter-value="Pending" data-filter-group="status">Pending ({{pending_orders}})</button>
-                <button
-                    id="filter-Preparing-status"
-                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border"
-                    data-filter-value="Preparing" data-filter-group="status">Preparing ({{preparing_orders}})</button>
-                <button
-                    id="filter-Completed-status"
-                    class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border"
-                    data-filter-value="Completed" data-filter-group="status">Completed ({{completed_orders}})</button>
-            </div>
-        </div>
+    <!-- Simplified: Removed Status Filters, Kept only Type Filters -->
+    <div class="mb-6 space-y-4 pl-4">
         <div id="type-filters">
-
             <div class="filter-group" data-filter-group="type">
                 <button
+                    id="filter-all"
                     class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-900 text-white hover:bg-gray-700 shadow-sm border"
                     data-filter-value="all" data-filter-group="type">All ({{total_orders}})</button>
                 <button
+                    id="filter-dinein"
                     class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border"
                     data-filter-value="Dine-in" data-filter-group="type">Dine-in ({{dine_in_orders}})</button>
                 <button
+                    id="filter-delivery"
                     class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border"
                     data-filter-value="Delivery" data-filter-group="type">Delivery ({{delivery_orders}})</button>
                 <button
+                    id="filter-takeout"
                     class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border"
                     data-filter-value="Takeout" data-filter-group="type">Takeout ({{take_out_orders}})</button>
             </div>
@@ -135,25 +110,38 @@
         {% for order in orders %}
         <div id="order-{{ order.order_id_str }}"
              class="order-card relative flex flex-col w-full p-6 rounded-lg bg-white border border-gray-200 shadow-sm scroll-mt-24 transition-colors duration-300 overflow-hidden"
-            data-status="{{ order.status }}" data-type="{{ order.order_type }}" data-order-db-id="{{ order.id }}">
-            <div
-                class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-gray-200 px-4 gap-2">
+             data-type="{{ order.order_type }}"> <!-- Removed data-status -->
+
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-gray-200 px-4 gap-2">
                 <div class="flex flex-col justify-start items-start">
-                    <p class="text-lg font-semibold text-gray-900 ">#{{ order.order_id_str }}</p>
+                    <p class="text-base font-semibold text-gray-900 ">#{{ order.order_id_str }}</p>
                     <p class="text-sm text-left text-gray-600">{{ order.order_date|date:"F d, Y \a\t g:i A" }}</p>
                 </div>
 
                 <div class="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
-                    <div class="px-3 py-1 rounded-lg bg-gray-100 text-sm font-medium text-gray-800">{{ order.order_type }}</div>
+                    {% if order.order_type == 'Dine in' or order.order_type == 'dine in' %}
+                        <div class="px-3 py-1 rounded-lg bg-yellow-100 text-sm font-medium text-yellow-800">Dine-in</div>
+                    {% elif order.order_type == 'Pick up' or order.order_type == 'pick up' %}
+                        <div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Takeout</div>
+                    {% elif order.order_type == 'Delivery' or order.order_type == 'delivery' %}
+                        <div class="px-3 py-1 rounded-lg bg-blue-100 text-sm font-medium text-blue-800">Delivery</div>
+                    {% endif %}
 
-                    <!-- Status Badge Container -->
+                    <!-- Only show status badge for Delivery -->
+                    {% if order.order_type == 'Delivery' or order.order_type == 'delivery' %}
                     <div class="status-badge-container">
-                        {% if order.status == 'Pending' %}<div class="px-3 py-1 rounded-lg bg-yellow-100 text-sm font-medium text-yellow-800">Pending</div>
-                        {% elif order.status == 'Preparing' %}<div class="px-3 py-1 rounded-lg bg-orange-100 text-sm font-medium text-orange-800">Preparing</div>
-                        {% elif order.status == 'Completed' %}<div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Completed</div>
-                        {% else %}<div class="px-3 py-1 rounded-lg bg-red-100 text-sm font-medium text-red-800">{{order.status }}</div>
+                        {% if order.delivery.delivery_status == 'preparing_order' %}
+                            <div class="px-3 py-1 rounded-lg bg-orange-100 text-sm font-medium text-orange-800">Preparing Order</div>
+                        {% elif order.delivery.delivery_status == 'in_progress' %}
+                            <div class="px-3 py-1 rounded-lg bg-blue-100 text-sm font-medium text-blue-800">Out for Delivery</div>
+                        {% elif order.delivery.delivery_status == 'delivered' %}
+                            <div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Delivered</div>
+                        {% else %}
+                             <!-- Fallback for legacy data -->
+                            <div class="px-3 py-1 rounded-lg bg-gray-100 text-sm font-medium text-gray-800">{{ order.delivery.get_delivery_status_display }}</div>
                         {% endif %}
                     </div>
+                    {% endif %}
                 </div>
 
             </div>
@@ -161,11 +149,34 @@
                 <p class="text-base font-medium text-gray-900 pb-2 px-4">Order Items:</p>
                 <div class="flex flex-col gap-1">
                     {% for item in order.items.all %}
-                    <div class="flex justify-between items-center px-6">
-                        <p class="text-sm text-gray-700">{{ item.quantity }}x {{ item.item.name }}</p>
-                        <p class="text-sm font-medium text-gray-900">Rs {{ item.get_cost|floatformat:2 }}</p>
+                    <div class="flex justify-between items-start px-6">
+                        <div class="flex flex-col">
+                            <p class="text-sm text-gray-700">{{ item.quantity }}x {{ item.item.name }}</p>
+                            {% if item.toppings_list %}
+                                <div class="flex flex-col">
+                                    {% for topping in item.toppings_list %}
+                                        <div class="flex items-center gap-2 pl-4">
+                                            <span class="text-xs text-gray-500 italic">+ {{ topping.name }}</span>
+                                            <span class="text-xs text-gray-400">(Rs {{ topping.price|floatformat:0 }})</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <p class="text-sm font-medium text-gray-900">Rs {{ item.subtotal|floatformat:2 }}</p>
                     </div>
                     {% endfor %}
+                    {% if order.order_type == 'pick up' or order.order_type == 'Takeout' %}
+                    <div  class="flex justify-between items-start px-6">
+                        <p class="text-sm text-gray-700">Takeout Fee: </p>
+                        <p class="text-sm font-medium text-gray-900">Rs {{ order.takeout_fee|floatformat:2 }}</p>
+                    </div>
+                    {% elif order.order_type == 'Delivery' or order.order_type == 'delivery' %}
+                    <div  class="flex justify-between items-start px-6">
+                        <p class="text-sm text-gray-700">Delivery Fee: </p>
+                        <p class="text-sm font-medium text-gray-900">Rs {{ order.delivery_fee|floatformat:2 }}</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             {% if order.order_type == 'Delivery' and order.user.profile.street_address %}
@@ -180,25 +191,28 @@
             <!-- Card Footer Actions -->
             <div class="flex flex-wrap justify-between items-center w-full pt-4 gap-3 border-t border-gray-200 pr-4">
                 <div class="flex gap-3">
-                    <!-- Update Status Button -->
-                    <button onclick="toggleStatusModal('status-overlay-{{ order.order_id_str }}', '{{ order.status }}')"
+                    <!-- Update Status Button (ONLY FOR DELIVERY) -->
+                    {% if order.order_type == 'Delivery' or order.order_type == 'delivery' %}
+                    <button onclick="toggleStatusModal('status-overlay-{{ order.order_id_str }}', '{{ order.delivery.delivery_status }}')"
                         class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-green-600 text-sm font-medium text-white hover:bg-green-700"
-                        data-current-status="{{ order.status }}">
-                        Update Status</button>
+                        data-current-status="{{ order.delivery.delivery_status }}">
+                        Update Delivery Status</button>
+                    {% endif %}
 
-                    <!-- View Receipt Button -->
+                    <!-- View Receipt Button (FOR ALL) -->
                     <button onclick="openReceiptModal('receipt-modal-{{ order.order_id_str }}')"
                         class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors">
                         View Receipt</button>
                 </div>
-                <p class="text-xl font-bold text-right text-gray-900">Rs {{ order.get_total_cost|floatformat:2 }}</p>
+                <p class="text-xl font-bold text-right text-gray-900">Rs {{ order.total|floatformat:2 }}</p>
             </div>
 
-            <!-- STATUS UPDATE OVERLAY -->
+            <!-- STATUS UPDATE OVERLAY (ONLY FOR DELIVERY) -->
+            {% if order.order_type == 'Delivery' or order.order_type == 'delivery' %}
             <div id="status-overlay-{{ order.order_id_str }}"
                  class="hidden absolute bottom-0 left-0 w-full bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-10 p-4 animate-slide-up">
                 <div class="flex justify-between items-center mb-3">
-                    <p class="text-sm font-semibold text-gray-700">Update Order Status</p>
+                    <p class="text-sm font-semibold text-gray-700">Update Delivery Status</p>
                     <button onclick="toggleStatusModal('status-overlay-{{ order.order_id_str }}')" class="text-gray-400 hover:text-gray-600">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -206,23 +220,24 @@
                     </button>
                 </div>
                 <div class="grid grid-cols-3 gap-3">
-                    <!-- Pending Button -->
-                    <button onclick="updateOrderStatus('{{ order.id }}', 'Pending', '{{ order.order_id_str }}')"
-                            class="flex justify-center items-center py-2 rounded-lg border border-yellow-200 text-yellow-700 hover:bg-yellow-100 hover:border-yellow-300 hover:text-yellow-900 transition-all duration-200 text-sm font-medium shadow-sm">
-                        Pending
-                    </button>
-                    <!-- Preparing Button -->
-                    <button onclick="updateOrderStatus('{{ order.id }}', 'Preparing', '{{ order.order_id_str }}')"
+                    <!-- Preparing Order Button -->
+                    <button onclick="updateOrderStatus('{{ order.id }}', 'preparing_order', '{{ order.order_id_str }}')"
                             class="flex justify-center items-center py-2 rounded-lg border border-orange-200 text-orange-700 hover:bg-orange-100 hover:border-orange-300 hover:text-orange-900 transition-all duration-200 text-sm font-medium shadow-sm">
-                        Preparing
+                        Preparing Order
                     </button>
-                    <!-- Completed Button -->
-                    <button onclick="updateOrderStatus('{{ order.id }}', 'Completed', '{{ order.order_id_str }}')"
+                    <!-- In Progress (Out for Delivery) Button -->
+                    <button onclick="updateOrderStatus('{{ order.id }}', 'in_progress', '{{ order.order_id_str }}')"
+                            class="flex justify-center items-center py-2 rounded-lg border border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-900 transition-all duration-200 text-sm font-medium shadow-sm">
+                        Out for Delivery
+                    </button>
+                    <!-- Delivered Button -->
+                    <button onclick="updateOrderStatus('{{ order.id }}', 'delivered', '{{ order.order_id_str }}')"
                             class="flex justify-center items-center py-2 rounded-lg border border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 hover:text-green-900 transition-all duration-200 text-sm font-medium shadow-sm">
-                        Completed
+                        Delivered
                     </button>
                 </div>
             </div>
+            {% endif %}
         </div>
 
         <!-- RECEIPT MODAL -->
@@ -241,21 +256,45 @@
                         <span>Time: {{ order.order_date|time:"H:i" }}</span>
                     </div>
                     <div class="text-xs text-gray-600 border-b border-dashed border-gray-300 pb-4">
-                        <p>Customer: {{ order.user.get_full_name|default:order.user.username }}</p>
+                        <p>Customer:</p>
                         <p>Type: {{ order.order_type }}</p>
                     </div>
                     <div class="space-y-2">
                         {% for item in order.items.all %}
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-800">{{ item.quantity }} x {{ item.item.name }}</span>
-                            <span class="text-gray-900 font-medium">{{ item.get_cost|floatformat:2 }}</span>
+                    <div class="flex justify-between items-start px-6">
+                        <div class="flex flex-col">
+                            <p class="text-sm text-gray-700">{{ item.quantity }}x {{ item.item.name }}</p>
+                            <!-- Toppings Line by Line with Price -->
+                            {% if item.toppings_list %}
+                                <div class="flex flex-col">
+                                    {% for topping in item.toppings_list %}
+                                        <div class="flex items-center gap-2 pl-4">
+                                            <span class="text-xs text-gray-500 italic">+ {{ topping.name }}</span>
+                                            <span class="text-xs text-gray-400">(Rs {{ topping.price|floatformat:0 }})</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
-                        {% endfor %}
+                        <p class="text-sm font-medium text-gray-900">Rs {{ item.subtotal|floatformat:2 }}</p>
+                    </div>
+                    {% endfor %}
+                    {% if order.order_type == 'pick up' %}
+                    <div  class="flex justify-between items-start px-6">
+                        <p class="text-sm text-gray-700">Takeout Fee: </p>
+                        <p class="text-sm font-medium text-gray-900">Rs {{ order.takeout_fee|floatformat:2 }}</p>
+                    </div>
+                    {% elif order.order_type == 'delivery' or order.order_type == 'Delivery' %}
+                    <div  class="flex justify-between items-start px-6">
+                        <p class="text-sm text-gray-700">Delivery Fee: </p>
+                        <p class="text-sm font-medium text-gray-900">Rs {{ order.delivery_fee|floatformat:2 }}</p>
+                    </div>
+                    {% endif %}
                     </div>
                     <div class="border-t border-dashed border-gray-300 pt-4 mt-4 space-y-1">
                         <div class="flex justify-between text-base font-bold text-gray-900 pt-2">
                             <span>TOTAL</span>
-                            <span>Rs {{ order.get_total_cost|floatformat:2 }}</span>
+                            <span>Rs {{ order.total|floatformat:2 }}</span>
                         </div>
                     </div>
                 </div>
@@ -283,16 +322,16 @@
 {% block scripts %}
 <script>
     // Global object to manage counts dynamically
-    const statusCounts = {};
+    const typeCounts = {};
 
     // --- INITIALIZATION ---
     document.addEventListener('DOMContentLoaded', () => {
         const countsData = document.getElementById('filter-counts');
         if (countsData) {
-            statusCounts.all = parseInt(countsData.getAttribute('data-total')) || 0;
-            statusCounts.Pending = parseInt(countsData.getAttribute('data-pending')) || 0;
-            statusCounts.Preparing = parseInt(countsData.getAttribute('data-preparing')) || 0;
-            statusCounts.Completed = parseInt(countsData.getAttribute('data-completed')) || 0;
+            typeCounts.all = parseInt(countsData.getAttribute('data-total')) || 0;
+            typeCounts['Dine-in'] = parseInt(countsData.getAttribute('data-dinein')) || 0;
+            typeCounts['Delivery'] = parseInt(countsData.getAttribute('data-delivery')) || 0;
+            typeCounts['Takeout'] = parseInt(countsData.getAttribute('data-takeout')) || 0;
         }
 
         // Initialize filters on load
@@ -302,13 +341,7 @@
     // --- AJAX Status Update Function ---
     async function updateOrderStatus(dbOrderId, newStatus, domOrderId) {
         const card = document.getElementById(`order-${domOrderId}`);
-        const oldStatus = card ? card.getAttribute('data-status') : null;
-
-        if (!oldStatus || oldStatus === newStatus) {
-            // No status change needed or card not found.
-            toggleStatusModal(`status-overlay-${domOrderId}`);
-            return;
-        }
+        // For delivery orders, we are tracking delivery_status, not card data-status attribute anymore
 
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
@@ -328,16 +361,12 @@
                 // 1. Close the modal
                 toggleStatusModal(`status-overlay-${domOrderId}`);
 
-                // 2. Update the DOM (badge and data attribute)
+                // 2. Update the DOM (badge)
                 updateOrderCardUI(domOrderId, newStatus);
 
-                // 3. Update the filter counts dynamically (the new function)
-                refreshFilterCounts(oldStatus, newStatus);
+                // We don't need to refresh filters anymore as we only filter by Type, not Status.
 
-                // 4. Re-run filters (to hide card if current filter doesn't match)
-                filterOrders();
-
-                // 5. Update the Update Status button's data attribute for future checks
+                // 3. Update the Update Status button's data attribute
                 const updateButton = card.querySelector('button[data-current-status]');
                 if (updateButton) {
                      updateButton.setAttribute('data-current-status', newStatus);
@@ -352,50 +381,21 @@
         }
     }
 
-    /**
-     * Updates the text of the status filter buttons based on the change.
-     * @param {string} oldStatus - The status before the update (e.g., 'Pending').
-     * @param {string} newStatus - The status after the update (e.g., 'Preparing').
-     */
-    function refreshFilterCounts(oldStatus, newStatus) {
-        if (oldStatus in statusCounts) {
-            statusCounts[oldStatus]--;
-        }
-        if (newStatus in statusCounts) {
-            statusCounts[newStatus]++;
-        }
-
-        // Helper function to update button text
-        function updateButtonText(status) {
-            const buttonId = `filter-${status}-status`;
-            const button = document.getElementById(buttonId);
-            if (button && status in statusCounts) {
-                button.textContent = `${status} (${statusCounts[status]})`;
-            }
-        }
-
-        // Update the two relevant status buttons
-        updateButtonText(oldStatus);
-        updateButtonText(newStatus);
-    }
 
     function updateOrderCardUI(domOrderId, status) {
         const card = document.getElementById(`order-${domOrderId}`);
         if (!card) return;
 
-        // Update data attribute
-        card.setAttribute('data-status', status);
-
-        // Update badge
+        // Update badge (Only for delivery orders)
         const badgeContainer = card.querySelector('.status-badge-container');
         if (badgeContainer) {
             let badgeHtml = '';
-            if (status === 'Pending') {
-                badgeHtml = '<div class="px-3 py-1 rounded-lg bg-yellow-100 text-sm font-medium text-yellow-800">Pending</div>';
-            } else if (status === 'Preparing') {
-                badgeHtml = '<div class="px-3 py-1 rounded-lg bg-orange-100 text-sm font-medium text-orange-800">Preparing</div>';
-            } else if (status === 'Completed') {
-                badgeHtml = '<div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Completed</div>';
+            if (status === 'preparing_order') {
+                badgeHtml = '<div class="px-3 py-1 rounded-lg bg-orange-100 text-sm font-medium text-orange-800">Preparing Order</div>';
+            } else if (status === 'in_progress') {
+                badgeHtml = '<div class="px-3 py-1 rounded-lg bg-blue-100 text-sm font-medium text-blue-800">Out for Delivery</div>';
+            } else if (status === 'delivered') {
+                badgeHtml = '<div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Delivered</div>';
             } else {
                 badgeHtml = `<div class="px-3 py-1 rounded-lg bg-gray-100 text-sm font-medium text-gray-800">${status}</div>`;
             }
@@ -406,8 +406,6 @@
     // --- Status Overlay Function ---
     function toggleStatusModal(overlayId, currentStatus) {
         const overlay = document.getElementById(overlayId);
-        const updateButton = overlay ? overlay.parentNode.querySelector('button[data-current-status]') : null;
-
         if (overlay) {
             overlay.classList.toggle('hidden');
         }
@@ -442,7 +440,6 @@
     // Close on Escape key
     document.addEventListener('keydown', function(event) {
         if (event.key === "Escape") {
-            // Close receipts
             const openReceipts = document.querySelectorAll('[id^="receipt-modal-"]:not(.hidden)');
             openReceipts.forEach(modal => {
                 modal.classList.add('hidden');
@@ -450,7 +447,6 @@
             document.body.style.overflow = '';
             document.body.style.paddingRight = '';
 
-            // Close status overlays
             const openOverlays = document.querySelectorAll('[id^="status-overlay-"]:not(.hidden)');
             openOverlays.forEach(overlay => {
                 overlay.classList.add('hidden');
@@ -459,17 +455,13 @@
     });
 
     // --- Filter functions ---
-    let activeStatus = 'all';
     let activeType = 'all';
 
     const activeStyles = {
         all: ["bg-gray-900", "text-white", "hover:bg-gray-700"],
-        Pending: ["bg-yellow-100", "text-yellow-800", "hover:bg-yellow-200"],
-        Preparing: ["bg-orange-100", "text-orange-800", "hover:bg-orange-200"],
-        Completed: ["bg-green-100", "text-green-800", "hover:bg-green-200"],
-        'Dine-in': ["bg-gray-900", "text-white", "hover:bg-gray-700"],
-        Delivery: ["bg-gray-900", "text-white", "hover:bg-gray-700"],
-        Takeout: ["bg-gray-900", "text-white", "hover:bg-gray-700"],
+        'Dine-in': ["bg-yellow-100", "text-yellow-800", "hover:bg-yellow-200"],
+        Delivery: ["bg-blue-100", "text-blue-800", "hover:bg-blue-200"],
+        Takeout: ["bg-green-100", "text-green-800", "hover:bg-green-200"],
     };
 
     const inactiveStyles = ["bg-gray-100", "text-gray-700", "hover:bg-gray-200"];
@@ -483,11 +475,23 @@
     function filterOrders() {
         let visibleCount = 0;
         orderCards.forEach(card => {
-            const cardStatus = card.getAttribute('data-status');
             const cardType = card.getAttribute('data-type');
-            const statusMatch = activeStatus === 'all' || cardStatus === activeStatus;
-            const typeMatch = activeType === 'all' || cardType === activeType;
-            if (statusMatch && typeMatch) {
+
+            // Loose matching for types (e.g., 'pick up' from DB vs 'Takeout' from filter)
+            let typeMatch = false;
+
+            if (activeType === 'all') {
+                typeMatch = true;
+            } else if (activeType === 'Takeout') {
+                // Handle various potential DB values for Takeout
+                typeMatch = cardType === 'Takeout' || cardType === 'pick up' || cardType === 'Pick Up';
+            } else if (activeType === 'Delivery') {
+                typeMatch = cardType === 'Delivery' || cardType === 'delivery';
+            } else if (activeType === 'Dine-in') {
+                typeMatch = cardType === 'Dine-in' || cardType === 'dine in';
+            }
+
+            if (typeMatch) {
                 card.classList.remove('hidden-card');
                 visibleCount++;
             } else {
@@ -495,8 +499,6 @@
             }
         });
 
-        // The totalCountElement currently displays the visible count based on filters.
-        // It does NOT display the overall total_orders count. This is intended.
         totalCountElement.textContent = visibleCount;
     }
 
@@ -504,11 +506,11 @@
         const button = event.currentTarget;
         const group = button.getAttribute('data-filter-group');
         const value = button.getAttribute('data-filter-value');
-        if (group === 'status') {
-            activeStatus = value;
-        } else if (group === 'type') {
+
+        if (group === 'type') {
             activeType = value;
         }
+
         const groupButtons = document.querySelectorAll(`.filter-button[data-filter-group="${group}"]`);
         groupButtons.forEach(btn => {
             const btnValue = btn.getAttribute('data-filter-value');

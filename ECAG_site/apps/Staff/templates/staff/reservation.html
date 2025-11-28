@@ -59,19 +59,21 @@
         data-cancelled="{{ cancelled_count }}">
     </div>
 
-    <header class="flex justify-between items-center w-full w-full h-14 mx-auto mb-6 pl-4 pr-4 pt-4">
+    <header class="flex justify-between items-center w-full w-full h-14 mx-auto mb-6 pl-3 pr-4 pt-4">
         <div class="flex flex-col justify-start items-start h-auto w-full sm:w-auto pl-2">
             <h1 class="text-xl font-bold text-gray-900">{{ view_title }}</h1>
             <p class="text-xs text-gray-600">{{ view_subtitle }}</p>
         </div>
-        <div class="flex flex-col justify-start items-end">
-            <p id="total-count-display" class="text-2xl font-bold text-right text-green-600">{{ total_reservations }}</p>
-            <p class="text-sm text-right text-gray-600">Reservations</p>
-      </div>
+        <div class=" items-center gap-2 bg-purple-50 text-purple-800 px-4 py-1 border rounded-lg shadow-sm">
+            <div class="flex items-center gap-2">
+                <p id="total-count-display" class="text-xl font-bold">{{ total_reservations }}</p>
+                <p class="text-base font-medium truncate">Reservations</p>
+            </div>
+        </div>
     </header>
 
     <!-- Filter Buttons Container -->
-    <div class="flex flex-wrap justify-start gap-2 items-center w-full mb-5 pl-3">
+    <div class="flex flex-wrap justify-start gap-2 items-center w-full mb-5 px-3">
 
         <!-- DATE FILTER -->
         <div class="relative group">
@@ -105,6 +107,7 @@
                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 date-input">
             </form>
         </div>
+
         <!-- Clear Date Button (Only visible if date selected) -->
         {% if selected_date %}
         <a href="{% url 'staff_reservations' %}" class="flex justify-center items-center h-9 w-9 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition" title="Clear Date Filter">
@@ -112,16 +115,19 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
         </a>
-        <div class="w-px h-6 bg-gray-300 mx-1"></div>
         {% endif %}
+
+        <div class="w-[1.5px] h-6 bg-gray-300 mx-1"></div>
 
         <!-- STATUS FILTERS -->
         <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-900 text-white hover:bg-gray-700 shadow-sm border" data-status="All">All ({{total_reservations}})</button>
-        <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border" data-status="pending">Pending ({{pending_count}})</button>
         <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border" data-status="confirmed">Confirmed ({{confirmed_count}})</button>
         <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border" data-status="seated">Seated ({{seated_count}})</button>
         <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border" data-status="completed">Completed ({{completed_count}})</button>
         <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border" data-status="cancelled">Cancelled ({{cancelled_count}})</button>
+
+
+
     </div>
 
     <!-- Reservation Cards List -->
@@ -134,7 +140,6 @@
 
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center self-stretch pb-4 gap-3 border-b border-gray-200">
             <p class="text-base font-semibold text-gray-900">#RES-{{ res.reservation_id }} - {{ res.full_name }}</p>
-            <div class="flex items-center gap-2 text-sm text-gray-500">{{res.date|date:"F d"}} {{ res.time|time:"g:i A" }}</div>
 
             <!-- Status Badge Container -->
             <div class="status-badge-container">
@@ -147,13 +152,22 @@
                 {% endif %}
             </div>
         </div>
-        <div class="grid grid-cols-2 gap-4 py-4 border-b border-gray-200 w-full">
+        <div class="grid grid-cols-3 gap-4 py-4 border-b border-gray-200 w-full">
             <div class="flex flex-col items-center"><span class="text-xs font-medium text-gray-600 mb-1">Guests</span><p class="text-ms font-semibold text-gray-900 w-full flex justify-center">{{ res.guest_count }} people</p></div>
             <div class="flex flex-col items-center"><span class="text-xs font-medium text-gray-600 mb-1">Table</span><p class="text-ms font-semibold text-gray-900 w-full flex justify-center">{{ res.table_id.table_number|default:"N/A" }}</p></div>
+            <div class="flex flex-col items-center"><span class="text-xs font-medium text-gray-600 mb-1">{{res.date|date:"F d"}}</span><p class="text-ms font-semibold text-gray-900 w-full flex justify-center">{{ res.time|time:"g:i A" }}</p></div>
         </div>
-        <div class="flex flex-wrap justify-between items-center self-stretch pt-4 gap-4">
+        {% if res.special_requests %}
+            <div class="w-full mt-4">
+                <div class="p-3 rounded-lg bg-amber-50">
+                    <p class="text-sm font-medium text-amber-800 pb-1">Special Requests:</p>
+                    <p class="text-sm text-amber-700">{{ res.special_requests }}</p>
+                </div>
+            </div>
+        {% endif %}
+        <div class="flex flex-wrap justify-start items-center self-stretch pt-4 gap-4 ">
             <div class="flex flex-wrap items-center gap-3">
-                {% if res.status != 'cancelled' %}
+                {% if res.status %}
                 <!-- Trigger Overlay Button -->
                 <button onclick="toggleStatusModal('status-overlay-{{ res.reservation_id }}')"
                         class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-sm font-medium text-white">
@@ -174,12 +188,7 @@
                     </svg>
                 </button>
             </div>
-            <div class="grid grid-cols-3 gap-2 sm:grid-cols-5">
-                <!-- Pending -->
-                <button onclick="updateReservationStatus('{{ res.reservation_id }}', 'pending')"
-                        class="flex justify-center items-center py-2 rounded-lg border border-yellow-200 text-yellow-700 hover:bg-yellow-100 transition-all duration-200 text-xs font-medium shadow-sm">
-                    Pending
-                </button>
+            <div class="grid grid-cols-4 gap-2">
                 <!-- Confirmed -->
                 <button onclick="updateReservationStatus('{{ res.reservation_id }}', 'confirmed')"
                         class="flex justify-center items-center py-2 rounded-lg border border-green-200 text-green-700 hover:bg-green-100 transition-all duration-200 text-xs font-medium shadow-sm">

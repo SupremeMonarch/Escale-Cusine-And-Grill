@@ -26,7 +26,6 @@
     /* Modal Backdrop */
     .modal-backdrop {
         background-color: rgba(0, 0, 0, 0.5);
-        /*backdrop-filter: blur(4px);*/
     }
 
     /* Modal Animation */
@@ -41,7 +40,7 @@
 {% endblock styles %}
 
 {% block dashboard_content %}
-    <div class="p-4 sm:p-6 lg:p-8 w-full max-w-[850px] mx-auto space-y-6">
+    <div class="p-4 sm:p-6 lg:p-8 w-full max-w-[900px] mx-auto space-y-6">
         {% csrf_token %}
 
         <header class="flex justify-between items-center w-full w-full h-14 mx-auto mb-6 pl-4 pr-4 pt-4">
@@ -50,13 +49,12 @@
                 <p class="text-xs text-gray-600">Track and manage your food orders</p>
             </div>
 
-            <!-- Filter Buttons -->
+            <!-- Filter Buttons: Switched from Status to Type -->
             <div class="flex flex-wrap gap-2 justify-start sm:justify-end truncate">
-                <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition duration-150 ease-in-out shadow-sm border" data-status="All" >All</button>
-                <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition duration-150 ease-in-out shadow-sm border" data-status="Pending" >Pending</button>
-                <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition duration-150 ease-in-out shadow-sm border" data-status="Preparing" >Preparing</button>
-                <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition duration-150 ease-in-out shadow-sm border" data-status="Completed" >Completed</button>
-                <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition duration-150 ease-in-out shadow-sm border" data-status="Cancelled" >Cancelled</button>
+                <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition duration-150 ease-in-out shadow-sm border" data-filter="All" >All</button>
+                <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition duration-150 ease-in-out shadow-sm border" data-filter="Dine-in" >Dine-in</button>
+                <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition duration-150 ease-in-out shadow-sm border" data-filter="Delivery" >Delivery</button>
+                <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition duration-150 ease-in-out shadow-sm border" data-filter="Takeout" >Takeout</button>
             </div>
         </header>
 
@@ -65,7 +63,7 @@
             {% for order in orders %}
             <div id="order-{{ order.order_id_str }}"
                  class="order-card flex flex-col w-full max-w-full p-6 rounded-xl bg-white border border-gray-200 shadow-sm scroll-mt-24 transition-colors duration-300"
-                 data-status="{{ order.status }}"
+                 data-type="{{ order.order_type }}"
                  data-order-id="{{ order.id }}">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-gray-200 pl-4 pr-4 gap-2">
                     <div class="flex flex-col justify-start items-start">
@@ -73,44 +71,147 @@
                         <p class="text-sm text-gray-500">{{ order.order_date|date:"F d, Y \a\t g:i A" }}</p>
                     </div>
                     <div class="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
-                        <div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-gray-100"><p class="text-sm text-gray-700">{{ order.order_type }}</p></div>
 
-                        <!-- Status Badge Container -->
+                        <!-- Order Type -->
+                        {% if order.order_type == 'dine in' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-yellow-100"><p class="text-sm font-medium text-yellow-800">Dine-in</p></div>
+                        {% elif order.order_type == 'delivery' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-blue-100"><p class="text-sm font-medium text-blue-800">Delivery</p></div>
+                        {% elif order.order_type == 'pick up' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-green-100"><p class="text-sm font-medium text-green-800">Takeout</p></div>
+                        {% else %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-gray-100"><p class="text-sm font-medium text-gray-800">{{ order_type_display }}</p></div>
+                        {% endif %}
+
+                        <!-- Delivery Status (Only for Delivery) -->
+                        {% if order.order_type == 'delivery' %}
                         <div class="status-badge-container">
-                            {% if order.status == 'Pending' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-yellow-100"><p class="text-sm font-medium text-yellow-800">Pending</p></div>
-                            {% elif order.status == 'Preparing' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-blue-100"><p class="text-sm font-medium text-blue-800">Preparing</p></div>
-                            {% elif order.status == 'Completed' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-green-100"><p class="text-sm font-medium text-green-800">Completed</p></div>
-                            {% elif order.status == 'Cancelled' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-red-100"><p class="text-sm font-medium text-red-800">Cancelled</p></div>
-                            {% else %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-gray-100"><p class="text-sm font-medium text-gray-800">{{ order.status }}</p></div>
+                            {% if order.delivery.delivery_status == 'preparing_order' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-orange-100"><p class="text-sm font-medium text-orange-800">Preparing</p></div>
+                            {% elif order.delivery.delivery_status == 'in_progress' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-blue-100"><p class="text-sm font-medium text-blue-800">Out for Delivery</p></div>
+                            {% elif order.delivery.delivery_status == 'delivered' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-green-100"><p class="text-sm font-medium text-green-800">Delivered</p></div>
                             {% endif %}
                         </div>
+                        {% endif %}
+
+                        <!-- Cancelled Badge (Global status check)
+                         {% if order.status == 'Cancelled' %}
+                            <div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-red-100"><p class="text-sm font-medium text-red-800">Cancelled</p></div>
+                        {% endif %}-->
+
                     </div>
                 </div>
                 <div class="flex flex-col pt-4">
 
                     <div class="flex flex-col space-y-2 max-h-40 overflow-y-auto">
-                        {% for item in order.items.all %}
-                            <div class="flex justify-between items-center px-6">
-                                <p class="text-sm text-left text-gray-700">{{ item.quantity }}x {{ item.item.name }}</p>
-                                <p class="text-sm font-medium text-left text-gray-900">Rs {{ item.get_cost|floatformat:2 }}</p>
-                            </div>
-                        {% endfor %}
+                    {% for item in order.items.all %}
+                    <div class="flex justify-between items-start px-6">
+                        <div class="flex flex-col">
+                            <p class="text-sm text-gray-700">{{ item.quantity }}x {{ item.item.name }}</p>
+                            {% if item.toppings_list %}
+                                <div class="flex flex-col">
+                                    {% for topping in item.toppings_list %}
+                                        <div class="flex items-center gap-2 pl-4">
+                                            <span class="text-xs text-gray-500 italic">+ {{ topping.name }}</span>
+                                            <span class="text-xs text-gray-400">(Rs {{ topping.price|floatformat:0 }})</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <p class="text-sm font-medium text-gray-900">Rs {{ item.subtotal|floatformat:2 }}</p>
+                    </div>
+                    {% endfor %}
+                    {% if order.order_type == 'pick up' or order.order_type == 'Takeout' %}
+                    <div  class="flex justify-between items-start px-6">
+                        <p class="text-sm text-gray-700">Takeout Fee: </p>
+                        <p class="text-sm font-medium text-gray-900">Rs {{ order.takeout_fee|floatformat:2 }}</p>
+                    </div>
+                    {% elif order.order_type == 'Delivery' or order.order_type == 'delivery' %}
+                    <div  class="flex justify-between items-start px-6">
+                        <p class="text-sm text-gray-700">Delivery Fee: </p>
+                        <p class="text-sm font-medium text-gray-900">Rs {{ order.delivery_fee|floatformat:2 }}</p>
+                    </div>
+                    {% endif %}
                     </div>
                 </div>
-                <div class="flex flex-col sm:flex-row justify-between items-center pt-4 border-t border-gray-200 mt-4 space-y-3 sm:space-y-0">
+                <div class="flex flex-col sm:flex-row justify-between items-center pt-4 border-t border-gray-200 mt-4 space-y-3 sm:space-y-0 pr-4">
                     <div class="flex gap-3 w-full sm:w-auto action-buttons">
-                        {% if order.status == 'Pending' %}
-                        <!-- Cancel Button to trigger modal -->
-                        <button onclick="openCancelModal('{{ order.id }}', '{{ order.order_id_str }}')"
-                                class="cancel-btn flex justify-center items-center h-10 px-4 py-2 rounded-lg bg-red-600 text-base text-white hover:bg-red-700 transition">
-                            Cancel Order
-                        </button>
-                        {% endif %}
+                        <!-- View Receipt Button (FOR ALL) -->
+                        <button onclick="openReceiptModal('receipt-modal-{{ order.order_id_str }}')"
+                            class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors">
+                            View Receipt</button>
                     </div>
-                    <p class="text-lg font-bold text-gray-900">Rs {{ order.get_total_cost|floatformat:2 }}</p>
+                    <p class="text-lg font-bold text-gray-900">Rs {{ order.total|floatformat:2 }}</p>
                 </div>
             </div>
 
+            <!-- RECEIPT MODAL -->
+            <div id="receipt-modal-{{ order.order_id_str }}"
+                class="fixed inset-0 w-screen h-screen hidden z-50 flex items-center justify-center p-4 modal-backdrop"
+                onclick="closeReceiptModal('receipt-modal-{{ order.order_id_str }}')">
+
+                <div class="bg-white w-full max-w-[380px] shadow-2xl rounded-sm overflow-hidden transform transition-all border border-gray-200" onclick="event.stopPropagation()">
+                    <div class="bg-gray-50 border-b border-gray-200 p-4 text-center">
+                        <h2 class="text-lg font-bold text-gray-800 uppercase tracking-wider">Receipt</h2>
+                        <p class="text-sm text-gray-500">Order #{{ order.order_id_str }}</p>
+                    </div>
+                    <div class="p-6 receipt-font space-y-4">
+                        <div class="text-xs text-gray-600 flex justify-between">
+                            <span>Date: {{ order.order_date|date:"M d, Y" }}</span>
+                            <span>Time: {{ order.order_date|time:"H:i" }}</span>
+                        </div>
+                        <div class="text-xs text-gray-600 border-b border-dashed border-gray-300 pb-4">
+                            <p>Customer:</p>
+                            <p>Type: {{ order.order_type }}</p>
+                        </div>
+                        <div class="space-y-2">
+                            {% for item in order.items.all %}
+                        <div class="flex justify-between items-start px-6">
+                            <div class="flex flex-col">
+                                <p class="text-sm text-gray-700">{{ item.quantity }}x {{ item.item.name }}</p>
+                                <!-- Toppings Line by Line with Price -->
+                                {% if item.toppings_list %}
+                                    <div class="flex flex-col">
+                                        {% for topping in item.toppings_list %}
+                                            <div class="flex items-center gap-2 pl-4">
+                                                <span class="text-xs text-gray-500 italic">+ {{ topping.name }}</span>
+                                                <span class="text-xs text-gray-400">(Rs {{ topping.price|floatformat:0 }})</span>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <p class="text-sm font-medium text-gray-900">Rs {{ item.subtotal|floatformat:2 }}</p>
+                        </div>
+                        {% endfor %}
+                        {% if order.order_type == 'pick up' %}
+                        <div  class="flex justify-between items-start px-6">
+                            <p class="text-sm text-gray-700">Takeout Fee: </p>
+                            <p class="text-sm font-medium text-gray-900">Rs {{ order.takeout_fee|floatformat:2 }}</p>
+                        </div>
+                        {% elif order.order_type == 'delivery' or order.order_type == 'Delivery' %}
+                        <div  class="flex justify-between items-start px-6">
+                            <p class="text-sm text-gray-700">Delivery Fee: </p>
+                            <p class="text-sm font-medium text-gray-900">Rs {{ order.delivery_fee|floatformat:2 }}</p>
+                        </div>
+                        {% endif %}
+                        </div>
+                        <div class="border-t border-dashed border-gray-300 pt-4 mt-4 space-y-1">
+                            <div class="flex justify-between text-base font-bold text-gray-900 pt-2">
+                                <span>TOTAL</span>
+                                <span>Rs {{ order.total|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-6 py-4 flex justify-between items-center gap-3">
+                        <button onclick="window.print()" class="text-gray-600 hover:text-gray-800 text-sm font-medium flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                            Print
+                        </button>
+                        <button onclick="closeReceiptModal('receipt-modal-{{ order.order_id_str }}')" class="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
             {% endfor %}
 
             <!-- Message when filter returns no results -->
@@ -120,40 +221,11 @@
         </div>
     </div>
 
-    <!-- CONFIRMATION MODAL -->
-    <div id="cancel-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-backdrop">
-        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm mx-4 transform transition-all animate-modal-pop">
-            <div class="text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                    <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                </div>
-                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Cancel Order?</h3>
-                <div class="mt-2">
-                    <p class="text-sm text-gray-500">
-                        Are you sure you want to cancel Order #<span id="modal-order-str"></span>? This action cannot be undone.
-                    </p>
-                </div>
-            </div>
-            <div class="mt-5 sm:mt-6 flex gap-3">
-                <button type="button" onclick="closeCancelModal()"
-                    class="flex-1 justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:text-sm">
-                    No, Keep Order
-                </button>
-                <button type="button" onclick="confirmCancelOrder()"
-                    class="flex-1 justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:text-sm">
-                    Yes, Cancel
-                </button>
-            </div>
-        </div>
-    </div>
 {% endblock dashboard_content %}
 
 
 {% block scripts %}
 <script>
-    // Variables to track the order being cancelled
     let orderToCancelId = null;
     let orderToCancelStr = null;
 
@@ -162,26 +234,27 @@
         const cards = document.querySelectorAll(".order-card");
         const noOrdersMessage = document.getElementById("no-orders-message");
 
+        // Updated Styles for Types
         const styles = {
-            inactive: ["bg-gray-100", "text-gray-600", "hover:bg-gray-200"],
+            inactive: ["bg-gray-100", "text-gray-600", "hover:bg-gray-200", "border"],
             All: ["bg-gray-900", "text-white", "hover:bg-gray-700"],
-            Pending: ["bg-yellow-100", "text-yellow-800", "hover:bg-yellow-200"],
-            Preparing: ["bg-blue-100", "text-blue-800", "hover:bg-blue-200"],
-            Completed: ["bg-green-100", "text-green-800", "hover:bg-green-200"],
-            Cancelled: ["bg-red-100", "text-red-800", "hover:bg-red-200"],
+            'Dine-in': ["bg-yellow-100", "text-yellow-800", "hover:bg-yellow-200", "border"],
+            Delivery: ["bg-blue-100", "text-blue-800", "hover:bg-blue-200", "border"],
+            Takeout: ["bg-green-100", "text-green-800", "hover:bg-green-200", "border"],
         };
+        const allActiveStyles = [...new Set(Object.values(styles).flat())];
 
-        function filterOrders(status) {
+        function filterOrders(filterType) {
             let visibleCount = 0;
 
             // Update button styles
             buttons.forEach(button => {
-                const buttonStatus = button.getAttribute("data-status");
-                // Reset all styles first
-                Object.values(styles).flat().forEach(styleClass => button.classList.remove(styleClass));
+                const buttonFilter = button.getAttribute("data-filter");
+                // Reset
+                button.classList.remove(...allActiveStyles);
 
-                if (buttonStatus === status) {
-                    button.classList.add(...styles[buttonStatus]);
+                if (buttonFilter === filterType) {
+                    button.classList.add(...(styles[buttonFilter] || styles.All));
                 } else {
                     button.classList.add(...styles.inactive);
                 }
@@ -189,8 +262,19 @@
 
             // Filter cards
             cards.forEach(card => {
-                const cardStatus = card.getAttribute("data-status");
-                if (status === "All" || cardStatus === status) {
+                const cardType = card.getAttribute("data-type");
+
+                // Logic:
+                // If filter is All -> Show all
+                // If filter is Specific Type -> Match cardType
+                let match = false;
+                if (filterType === "All") {
+                    match = true;
+                } else if (cardType === filterType) {
+                    match = true;
+                }
+
+                if (match) {
                     card.style.display = "flex";
                     visibleCount++;
                 } else {
@@ -198,7 +282,6 @@
                 }
             });
 
-            // Show or hide the "no orders" message
             if (visibleCount === 0) {
                 noOrdersMessage.style.display = "block";
             } else {
@@ -206,109 +289,57 @@
             }
         }
 
-        // Attach click event listeners
         buttons.forEach(button => {
             button.addEventListener("click", () => {
-                const status = button.getAttribute("data-status");
-                filterOrders(status);
+                const filter = button.getAttribute("data-filter");
+                filterOrders(filter);
             });
         });
 
-        // Initialize filter on load
+        // Initialize
         filterOrders('All');
     });
 
-    // --- Modal Functions ---
-    // Helper to determine scrollbar width to prevent layout shift when modal is opened
+    // --- Modal Functions (Receipt) ---
     function getScrollbarWidth() {
         return window.innerWidth - document.documentElement.clientWidth;
     }
 
-    function openCancelModal(orderId, orderIdStr) {
-        orderToCancelId = orderId;
-        orderToCancelStr = orderIdStr;
-
-        document.getElementById('modal-order-str').textContent = orderIdStr;
-        const modal = document.getElementById('cancel-modal');
-
-        // Add padding to body to replace scrollbar width to prevent content jump
-        const scrollbarWidth = getScrollbarWidth();
-        if (scrollbarWidth > 0) {
-            document.body.style.paddingRight = `${scrollbarWidth}px`;
-        }
-
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; // Prevent scrolling
-    }
-
-    function closeCancelModal() {
-        orderToCancelId = null;
-        orderToCancelStr = null;
-
-        const modal = document.getElementById('cancel-modal');
-        modal.classList.add('hidden');
-        document.body.style.overflow = ''; // Restore scrolling
-        document.body.style.paddingRight = ''; // Restore padding
-    }
-
-    async function confirmCancelOrder() {
-        if (!orderToCancelId) return;
-
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-        try {
-            const response = await fetch(`/staff/orders/update-status/${orderToCancelId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({ status: 'Cancelled' })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                // 1. Update UI
-                updateOrderCardCancelled(orderToCancelStr);
-                // 2. Close Modal
-                closeCancelModal();
-            } else {
-                alert('Failed to cancel order: ' + (data.error || 'Unknown error'));
-                closeCancelModal();
+    function openReceiptModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            const scrollbarWidth = getScrollbarWidth();
+            if (scrollbarWidth > 0) {
+                document.body.style.paddingRight = `${scrollbarWidth}px`;
             }
-        } catch (error) {
-            console.error('Error cancelling order:', error);
-            alert('An error occurred. Please try again.');
-            closeCancelModal();
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
     }
 
-    function updateOrderCardCancelled(orderStr) {
-        // Use querySelector to find by ID since we added IDs to cards
-        const card = document.getElementById(`order-${orderStr}`);
-        if (!card) return;
-
-        // Update data status for filtering
-        card.setAttribute('data-status', 'Cancelled');
-
-        // Update Badge
-        const badgeContainer = card.querySelector('.status-badge-container');
-        if (badgeContainer) {
-            badgeContainer.innerHTML = `<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-red-100"><p class="text-sm font-medium text-red-800">Cancelled</p></div>`;
-        }
-
-        // Remove the Cancel Button
-        const actionButtons = card.querySelector('.action-buttons');
-        if (actionButtons) {
-            actionButtons.innerHTML = ''; // clear buttons
+    function closeReceiptModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
         }
     }
 
-    // Close modal on Escape key
+    // Close on Escape key
     document.addEventListener('keydown', function(event) {
         if (event.key === "Escape") {
-            closeCancelModal();
+            const openReceipts = document.querySelectorAll('[id^="receipt-modal-"]:not(.hidden)');
+            openReceipts.forEach(modal => {
+                modal.classList.add('hidden');
+            });
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+
+            const openOverlays = document.querySelectorAll('[id^="status-overlay-"]:not(.hidden)');
+            openOverlays.forEach(overlay => {
+                overlay.classList.add('hidden');
+            });
         }
     });
 </script>

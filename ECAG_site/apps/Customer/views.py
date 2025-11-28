@@ -17,26 +17,24 @@ def overview(request):
 
     all_orders = Order.objects.filter(user=customer)
     total_orders = all_orders.count()
-    pending_orders = all_orders.filter(status__in=['Pending']).count()
-    preparing_orders = all_orders.filter(status__in=['Preparing']).count()
 
-    #total_spent_data = all_orders.filter(status='Completed').aggregate(total=Sum('total'))
-    #total_spent = total_spent_data['total'] or 0.00
+    active_deliveries_count = all_orders.filter(
+        order_type__in=['Delivery', 'delivery'],
+        delivery__delivery_status__in=['preparing_order', 'in_progress']
+    ).count()
 
     all_reservations = Reservation.objects.filter(user_id=customer)
     total_reservations = all_reservations.count()
 
     upcoming_reservations_count = all_reservations.filter(status='confirmed').count()
 
-    recent_orders = all_orders.order_by('-order_date')[:3]
-    recent_reservations = all_reservations.order_by('-date', '-time')[:3]
+    recent_orders = all_orders.order_by('-order_date')[:5] # Limit to 5 for overview
+    recent_reservations = all_reservations.order_by('-date', '-time')[:5]
 
     context = {
         'user': customer,
         'total_orders': total_orders,
-        'pending_orders': pending_orders,
-        'preparing_orders': preparing_orders,
-        # 'total_spent': f"{total_spent:.2f}",
+        'active_deliveries_count': active_deliveries_count, # New Stat
         'total_reservations': total_reservations,
         'upcoming_reservations': upcoming_reservations_count,
         'recent_orders': recent_orders,
@@ -48,7 +46,7 @@ def overview(request):
 @login_required
 def my_orders(request):
     customer = get_current_user(request)
-    orders = Order.objects.filter(user=customer)
+    orders = Order.objects.filter(user=customer).select_related('delivery').order_by('-order_date')
     context = {'orders': orders, 'active_page': 'my_orders'}
     return render(request, 'customer/my_orders.html', context)
 
