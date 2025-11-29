@@ -760,19 +760,23 @@
     });
   }
 
-    // Wire the checkout CTA to sync cart then navigate to checkout
+  function wireCheckoutButton() {
+    // Wire the checkout CTA to sync cart then navigate to checkout page
     try {
       const checkoutCTA = document.getElementById('checkout-cta');
       if (checkoutCTA) {
         checkoutCTA.addEventListener('click', async function (e) {
           // prevent default navigation while syncing
           e.preventDefault();
-          const ok = await syncCartToSession();
-          // proceed regardless, but prefer success
-          window.location = checkoutCTA.href;
+          try {
+            await syncCartToSession();
+          } catch (_) {}
+          // navigate to checkout page after sync
+          window.location.href = checkoutCTA.href;
         });
       }
     } catch (e) {}
+  }
 
   // ---------- INIT ----------
   window.addEventListener("load", () => {
@@ -805,6 +809,7 @@
 
     renderCart();
     wireOrderButtons();
+    wireCheckoutButton(); // Wire checkout after DOM is fully loaded
   });
 
   window.addEventListener("resize", () => {
