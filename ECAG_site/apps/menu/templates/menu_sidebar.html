@@ -137,13 +137,16 @@
 
         <p style="margin:0 0 4px 0; font-size:16px; color:#6b7280;"><span id="order-fee-label">Dine In</span> : Rs <span id="order-delivery" style="font-weight:700; color:#111827;">0</span></p>
 
+        <!-- Subtotal (styled like "No. of items" as requested) placed above total -->
+        <p style="margin:8px 0 8px 0; font-size:18px; font-weight:700; color:#111827;">Subtotal: Rs <span id="order-subtotal">0</span></p>
+
         <p style="margin:0; font-size:20px; font-weight:800; color:#111827;">Total Price: Rs <span id="order-total" style="color:#111827; font-weight:900;">0</span></p>
       </div>
 
+      <!-- Checkout button navigates to checkout page -->
       <a
         id="checkout-cta"
         href="{% url 'menu:checkout' %}"
-        role="button"
         style="
           display: inline-block;
           text-align: center;
@@ -156,6 +159,8 @@
           text-decoration: none;
           background: linear-gradient(to right, #f65e00, #ff3737);
           box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+          border: none;
+          cursor: pointer;
         "
       >
         Proceed to Checkout
@@ -164,3 +169,45 @@
 
   </div>
 </div>
+
+<!-- Sync subtotal with total and keep hidden input updated -->
+<script>
+  (function() {
+    var totalEl = document.getElementById('order-total');
+    var feeEl = document.getElementById('order-delivery');
+    var subtotalEl = document.getElementById('order-subtotal');
+    var inputEl = document.getElementById('subtotal-input');
+
+    function toNumber(text) {
+      var n = String(text || '').replace(/[^0-9.]/g, '');
+      return n ? parseFloat(n) : 0;
+    }
+
+    function syncSubtotal() {
+      var total = totalEl ? toNumber(totalEl.textContent) : 0;
+      var fee = feeEl ? toNumber(feeEl.textContent) : 0;
+      var computed = Math.max(0, total - fee);
+      var formatted = (Math.round(computed * 100) / 100).toString();
+      subtotalEl.textContent = formatted;
+      if (inputEl) inputEl.value = formatted;
+    }
+
+    if (totalEl) {
+      // Initial sync
+      syncSubtotal();
+      // Observe changes to total to keep subtotal current
+      var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function() {
+          syncSubtotal();
+        });
+      });
+      observer.observe(totalEl, { childList: true, characterData: true, subtree: true });
+      if (feeEl) {
+        var feeObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function() { syncSubtotal(); });
+        });
+        feeObserver.observe(feeEl, { childList: true, characterData: true, subtree: true });
+      }
+    }
+  })();
+</script>

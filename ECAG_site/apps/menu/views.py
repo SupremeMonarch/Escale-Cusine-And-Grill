@@ -44,8 +44,20 @@ def menu_beverages(request):
 
 
 def checkout(request):
-    """Unconditional checkout: any payment method succeeds and redirects."""
+    """GET: Display checkout page with order preview from session.
+       POST: Complete the order and transaction, mark as COMPLETED."""
     if request.method == "POST":
+        # Retrieve the in-progress order from session
+        order_id = request.session.get('checkout_order_id')
+        if not order_id:
+            # No order found, redirect back to checkout
+            return redirect("menu:checkout")
+        
+        try:
+            order = Order.objects.get(pk=order_id, status=Order.Status.IN_PROGRESS)
+        except Order.DoesNotExist:
+            return redirect("menu:checkout")
+
         raw_method = request.POST.get("payment_method") or "card"
         if raw_method == "card":
             pm = Transaction.Method.CREDIT_CARD
@@ -55,95 +67,72 @@ def checkout(request):
             pm = Transaction.Method.JUICE
         else:
             pm = Transaction.Method.MYT_MOB
-        cart_items = request.session.get("cart_items", [])
+
         try:
             with db_transaction.atomic():
-                # Do not proceed if cart is empty
-                if not cart_items:
-                    return redirect("menu:checkout")
-
-                # Map order type from session
-                raw_type = request.session.get('order_type_raw')
-                ORDER_TYPE_MAP = {
-                    'dine_in': Order.Ordertype.DINE_IN,
-                    'pick_up': Order.Ordertype.CARRY_OUT,
-                    'delivery': Order.Ordertype.DELIVERY,
-                }
-                mapped_ot = ORDER_TYPE_MAP.get(raw_type) or Order.Ordertype.DELIVERY
-
-                # Create a fresh Order now (first persistence point)
-                order = Order.objects.create(
-                    user=request.user if request.user.is_authenticated else None,
-                    order_type=mapped_ot,
-                    status=Order.Status.IN_PROGRESS,
-                )
-
-                # Create OrderItems from session cart
-                for x in cart_items:
-                    iid = x.get('item_id')
-                    qty = int(x.get('quantity', 1) or 1)
-                    meat = x.get('meat_topping') or ''
-                    extras = x.get('extra_toppings') or []
-                    if not iid:
-                        continue
-                    try:
-                        menu_item = MenuItem.objects.get(pk=int(iid))
-                    except MenuItem.DoesNotExist:
-                        continue
-                    OrderItem.objects.create(
-                        order=order,
-                        item=menu_item,
-                        quantity=qty,
-                        meat_topping=meat,
-                        extra_toppings=",".join([e for e in extras if e]),
-                    )
-
-                # If delivery, create a Delivery row to persist the fee
-                if mapped_ot == Order.Ordertype.DELIVERY:
-                    from .models import Delivery
-                    Delivery.objects.create(order=order, address="TBD", fee=DELIVERY_FEE)
-                elif mapped_ot == Order.Ordertype.CARRY_OUT:
-                    from .models import Takeout
-                    Takeout.objects.create(order=order, fee=TAKEOUT_FEE)
-
-                # Update totals (subtotal + delivery)
-                order.update_total()
-                # Capture card fields only if credit card chosen; otherwise store blanks.
-                card_name = request.POST.get("card_name", "") if pm == Transaction.Method.CREDIT_CARD else ""
-                card_number = request.POST.get("card_number", "") if pm == Transaction.Method.CREDIT_CARD else ""
-                exp_date_val = None
+                # Update transaction with payment details and mark complete
+                try:
+                    txn = Transaction.objects.get(order=order, status=Transaction.Status.IN_PROGRESS)
+                except Transaction.DoesNotExist:
+                    # Create transaction if it doesn't exist
+                    txn = Transaction(order=order, payment_method=pm, status=Transaction.Status.IN_PROGRESS)
+                
+                txn.payment_method = pm
+                # Capture card fields only if credit card chosen
                 if pm == Transaction.Method.CREDIT_CARD:
+                    txn.card_name = request.POST.get("card_name", "")
+                    txn.card_number = request.POST.get("card_number", "")
                     raw_exp = request.POST.get("exp_date")
                     if raw_exp:
                         from datetime import datetime
                         try:
-                            exp_date_val = datetime.strptime(raw_exp, "%Y-%m-%d").date()
+                            txn.exp_date = datetime.strptime(raw_exp, "%Y-%m-%d").date()
                         except Exception:
-                            exp_date_val = None
-                cvv = request.POST.get("cvv", "") if pm == Transaction.Method.CREDIT_CARD else ""
-                txn = Transaction(
-                    order=order,
-                    payment_method=pm,
-                    card_name=card_name,
-                    card_number=card_number,
-                    exp_date=exp_date_val,
-                    cvv=cvv,
-                )
+                            pass
+                    txn.cvv = request.POST.get("cvv", "")
+                else:
+                    txn.card_name = ""
+                    txn.card_number = ""
+                    txn.exp_date = None
+                    txn.cvv = ""
+                
+                txn.status = Transaction.Status.COMPLETED
                 txn.save()
+                
+                # Mark order as completed
                 order.status = Order.Status.COMPLETED
                 order.save()
-                # Fully clear cart-related session state so sidebar resets.
+                
+                # Clear cart-related session state
                 _reset_cart_session(request.session)
-                request.session["cart_items"] = []  # explicit empty list (sidebar JS may expect it)
+                request.session["cart_items"] = []
+                request.session.pop('checkout_order_id', None)
                 request.session.modified = True
                 request.session["last_order_id"] = order.id
-        except Exception:
-            # Fail open: still try to redirect.
+        except Exception as e:
+            # Log error but still redirect
+            print(f"Error completing order: {e}")
             pass
+        
         return redirect("menu:checkout_success")
 
-    # GET: show current cart snapshot from session (no DB order)
+    # GET: Create order from session cart if not already created
+    order_id = request.session.get('checkout_order_id')
+    order = None
+    
+    if order_id:
+        try:
+            order = Order.objects.get(pk=order_id, status=Order.Status.IN_PROGRESS)
+        except Order.DoesNotExist:
+            order = None
+    
+    # If no order exists, we'll show preview from session (create on first visit)
     sess_cart = request.session.get("cart_items", [])
+    
+    if not sess_cart:
+        # Empty cart, redirect to menu
+        return redirect("menu:menu_starters")
+    
     item_ids = [int(x.get('item_id')) for x in sess_cart if x.get('item_id')]
     items_map = {m.item_id: m for m in MenuItem.objects.filter(item_id__in=item_ids)} if item_ids else {}
 
@@ -157,7 +146,7 @@ def checkout(request):
         mi = items_map.get(iid)
         if not mi:
             continue
-        # per-unit price = base + toppings (no promos applied for preview)
+        # per-unit price = base + toppings
         unit_price = Decimal(mi.price)
         if eligible_for_toppings(getattr(mi, 'name', '')):
             meat = x.get('meat_topping') or ''
@@ -196,6 +185,71 @@ def checkout(request):
     delivery_fee = DELIVERY_FEE if raw_type == 'delivery' else (TAKEOUT_FEE if raw_type == 'pick_up' else Decimal("0.00"))
     fee_label = 'Delivery' if raw_type == 'delivery' else ('Take Out' if raw_type == 'pick_up' else 'Dine In')
     type_label = 'Delivery' if raw_type == 'delivery' else ('Pick Up' if raw_type == 'pick_up' else 'Dine In')
+    
+    # If this is the first GET request, create the order now with IN_PROGRESS status
+    if not order:
+        ORDER_TYPE_MAP = {
+            'dine_in': Order.Ordertype.DINE_IN,
+            'pick_up': Order.Ordertype.CARRY_OUT,
+            'delivery': Order.Ordertype.DELIVERY,
+        }
+        mapped_ot = ORDER_TYPE_MAP.get(raw_type) or Order.Ordertype.DELIVERY
+        
+        try:
+            with db_transaction.atomic():
+                # Create order with IN_PROGRESS status
+                order = Order.objects.create(
+                    user=request.user if request.user.is_authenticated else None,
+                    order_type=mapped_ot,
+                    status=Order.Status.IN_PROGRESS,
+                )
+                
+                # Create OrderItems from session cart
+                for x in sess_cart:
+                    iid = x.get('item_id')
+                    qty = int(x.get('quantity', 1) or 1)
+                    meat = x.get('meat_topping') or ''
+                    extras = x.get('extra_toppings') or []
+                    if not iid:
+                        continue
+                    try:
+                        menu_item = MenuItem.objects.get(pk=int(iid))
+                    except MenuItem.DoesNotExist:
+                        continue
+                    OrderItem.objects.create(
+                        order=order,
+                        item=menu_item,
+                        quantity=qty,
+                        meat_topping=meat,
+                        extra_toppings=",".join([e for e in extras if e]),
+                    )
+                
+                # Create Delivery/Takeout record
+                if mapped_ot == Order.Ordertype.DELIVERY:
+                    from .models import Delivery
+                    Delivery.objects.create(order=order, address="TBD", fee=DELIVERY_FEE)
+                elif mapped_ot == Order.Ordertype.CARRY_OUT:
+                    from .models import Takeout
+                    Takeout.objects.create(order=order, fee=TAKEOUT_FEE)
+                
+                # Update totals
+                order.update_total()
+                
+                # Create transaction with IN_PROGRESS status
+                Transaction.objects.create(
+                    order=order,
+                    payment_method=Transaction.Method.CREDIT_CARD,
+                    status=Transaction.Status.IN_PROGRESS,
+                )
+                
+                # Store order ID in session
+                request.session['checkout_order_id'] = order.id
+                request.session.modified = True
+        except Exception as e:
+            print(f"Error creating order: {e}")
+            # If order creation fails, show preview from session
+            pass
+    
     order_ctx = {
         "order_type": raw_type or "delivery",
         "get_order_type_display": None,

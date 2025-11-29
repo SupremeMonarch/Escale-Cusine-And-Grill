@@ -14,14 +14,13 @@
 {% endblock scripts %}
 {% block content %}
 <div class="w-full" style="background-color:#111827;">
-  <!-- Banner copied exactly from checkout.html -->
   <section aria-label="Checkout hero" class="w-full -mt-[calc(5rem+1px)] bg-gradient-to-r from-[#f65e00] to-[#ff3737] hero-gradient" style="background: linear-gradient(90deg,#f65e00 0%,#ff3737 100%);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(5rem+1px)] py-8 md:py-16 text-center">
       <h1 class="mt-8 sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">Checkout</h1>
     </div>
   </section>
 
-  <!-- Center Card (reduced vertical padding, no extra bottom space) -->
+  <!-- Center Card -->
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-0">
     <!-- Enlarged card to push footer down -->
     <div class="relative w-full max-w-4xl mx-auto bg-[#292626] rounded-xl shadow-xl p-16 sm:p-20 text-center border border-[#3A3434] min-h-[calc(100vh-430px)] flex flex-col justify-start">
@@ -34,7 +33,6 @@
         </div>
       </div>
       <p class="mt-16 text-5xl md:text-6xl font-bold text-white tracking-wide">Thank You!</p>
-      {# Removed order confirmation text per request #}
       <div class="mt-16 flex flex-col sm:flex-row gap-6 justify-center pb-6">
         <a href="{% url 'menu:menu_starters' %}" class="inline-flex justify-center items-center px-10 py-5 rounded-lg bg-gradient-to-r from-[#f65e00] to-[#ff3737] text-white text-base md:text-lg font-semibold shadow-md hover:shadow-lg hover:opacity-95 transition">Order More</a>
         <a href="/" class="inline-flex justify-center items-center px-10 py-5 rounded-lg border-2 border-orange-500 text-orange-500 text-base md:text-lg font-semibold bg-[#292626] hover:bg-orange-500 hover:text-white transition-colors duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">Home</a>
