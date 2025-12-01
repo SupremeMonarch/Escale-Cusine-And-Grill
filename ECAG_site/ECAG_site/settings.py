@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'apps.Customer',
     'apps.Staff',
     'apps.review',
-    'login_registration'  #ADDED BY NOAH, TO REMOVE IF BREAKING WHOLE
+    'apps.login_registration'
 ]
 
 if DEBUG:
