@@ -31,7 +31,7 @@ from .models import Customer
 #     context={'form':form}                                           
 #     return render(request,'login_registration/page1.html',context)
 
-def home(request):
+def register(request):
     if request.method == 'POST':
         form = CustomerRegistrationForm(request.POST)
         if form.is_valid():
@@ -41,7 +41,7 @@ def home(request):
     else:
         form = CustomerRegistrationForm()
 
-    return render(request, 'login_registration/page1.html', {'form': form})
+    return render(request, 'login_registration/registration_page.html', {'form': form})
     
 def contact(request):
     # return HttpResponse("Contact")

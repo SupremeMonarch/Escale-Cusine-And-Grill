@@ -19,7 +19,7 @@ class Customer(models.Model):
                                     message="Enter a valid Mauritian mobile number (e.g. 5XXXXXXX or +2305XXXXXXX)."
                                 )
     email_regex=RegexValidator(
-                                    regex=r'(?i)^[a-zA-Z1-9]+@(gmail|hotmail|umail)\.com$',
+                                    regex=r'(?i)^[a-zA-Z1-9]+@(gmail|hotmail|umail)\.[a-zA-Z]$',
                                     message="Enter a valid Email."
                                 )
     customer_id = models.AutoField(primary_key=True)
@@ -29,7 +29,7 @@ class Customer(models.Model):
     password = models.CharField(max_length=255)
     phone_number=models.CharField(validators=[phone_regex],max_length=20)
     role=models.CharField(max_length=10,choices=Role_Choices)
-    email=models.CharField(validators=[email_regex],max_length=100)
+    email=models.CharField(validators=[email_regex],max_length=100,unique=True)
     date_joined=models.DateTimeField(auto_now_add=True,null=True)
     
     # HASH ONCE, SI HASH TWICE KK FANE
