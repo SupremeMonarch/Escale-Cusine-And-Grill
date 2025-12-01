@@ -1,0 +1,72 @@
+{% extends "admin_panel/base_dashboard.html" %}
+
+{% block dashboard_content %}
+
+<h1 class="text-3xl font-bold mb-8">Dashboard Overview</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+    <!-- Total Revenue -->
+    <div class="bg-white shadow-sm hover:shadow-lg transition rounded-xl p-6 border">
+        <div class="flex items-center justify-between">
+            <h2 class="text-gray-500 font-semibold">Total Revenue</h2>
+            <span class="text-green-500 text-2xl">💰</span>
+        </div>
+        <p class="text-3xl font-bold mt-2 counter" data-value="{{ total_revenue }}"></p>
+    </div>
+
+    <!-- Active Orders -->
+    <div class="bg-white shadow-sm hover:shadow-lg transition rounded-xl p-6 border">
+        <div class="flex items-center justify-between">
+            <h2 class="text-gray-500 font-semibold">Active Orders</h2>
+            <span class="text-blue-500 text-2xl">🛒</span>
+        </div>
+        <p class="text-3xl font-bold mt-2 counter" data-value="{{ active_orders }}"></p>
+    </div>
+
+    <!-- Pending Reservations -->
+    <div class="bg-white shadow-sm hover:shadow-lg transition rounded-xl p-6 border">
+        <div class="flex items-center justify-between">
+            <h2 class="text-gray-500 font-semibold">Pending Reservations</h2>
+            <span class="text-yellow-500 text-2xl">📅</span>
+        </div>
+        <p class="text-3xl font-bold mt-2 counter" data-value="{{ pending_reservations }}"></p>
+    </div>
+
+    <!-- Total Customers -->
+    <div class="bg-white shadow-sm hover:shadow-lg transition rounded-xl p-6 border">
+        <div class="flex items-center justify-between">
+            <h2 class="text-gray-500 font-semibold">Total Customers</h2>
+            <span class="text-purple-500 text-2xl">👥</span>
+        </div>
+        <p class="text-3xl font-bold mt-2 counter" data-value="{{ total_customers }}"></p>
+    </div>
+
+</div>
+
+<!-- Counter Animation -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const counters = document.querySelectorAll(".counter");
+
+    counters.forEach(counter => {
+        const target = Number(counter.getAttribute("data-value"));
+        let count = 0;
+        const speed = 20;
+
+        const updateCounter = () => {
+            if (count < target) {
+                count += Math.ceil(target / 50);
+                counter.textContent = count.toLocaleString();
+                requestAnimationFrame(updateCounter);
+            } else {
+                counter.textContent = target.toLocaleString();
+            }
+        };
+
+        updateCounter();
+    });
+});
+</script>
+
+{% endblock %}
