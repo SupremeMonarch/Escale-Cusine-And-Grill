@@ -19,7 +19,8 @@ class Customer(models.Model):
                                     message="Enter a valid Mauritian mobile number (e.g. 5XXXXXXX or +2305XXXXXXX)."
                                 )
     email_regex=RegexValidator(
-                                    regex=r'(?i)^[a-zA-Z1-9]+@(gmail|hotmail|umail)\.[a-zA-Z]$',
+                                    regex=r'(?i)^[a-z0-9._%+-]+@(gmail|hotmail|umail)\.com$',
+        
                                     message="Enter a valid Email."
                                 )
     customer_id = models.AutoField(primary_key=True)
@@ -37,4 +38,5 @@ class Customer(models.Model):
         # Hash password only when creating
         if not self.pk:  
             self.password = make_password(self.password)
+
         super().save(*args, **kwargs)
