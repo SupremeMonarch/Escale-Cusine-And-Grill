@@ -28,6 +28,7 @@ urlpatterns = [
     path("review/", include("apps.review.urls")),
     path("staff/", include("apps.Staff.urls")),
     path("user/", include("apps.Customer.urls")),
+    path("login/", include('apps.login_registration.urls', namespace="login_registration"))
 ]
 
 if settings.DEBUG:
