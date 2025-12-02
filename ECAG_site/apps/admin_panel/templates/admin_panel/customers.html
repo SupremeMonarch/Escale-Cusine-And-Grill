@@ -2,4 +2,208 @@
 
 {% block dashboard_content %}
 
-{%endblock%}
+<div class="mb-8">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">Customer Management</h1>
+    <p class="text-base text-gray-600 mt-1">Manage your restaurant customers and their activity</p>
+  </div>
+
+  <!-- Search Bar -->
+  <form method="get" class="relative mb-6 w-full md:w-64">
+    <input
+      type="text"
+      name="search"
+      value="{{ search_query }}"
+      placeholder="Search customers..."
+      class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg
+             focus:outline-none focus:ring-2 focus:ring-amber-600"
+    >
+    <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z"/>
+    </svg>
+  </form>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Total Customers -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Total Customers</p>
+          <p class="text-3xl font-bold text-gray-900 mt-2">{{ total_customers }}</p>
+        </div>
+        <div class="bg-blue-100 p-3 rounded-lg">
+          <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 21 20">
+            <path d="M10.414 11.25C9.50314 11.25 8.66446 11.0222 7.89799 10.5667C7.14262 10.1222 6.54277 9.52222 6.09844 8.76667C5.64299 8 5.41527 7.16111 5.41527 6.25C5.41527 5.33889 5.64299 4.5 6.09844 3.73333C6.54277 2.97778 7.14262 2.37778 7.89799 1.93333C8.66446 1.47778 9.50314 1.25 10.414 1.25C11.3249 1.25 12.1636 1.47778 12.9301 1.93333C13.6854 2.37778 14.2853 2.97778 14.7296 3.73333C15.1851 4.5 15.4128 5.33889 15.4128 6.25C15.4128 7.16111 15.1851 8 14.7296 8.76667C14.2853 9.52222 13.6854 10.1222 12.9301 10.5667C12.1636 11.0222 11.3249 11.25 10.414 11.25Z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Customers -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Active Customers</p>
+          <p class="text-3xl font-bold text-gray-900 mt-2">{{ active_customers }}</p>
+        </div>
+        <div class="bg-green-100 p-3 rounded-lg">
+          <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 21 20">
+            <path d="M5.11522 11.25V2.91667H1.78271V1.25H5.11522C5.11522 1.25 5.11522 2.08333 5.11522 11.0833H15.4793L17.1455 5.41667H6.78147V3.75H18.2119C18.2119 3.75 19.0451 4.58333 19.0451 4.58333L16.9289 13.1167C16.9289 13.1167 16.1291 13.75 4.28209 13.75H4.28209C4.28209 13.75 3.44896 13.75 3.44896 12.9167Z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIP Customers -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-sm font-medium text-gray-600">VIP Customers</p>
+          <p class="text-3xl font-bold text-gray-900 mt-2">{{ vip_customers }}</p>
+        </div>
+        <div class="bg-purple-100 p-3 rounded-lg">
+          <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 21 20">
+            <path d="M2.08301 16.25H18.7455V17.9167H2.08301V16.25ZM2.08301 4.58334L6.24863 7.50001L10.4143 2.08334L14.5799 7.50001L18.7455 4.58334V14.5833H2.08301V4.58334Z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Revenue -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Total Revenue</p>
+          <p class="text-3xl font-bold text-gray-900 mt-2">{{ total_revenue }}</p>
+        </div>
+        <div class="bg-amber-100 p-3 rounded-lg">
+          <svg class="w-6 h-6 text-amber-600" fill="currentColor" viewBox="0 0 21 20">
+            <path d="M10.4143 18.3333C9.28121 18.3333 8.19815 18.1167 7.16507 17.6833C6.17643 17.2611 5.29609 16.6639 4.52406 15.8917C3.75204 15.1194 3.15496 14.2389 2.73285 13.25C2.29962 12.2167 2.08301 11.1333 2.08301 10C2.08301 8.86666 2.29962 7.78333 2.73285 6.75C3.15496 5.76111 3.75204 4.88055 4.52406 4.10833C5.29609 3.33611 6.17643 2.73888 7.16507 2.31666C8.19815 1.88333 9.28121 1.66666 10.4143 1.66666C11.5473 1.66666 12.6304 1.88333 13.6634 2.31666C14.6521 2.73888 15.5324 3.33611 16.3045 4.10833C17.0765 4.88055 17.6736 5.76111 18.0957 6.75C18.5289 7.78333 18.7455 8.86666 18.7455 10C18.7455 11.1333 18.5289 12.2167 18.0957 13.25C17.6736 14.2389 17.0765 15.1194 16.3045 15.8917C15.5324 16.6639 14.6521 17.2611 13.6634 17.6833C12.6304 18.1167 11.5473 18.3333 10.4143 18.3333Z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Customers Table -->
+<div class="bg-white shadow-md rounded-lg overflow-hidden border">
+  <!-- Desktop Table -->
+  <div class="hidden md:block overflow-x-auto">
+    <table class="min-w-full text-left text-sm">
+      <thead class="bg-gray-50 text-gray-700 font-semibold border-b">
+        <tr>
+          <th class="px-6 py-4">Customer</th>
+          <th class="px-6 py-4">Contact</th>
+          <th class="px-6 py-4">Orders</th>
+          <th class="px-6 py-4">Total Spent</th>
+          <th class="px-6 py-4">Last Order</th>
+          <th class="px-6 py-4">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for customer in customers %}
+        <tr class="border-t hover:bg-gray-50">
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                <span class="text-amber-700 font-semibold text-sm">
+                  {{ customer.first_name|slice:":1"|upper }}
+                </span>
+              </div>
+              <div>
+                <p class="font-medium text-gray-900">{{ customer.first_name }} {{ customer.last_name }}</p>
+                <p class="text-xs text-gray-500">Joined {{ customer.date_joined|date:"m/d/Y" }}</p>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4">
+            <p class="text-gray-900">{{ customer.email }}</p>
+            <p class="text-gray-500 text-xs">{{ customer.phone|default:"N/A" }}</p>
+          </td>
+          <td class="px-6 py-4 text-gray-900">{{ customer.orders_count|default:0 }}</td>
+          <td class="px-6 py-4">
+            <span class="text-lg font-semibold text-green-600">Rs {{ customer.total_spent|default:"0.00" }}</span>
+          </td>
+          <td class="px-6 py-4 text-gray-900">
+            {% if customer.last_order_date %}
+              {{ customer.last_order_date|date:"m/d/Y" }}
+            {% else %}
+              Never
+            {% endif %}
+          </td>
+          <td class="px-6 py-4">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold
+              {% if customer.status == 'VIP' %}
+                bg-purple-100 text-purple-800
+              {% elif customer.status == 'Active' %}
+                bg-blue-100 text-blue-800
+              {% else %}
+                bg-gray-100 text-gray-800
+              {% endif %}">
+              {{ customer.status|default:"Regular" }}
+            </span>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="6" class="px-6 py-6 text-center text-gray-500">No customers found.</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile Card List -->
+  <div class="md:hidden p-4 space-y-3">
+    {% for customer in customers %}
+      <div class="border rounded-lg p-4 bg-white">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+              <span class="text-amber-700 font-semibold text-sm">
+                {{ customer.first_name|slice:":1"|upper }}
+              </span>
+            </div>
+            <div>
+              <p class="font-medium text-gray-900">{{ customer.first_name }} {{ customer.last_name }}</p>
+              <p class="text-xs text-gray-500">{{ customer.email }}</p>
+            </div>
+          </div>
+          <span class="px-2 py-1 rounded-full text-xs font-semibold
+            {% if customer.status == 'VIP' %}
+              bg-purple-100 text-purple-800
+            {% elif customer.status == 'Active' %}
+              bg-blue-100 text-blue-800
+            {% else %}
+              bg-gray-100 text-gray-800
+            {% endif %}">
+            {{ customer.status|default:"Regular" }}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-sm mb-3">
+          <div>
+            <p class="text-gray-500">Orders</p>
+            <p class="font-semibold text-gray-900">{{ customer.orders_count|default:0 }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Total Spent</p>
+            <p class="font-semibold text-green-600">Rs {{ customer.total_spent|default:"0.00" }}</p>
+          </div>
+        </div>
+
+        <div class="text-xs text-gray-500">
+          Last Order: {% if customer.last_order_date %}{{ customer.last_order_date|date:"m/d/Y" }}{% else %}Never{% endif %}
+        </div>
+      </div>
+    {% empty %}
+      <div class="text-center text-gray-500 py-6">No customers found.</div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

@@ -2,4 +2,200 @@
 
 {% block dashboard_content %}
 
-{%endblock%}
+<h1 class="text-3xl font-bold mb-6">Reservations</h1>
+
+<!-- Top Bar -->
+<div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
+  <form method="get" class="relative w-full md:w-64">
+    <input
+      type="text"
+      name="q"
+      value="{{ query }}"
+      placeholder="Search reservations..."
+      class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg
+             focus:outline-none focus:ring-2 focus:ring-amber-600"
+    >
+    <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z"/>
+    </svg>
+  </form>
+
+  <div class="flex flex-wrap gap-2">
+    {% for key, label in status_filters.items %}
+      <a href="?status={{ key }}{% if query %}&q={{ query }}{% endif %}"
+         class="px-4 py-2 rounded-lg text-sm font-medium
+                {% if current_status == key %}
+                    bg-amber-600 text-white
+                {% else %}
+                    bg-gray-200 text-gray-700
+                {% endif %}">
+        {{ label }}
+      </a>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Desktop table -->
+<div class="bg-white shadow-md rounded-xl border overflow-hidden">
+  <div class="hidden md:block">
+    <table class="min-w-full text-left">
+      <thead class="bg-gray-100 text-gray-700">
+        <tr>
+          <th class="px-6 py-3 font-semibold">Guest Details</th>
+          <th class="px-6 py-3 font-semibold">Date & Time</th>
+          <th class="px-6 py-3 font-semibold">Party Size</th>
+          <th class="px-6 py-3 font-semibold">Table</th>
+          <th class="px-6 py-3 font-semibold">Status</th>
+          <th class="px-6 py-3 font-semibold">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+      {% for r in reservations %}
+        <tr class="border-t hover:bg-gray-50">
+          <td class="px-6 py-4">
+            <div class="font-medium text-gray-900">{{ r.full_name|default:r.user_id.username }}</div>
+            <div class="text-sm text-gray-500">{{ r.email }}</div>
+            <div class="text-sm text-gray-500">{{ r.phone }}</div>
+          </td>
+
+          <td class="px-6 py-4">
+            <div class="font-medium text-gray-900">{{ r.date }}</div>
+            <div class="text-sm text-gray-500">{{ r.time|time:"H:i" }}</div>
+          </td>
+
+          <td class="px-6 py-4">{{ r.guest_count }}</td>
+
+          <td class="px-6 py-4">
+            {% if r.table_id %}
+              Table {{ r.table_id.table_number }} ({{ r.table_id.seats }} seats)
+            {% else %}
+              -
+            {% endif %}
+          </td>
+
+          <td class="px-6 py-4">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold
+                {% if r.status == 'pending' %} bg-yellow-200 text-yellow-800
+                {% elif r.status == 'confirmed' %} bg-blue-200 text-blue-800
+                {% elif r.status == 'seated' %} bg-purple-200 text-purple-800
+                {% elif r.status == 'completed' %} bg-green-200 text-green-800
+                {% elif r.status == 'cancelled' %} bg-red-200 text-red-800
+                {% elif r.status == 'no-show' %} bg-gray-300 text-gray-700
+                {% endif %}">
+              {{ r.status|title }}
+            </span>
+          </td>
+
+          <td class="px-6 py-4">
+            {% if r.status == 'pending' %}
+              <form method="post" action="{% url 'admin-reservation-action' r.reservation_id %}" class="inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="confirm">
+                <button class="px-3 py-1 mr-2 bg-green-100 text-green-700 rounded">Confirm</button>
+              </form>
+              <form method="post" action="{% url 'admin-reservation-action' r.reservation_id %}" class="inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="cancel">
+                <button class="px-3 py-1 bg-red-100 text-red-700 rounded">Cancel</button>
+              </form>
+            {% elif r.status == 'confirmed' %}
+              <form method="post" action="{% url 'admin-reservation-action' r.reservation_id %}" class="inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="seat">
+                <button class="px-3 py-1 mr-2 bg-amber-100 text-amber-700 rounded">Seat</button>
+              </form>
+              <form method="post" action="{% url 'admin-reservation-action' r.reservation_id %}" class="inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="cancel">
+                <button class="px-3 py-1 bg-red-100 text-red-700 rounded">Cancel</button>
+              </form>
+            {% elif r.status == 'seated' %}
+              <form method="post" action="{% url 'admin-reservation-action' r.reservation_id %}" class="inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="complete">
+                <button class="px-3 py-1 bg-blue-100 text-blue-700 rounded">Complete</button>
+              </form>
+            {% else %}
+              <div class="text-sm text-gray-400">No actions</div>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="6" class="px-6 py-6 text-center text-gray-500">No reservations found.</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile list -->
+  <div class="md:hidden p-4 space-y-3">
+    {% for r in reservations %}
+      <div class="border rounded-lg p-4 bg-white shadow-sm">
+        <div class="flex justify-between">
+          <div>
+            <div class="font-medium text-gray-900">{{ r.full_name|default:r.user_id.username }}</div>
+            <div class="text-sm text-gray-500">{{ r.email }} · {{ r.phone }}</div>
+          </div>
+          <div class="text-sm text-gray-700">{{ r.date }} · {{ r.time|time:"H:i" }}</div>
+        </div>
+
+        <div class="mt-3 flex items-center justify-between">
+          <div class="text-sm text-gray-600">Party: {{ r.guest_count }}</div>
+          <div>
+            <span class="px-2 py-1 rounded-full text-xs font-semibold
+                {% if r.status == 'pending' %} bg-yellow-200 text-yellow-800
+                {% elif r.status == 'confirmed' %} bg-blue-200 text-blue-800
+                {% elif r.status == 'seated' %} bg-purple-200 text-purple-800
+                {% elif r.status == 'completed' %} bg-green-200 text-green-800
+                {% elif r.status == 'cancelled' %} bg-red-200 text-red-800
+                {% endif %}">
+              {{ r.status|title }}
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-3 flex gap-2">
+          {% if r.status == 'pending' %}
+            <form method="post" action="{% url 'admin-reservation-action' r.reservation_id %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="confirm">
+              <button class="px-3 py-1 bg-green-100 text-green-700 rounded text-sm">Confirm</button>
+            </form>
+            <form method="post" action="{% url 'admin-reservation-action' r.reservation_id %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="cancel">
+              <button class="px-3 py-1 bg-red-100 text-red-700 rounded text-sm">Cancel</button>
+            </form>
+          {% elif r.status == 'confirmed' %}
+            <form method="post" action="{% url 'admin-reservation-action' r.reservation_id %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="seat">
+              <button class="px-3 py-1 bg-amber-100 text-amber-700 rounded text-sm">Seat</button>
+            </form>
+            <form method="post" action="{% url 'admin-reservation-action' r.reservation_id %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="cancel">
+              <button class="px-3 py-1 bg-red-100 text-red-700 rounded text-sm">Cancel</button>
+            </form>
+          {% elif r.status == 'seated' %}
+            <form method="post" action="{% url 'admin-reservation-action' r.reservation_id %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="complete">
+              <button class="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm">Complete</button>
+            </form>
+          {% else %}
+            <div class="text-sm text-gray-400">No actions</div>
+          {% endif %}
+        </div>
+      </div>
+    {% empty %}
+      <div class="text-center text-gray-500">No reservations found.</div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

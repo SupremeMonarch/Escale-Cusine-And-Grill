@@ -1,71 +1,219 @@
 {% extends "admin_panel/base_dashboard.html" %}
+{% load static %}
 
 {% block dashboard_content %}
 
-<h1 class="text-3xl font-bold mb-8">Dashboard Overview</h1>
+<div class="flex flex-col justify-start items-start w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <h1 class="text-3xl font-bold mb-8 text-gray-900">Dashboard Overview</h1>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
+  <div class="flex flex-col justify-start items-start w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex justify-between items-center w-full mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
+    
+    <!-- Export Buttons -->
+    <div class="flex gap-3">
+      <a href="/admin_panel/export/orders/" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        </svg>
+        Export Orders
+      </a>
+      <a href="/admin_panel/export/reservations/" class="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        </svg>
+        Export Reservations
+      </a>
+      <a href="/admin_panel/export/reviews/" class="px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        </svg>
+        Export Reviews
+      </a>
+    </div>
+  </div>
+  
+  <!-- Stats Cards - Responsive Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full mb-8">
+    
     <!-- Total Revenue -->
-    <div class="bg-white shadow-sm hover:shadow-lg transition rounded-xl p-6 border">
-        <div class="flex items-center justify-between">
-            <h2 class="text-gray-500 font-semibold">Total Revenue</h2>
-            <span class="text-green-500 text-2xl">💰</span>
+    <div class="bg-white shadow-sm hover:shadow-lg transition rounded-xl p-6 border border-gray-200">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-gray-600 font-semibold text-sm">Today's Revenue</h2>
+        <div class="flex justify-center items-center w-12 h-12 rounded-lg bg-green-500">
+          <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6">
+            <path d="M12.5 22C11.14 22 9.84 21.74 8.6 21.22C7.41333 20.7133 6.35667 19.9967 5.43 19.07C4.50333 18.1433 3.78667 17.0867 3.28 15.9C2.76 14.66 2.5 13.36 2.5 12C2.5 10.64 2.76 9.34 3.28 8.1C3.78667 6.91333 4.50333 5.85667 5.43 4.93C6.35667 4.00333 7.41333 3.28667 8.6 2.78C9.84 2.26 11.14 2 12.5 2C13.86 2 15.16 2.26 16.4 2.78C17.5867 3.28667 18.6433 4.00333 19.57 4.93C20.4967 5.85667 21.2133 6.91333 21.72 8.1C22.24 9.34 22.5 10.64 22.5 12C22.5 13.36 22.24 14.66 21.72 15.9C21.2133 17.0867 20.4967 18.1433 19.57 19.07C18.6433 19.9967 17.5867 20.7133 16.4 21.22C15.16 21.74 13.86 22 12.5 22ZM12.5 20C13.9533 20 15.3 19.6333 16.54 18.9C17.74 18.1933 18.6933 17.24 19.4 16.04C20.1333 14.8 20.5 13.4533 20.5 12C20.5 10.5467 20.1333 9.2 19.4 7.96C18.6933 6.76 17.74 5.80667 16.54 5.1C15.3 4.36667 13.9533 4 12.5 4C11.0467 4 9.7 4.36667 8.46 5.1C7.26 5.80667 6.30667 6.76 5.6 7.96C4.86667 9.2 4.5 10.5467 4.5 12C4.5 13.4533 4.86667 14.8 5.6 16.04C6.30667 17.24 7.26 18.1933 8.46 18.9C9.7 19.6333 11.0467 20 12.5 20ZM9 14H14.5C14.6333 14 14.75 13.95 14.85 13.85C14.95 13.75 15 13.6333 15 13.5C15 13.3667 14.95 13.25 14.85 13.15C14.75 13.05 14.6333 13 14.5 13H10.5C10.0467 13 9.63 12.8867 9.25 12.66C8.87 12.4333 8.56667 12.13 8.34 11.75C8.11333 11.37 8 10.9533 8 10.5C8 10.0467 8.11333 9.63 8.34 9.25C8.56667 8.87 8.87 8.56667 9.25 8.34C9.63 8.11333 10.0467 8 10.5 8H11.5V6H13.5V8H16V10H10.5C10.3667 10 10.25 10.05 10.15 10.15C10.05 10.25 10 10.3667 10 10.5C10 10.6333 10.05 10.75 10.15 10.85C10.25 10.95 10.3667 11 10.5 11H14.5C14.9533 11 15.37 11.1133 15.75 11.34C16.13 11.5667 16.4333 11.87 16.66 12.25C16.8867 12.63 17 13.0467 17 13.5C17 13.9533 16.8867 14.37 16.66 14.75C16.4333 15.13 16.13 15.4333 15.75 15.66C15.37 15.8867 14.9533 16 14.5 16H13.5V18H11.5V16H9V14Z" fill="white"></path>
+          </svg>
         </div>
-        <p class="text-3xl font-bold mt-2 counter" data-value="{{ total_revenue }}"></p>
+      </div>
+      <p class="text-3xl font-bold text-gray-900 mb-2">Rs {{ total_revenue }}</p>
+      <p class="text-sm text-green-600">+12% from yesterday</p>
     </div>
 
     <!-- Active Orders -->
-    <div class="bg-white shadow-sm hover:shadow-lg transition rounded-xl p-6 border">
-        <div class="flex items-center justify-between">
-            <h2 class="text-gray-500 font-semibold">Active Orders</h2>
-            <span class="text-blue-500 text-2xl">🛒</span>
+    <div class="bg-white shadow-sm hover:shadow-lg transition rounded-xl p-6 border border-gray-200">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-gray-600 font-semibold text-sm">Active Orders</h2>
+        <div class="flex justify-center items-center w-12 h-12 rounded-lg bg-blue-500">
+          <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6">
+            <path d="M4.14001 15.5V3.5H2.14001V1.5H5.14001C5.42001 1.5 5.65668 1.59667 5.85001 1.79C6.04335 1.98333 6.14001 2.22 6.14001 2.5V14.5H18.58L20.58 6.5H8.14001V4.5H21.86C22.14 4.5 22.3767 4.59667 22.57 4.79C22.7633 4.98333 22.86 5.22 22.86 5.5C22.86 5.58 22.8467 5.66 22.82 5.74L20.32 15.74C20.2667 15.9667 20.15 16.15 19.97 16.29C19.79 16.43 19.5867 16.5 19.36 16.5H5.14001C4.86001 16.5 4.62335 16.4033 4.43001 16.21C4.23668 16.0167 4.14001 15.78 4.14001 15.5ZM6.14001 22.5C5.78001 22.5 5.44668 22.41 5.14001 22.23C4.83335 22.05 4.59001 21.8067 4.41001 21.5C4.23001 21.1933 4.14001 20.86 4.14001 20.5C4.14001 20.14 4.23001 19.8067 4.41001 19.5C4.59001 19.1933 4.83335 18.95 5.14001 18.77C5.44668 18.59 5.78001 18.5 6.14001 18.5C6.50001 18.5 6.83335 18.59 7.14001 18.77C7.44668 18.95 7.69001 19.1933 7.87001 19.5C8.05001 19.8067 8.14001 20.14 8.14001 20.5C8.14001 20.86 8.05001 21.1933 7.87001 21.5C7.69001 21.8067 7.44668 22.05 7.14001 22.23C6.83335 22.41 6.50001 22.5 6.14001 22.5ZM18.14 22.5C17.78 22.5 17.4467 22.41 17.14 22.23C16.8333 22.05 16.59 21.8067 16.41 21.5C16.23 21.1933 16.14 20.86 16.14 20.5C16.14 20.14 16.23 19.8067 16.41 19.5C16.59 19.1933 16.8333 18.95 17.14 18.77C17.4467 18.59 17.78 18.5 18.14 18.5C18.5 18.5 18.8333 18.59 19.14 18.77C19.4467 18.95 19.69 19.1933 19.87 19.5C20.05 19.8067 20.14 20.14 20.14 20.5C20.14 20.86 20.05 21.1933 19.87 21.5C19.69 21.8067 19.4467 22.05 19.14 22.23C18.8333 22.41 18.5 22.5 18.14 22.5Z" fill="white"></path>
+          </svg>
         </div>
-        <p class="text-3xl font-bold mt-2 counter" data-value="{{ active_orders }}"></p>
+      </div>
+      <p class="text-3xl font-bold text-gray-900 mb-2">{{ active_orders }}</p>
+      <p class="text-sm text-green-600">+5% from yesterday</p>
     </div>
 
     <!-- Pending Reservations -->
-    <div class="bg-white shadow-sm hover:shadow-lg transition rounded-xl p-6 border">
-        <div class="flex items-center justify-between">
-            <h2 class="text-gray-500 font-semibold">Pending Reservations</h2>
-            <span class="text-yellow-500 text-2xl">📅</span>
+    <div class="bg-white shadow-sm hover:shadow-lg transition rounded-xl p-6 border border-gray-200">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-gray-600 font-semibold text-sm">Pending Reservations</h2>
+        <div class="flex justify-center items-center w-12 h-12 rounded-lg bg-amber-500">
+          <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6">
+            <path d="M6.32937 1.33335V2.66669H10.3269V1.33335H11.6594V2.66669H14.3244C14.5109 2.66669 14.6686 2.73113 14.7974 2.86002C14.9262 2.98891 14.9906 3.14669 14.9906 3.33335V14C14.9906 14.1867 14.9262 14.3445 14.7974 14.4734C14.6686 14.6022 14.5109 14.6667 14.3244 14.6667H2.33187C2.14532 14.6667 1.98764 14.6022 1.85883 14.4734C1.73002 14.3445 1.66562 14.1867 1.66562 14V3.33335C1.66562 3.14669 1.73002 2.98891 1.85883 2.86002C1.98764 2.73113 2.14532 2.66669 2.33187 2.66669H4.99687V1.33335H6.32937ZM13.6581 8.00002H2.99812V13.3334H13.6581V8.00002ZM4.99687 4.00002H2.99812V6.66669H13.6581V4.00002H11.6594V5.33335H10.3269V4.00002H6.32937V5.33335H4.99687V4.00002Z" fill="white"></path>
+          </svg>
         </div>
-        <p class="text-3xl font-bold mt-2 counter" data-value="{{ pending_reservations }}"></p>
+      </div>
+      <p class="text-3xl font-bold text-gray-900 mb-2">{{ pending_reservations }}</p>
+      <p class="text-sm text-green-600">+8% from yesterday</p>
     </div>
 
     <!-- Total Customers -->
-    <div class="bg-white shadow-sm hover:shadow-lg transition rounded-xl p-6 border">
-        <div class="flex items-center justify-between">
-            <h2 class="text-gray-500 font-semibold">Total Customers</h2>
-            <span class="text-purple-500 text-2xl">👥</span>
+    <div class="bg-white shadow-sm hover:shadow-lg transition rounded-xl p-6 border border-gray-200">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-gray-600 font-semibold text-sm">Total Customers</h2>
+        <div class="flex justify-center items-center w-12 h-12 rounded-lg bg-purple-500">
+          <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6">
+            <path d="M4.5 22.5C4.5 21.0467 4.86667 19.7 5.6 18.46C6.30667 17.26 7.26 16.3067 8.46 15.6C9.7 14.8667 11.0467 14.5 12.5 14.5C13.9533 14.5 15.3 14.8667 16.54 15.6C17.74 16.3067 18.6933 17.26 19.4 18.46C20.1333 19.7 20.5 21.0467 20.5 22.5H18.5C18.5 21.42 18.2267 20.4133 17.68 19.48C17.1467 18.5733 16.4267 17.8533 15.52 17.32C14.5867 16.7733 13.58 16.5 12.5 16.5C11.42 16.5 10.4133 16.7733 9.48 17.32C8.57333 17.8533 7.85333 18.5733 7.32 19.48C6.77333 20.4133 6.5 21.42 6.5 22.5H4.5ZM12.5 13.5C11.4067 13.5 10.4 13.2267 9.48 12.68C8.57333 12.1467 7.85333 11.4267 7.32 10.52C6.77333 9.6 6.5 8.59333 6.5 7.5C6.5 6.40667 6.77333 5.4 7.32 4.48C7.85333 3.57333 8.57333 2.85333 9.48 2.32C10.4 1.77333 11.4067 1.5 12.5 1.5C13.5933 1.5 14.6 1.77333 15.52 2.32C16.4267 2.85333 17.1467 3.57333 17.68 4.48C18.2267 5.4 18.5 6.40667 18.5 7.5C18.5 8.59333 18.2267 9.6 17.68 10.52C17.1467 11.4267 16.4267 12.1467 15.52 12.68C14.6 13.2267 13.5933 13.5 12.5 13.5ZM12.5 11.5C13.22 11.5 13.8867 11.32 14.5 10.96C15.1133 10.6 15.6 10.1133 15.96 9.5C16.32 8.88667 16.5 8.22 16.5 7.5C16.5 6.78 16.32 6.11333 15.96 5.5C15.6 4.88667 15.1133 4.4 14.5 4.04C13.8867 3.68 13.22 3.5 12.5 3.5C11.78 3.5 11.1133 3.68 10.5 4.04C9.88667 4.4 9.4 4.88667 9.04 5.5C8.68 6.11333 8.5 6.78 8.5 7.5C8.5 8.22 8.68 8.88667 9.04 9.5C9.4 10.1133 9.88667 10.6 10.5 10.96C11.1133 11.32 11.78 11.5 12.5 11.5Z" fill="white"></path>
+          </svg>
         </div>
-        <p class="text-3xl font-bold mt-2 counter" data-value="{{ total_customers }}"></p>
+      </div>
+      <p class="text-3xl font-bold text-gray-900 mb-2">{{ total_customers }}</p>
+      <p class="text-sm text-green-600">+15% from yesterday</p>
     </div>
+  </div>
+
+  <!-- Charts & Popular Items Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full mb-8">
+    
+    <!-- Weekly Revenue Chart -->
+    <div class="bg-white shadow-sm rounded-xl p-6 border border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Weekly Revenue</h3>
+      <div style="position: relative; height: 300px;">
+        <canvas id="revenueChart"></canvas>
+      </div>
+    </div>
+
+
+    <!-- Popular Menu Items -->
+    <div class="bg-white shadow-sm rounded-xl p-6 border border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Popular Menu Items</h3>
+      <div class="space-y-3">
+        {% for item in popular_items %}
+          <div class="flex justify-between items-center p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition">
+            <div>
+              <p class="font-medium text-gray-900 text-sm sm:text-base">{{ item.name }}</p>
+              <p class="text-xs sm:text-sm text-gray-600">{{ item.order_count }} orders</p>
+            </div>
+            <div class="text-right">
+              <p class="font-semibold text-gray-900 text-sm sm:text-base">Rs {{ item.revenue }}</p>
+              <p class="text-xs sm:text-sm text-green-600">Revenue</p>
+            </div>
+          </div>
+        {% empty %}
+          <p class="text-gray-500 text-center py-4">No popular items yet</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity Section -->
+  <div class="bg-white shadow-sm rounded-xl p-6 border border-gray-200 w-full">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+    <div class="space-y-4">
+      {% for order in recent_orders %}
+        <div class="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition">
+          <div class="flex justify-center items-center w-8 h-8 rounded-full bg-amber-100 flex-shrink-0">
+            <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4">
+              <path d="M6.32937 1.33335V2.66669H10.3269V1.33335H11.6594V2.66669H14.3244C14.5109 2.66669 14.6686 2.73113 14.7974 2.86002C14.9262 2.98891 14.9906 3.14669 14.9906 3.33335V14C14.9906 14.1867 14.9262 14.3445 14.7974 14.4734C14.6686 14.6022 14.5109 14.6667 14.3244 14.6667H2.33187C2.14532 14.6667 1.98764 14.6022 1.85883 14.4734C1.73002 14.3445 1.66562 14.1867 1.66562 14V3.33335C1.66562 3.14669 1.73002 2.98891 1.85883 2.86002C1.98764 2.73113 2.14532 2.66669 2.33187 2.66669H4.99687V1.33335H6.32937Z" fill="#D97706"></path>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <p class="text-gray-900 text-sm sm:text-base font-medium">Order #{{ order.id }} placed by {{ order.user.first_name|default:"Customer" }}</p>
+            <p class="text-xs sm:text-sm text-gray-500 mt-1">{{ order.order_date|timesince }} ago</p>
+          </div>
+          <p class="text-gray-900 font-semibold text-sm sm:text-base whitespace-nowrap">Rs {{ order.total }}</p>
+        </div>
+      {% empty %}
+        <p class="text-gray-500 text-center py-4">No recent orders</p>
+      {% endfor %}
+    </div>
+  </div>
 
 </div>
 
-<!-- Counter Animation -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    const counters = document.querySelectorAll(".counter");
-
-    counters.forEach(counter => {
-        const target = Number(counter.getAttribute("data-value"));
-        let count = 0;
-        const speed = 20;
-
-        const updateCounter = () => {
-            if (count < target) {
-                count += Math.ceil(target / 50);
-                counter.textContent = count.toLocaleString();
-                requestAnimationFrame(updateCounter);
-            } else {
-                counter.textContent = target.toLocaleString();
+  // Revenue Chart
+  const ctx = document.getElementById('revenueChart');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: {{ chart_labels|safe }},
+        datasets: [{
+          label: 'Revenue (Rs)',
+          data: {{ chart_data|safe }},
+          backgroundColor: '#f59e0b',
+          borderColor: '#d97706',
+          borderWidth: 2,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return 'Rs ' + value;
+              }
             }
-        };
-
-        updateCounter();
+          }
+        }
+      }
     });
+  }
+
+  // Counter Animation
+  const counters = document.querySelectorAll("[data-counter]");
+  counters.forEach(counter => {
+    const target = Number(counter.textContent.replace(/[^\d.-]/g, ''));
+    let current = 0;
+    const increment = target / 50;
+    
+    const updateCounter = () => {
+      if (current < target) {
+        current += increment;
+        counter.textContent = Math.ceil(current).toLocaleString();
+        requestAnimationFrame(updateCounter);
+      } else {
+        counter.textContent = target.toLocaleString();
+      }
+    };
+    
+    updateCounter();
+  });
 });
 </script>
 

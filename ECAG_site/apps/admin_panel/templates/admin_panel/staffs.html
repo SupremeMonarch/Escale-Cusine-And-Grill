@@ -1,5 +1,196 @@
 {% extends "admin_panel/base_dashboard.html" %}
 
-{% block dashboard_content %}
+{% block  dashboard_content %}
+<div class="p-8">
+  <div class="mb-8">
+    <div class="flex justify-between items-start mb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Staff Management</h1>
+        <p class="text-base text-gray-600 mt-1">Manage your restaurant team members and their roles</p>
+      </div>
+      <button onclick="openInviteModal()" class="flex items-center gap-2 px-6 py-2 rounded-lg bg-amber-600 text-white text-base font-medium hover:bg-amber-700 shadow-md">
+        <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4">
+          <path d="M8.66973 9.84V11.2267C8.24293 11.0756 7.79834 11 7.33598 11C6.61575 11 5.94443 11.1822 5.32201 11.5467C4.71738 11.9022 4.23723 12.3822 3.88156 12.9867C3.51701 13.6089 3.33473 14.28 3.33473 15H2.00098C2.00098 14.0311 2.2455 13.1333 2.73454 12.3067C3.2058 11.5067 3.84155 10.8711 4.6418 10.4C5.46873 9.91111 6.36678 9.66667 7.33598 9.66667C7.78945 9.66667 8.23403 9.72444 8.66973 9.84ZM7.33598 9C6.60686 9 5.93554 8.81778 5.32201 8.45333C4.71738 8.09778 4.23723 7.61778 3.88156 7.01333C3.51701 6.4 3.33473 5.72889 3.33473 5C3.33473 4.27111 3.51701 3.6 3.88156 2.98667C4.23723 2.38222 4.71738 1.90222 5.32201 1.54667C5.93554 1.18222 6.60686 1 7.33598 1C8.06509 1 8.73641 1.18222 9.34994 1.54667C9.95457 1.90222 10.4347 2.38222 10.7904 2.98667C11.1549 3.6 11.3372 4.27111 11.3372 5C11.3372 5.72889 11.1549 6.4 10.7904 7.01333C10.4347 7.61778 9.95457 8.09778 9.34994 8.45333C8.73641 8.81778 8.06509 9 7.33598 9Z" fill="currentColor"/>
+        </svg>
+        Invite Staff
+      </button>
+    </div>
+      <!-- Invite Modal -->
+      <div id="inviteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
+          <h2 class="text-2xl font-bold text-gray-900 mb-4">Invite Staff Member</h2>
+          <form method="post" action="{% url 'admin-invite-staff' %}">
+            {% csrf_token %}
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+              <input type="email" name="email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600">
+            </div>
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+              <select name="role" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600">
+                <option value="staff">Staff Member</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div class="flex gap-3">
+              <button type="submit" class="flex-1 px-4 py-2 rounded-lg bg-amber-600 text-white font-medium hover:bg-amber-700">
+                Send Invite
+              </button>
+              <button type="button" onclick="closeInviteModal()" class="flex-1 px-4 py-2 rounded-lg bg-gray-300 text-gray-800 font-medium hover:bg-gray-400">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
 
-{%endblock%}
+      <script>
+        function openInviteModal() {
+          document.getElementById('inviteModal').classList.remove('hidden');
+        }
+        function closeInviteModal() {
+          document.getElementById('inviteModal').classList.add('hidden');
+        }
+      </script>
+    <!-- Search Bar -->
+    <form method="get" class="mb-6 w-full md:w-64 relative">
+      <input type="text" name="search" value="{{ search_query }}" placeholder="Search staff..." 
+             class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600">
+      <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z"/>
+      </svg>
+    </form>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Total Staff</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ total_staff }}</p>
+          </div>
+          <div class="bg-blue-100 p-3 rounded-lg">
+            <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 21 20">
+              <path d="M10.4143 9.16666C11.1696 9.16666 11.8667 9.35277 12.5054 9.725C13.1441 10.0972 13.6496 10.6028 14.0217 11.2417C14.3938 11.8806 14.5799 12.5778 14.5799 13.3333V18.3333H12.9136V13.3333C12.9136 12.9 12.8081 12.4972 12.597 12.125C12.386 11.7528 12.1027 11.4528 11.7473 11.225C11.3918 10.9972 10.9974 10.8667 10.5642 10.8333H10.4143C9.98103 10.8333 9.57836 10.9389 9.20623 11.15C8.8341 11.3611 8.53417 11.6444 8.30645 12C8.07873 12.3556 7.94821 12.75 7.91488 13.1833V18.3333H6.24863V13.3333C6.24863 12.5778 6.4347 11.8806 6.80683 11.2417C7.17896 10.6028 7.68439 10.0972 8.32311 9.725C8.96184 9.35277 9.65889 9.16666 10.4143 9.16666Z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Admins</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ admin_count }}</p>
+          </div>
+          <div class="bg-red-100 p-3 rounded-lg">
+            <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 21 20">
+              <path d="M9.58102 12.0833V13.75C8.68124 13.75 7.84256 13.9778 7.06498 14.4333C6.30961 14.8778 5.70976 15.4778 5.26543 16.2333C4.80999 17.0111 4.58227 17.85 4.58227 18.75H2.91602C2.91602 17.5389 3.22149 16.4167 3.83245 15.3833C4.42119 14.3833 5.21544 13.5889 6.21519 13C7.24827 12.3889 8.37021 12.0833 9.58102 12.0833Z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Staff Members</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ staff_count }}</p>
+          </div>
+          <div class="bg-green-100 p-3 rounded-lg">
+            <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 21 20">
+              <path d="M3.74902 18.75C3.74902 17.5389 4.0545 16.4167 4.66546 15.3833C5.2542 14.3833 6.04845 13.5889 7.0482 13C8.08127 12.3889 9.20322 12.0833 10.414 12.0833C11.6248 12.0833 12.7468 12.3889 13.7798 13C14.7796 13.5889 15.5738 14.3833 16.1626 15.3833C16.7735 16.4167 17.079 17.5389 17.079 18.75H15.4128C15.4128 17.85 15.1851 17.0111 14.7296 16.2333C14.2853 15.4778 13.6854 14.8778 12.9301 14.4333C12.1525 13.9778 11.3138 13.75 10.414 13.75C9.51425 13.75 8.67557 13.9778 7.89799 14.4333C7.14262 14.8778 6.54277 15.4778 6.09844 16.2333C5.64299 17.0111 5.41527 17.85 5.41527 18.75H3.74902Z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Staff Table -->
+  <div class="bg-white shadow-md rounded-lg overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-gray-50 text-gray-700 font-semibold border-b">
+          <tr>
+            <th class="px-6 py-4">Staff Member</th>
+            <th class="px-6 py-4">Contact</th>
+            <th class="px-6 py-4">Role</th>
+            <th class="px-6 py-4">Joined</th>
+            <th class="px-6 py-4">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for staff in staff_list %}
+          <tr class="border-t hover:bg-gray-50">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                  <span class="text-amber-700 font-semibold text-sm">{{ staff.first_name|slice:":1"|upper }}</span>
+                </div>
+                <div>
+                  <p class="font-medium text-gray-900">{{ staff.first_name }} {{ staff.last_name }}</p>
+                  <p class="text-xs text-gray-500">ID: {{ staff.id }}</p>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <p class="text-gray-900">{{ staff.email }}</p>
+              <p class="text-gray-500 text-xs">{{ staff.phone|default:"N/A" }}</p>
+            </td>
+            <td class="px-6 py-4">
+              <span class="px-3 py-1 rounded-full text-xs font-semibold
+                {% if staff.is_superuser %}
+                  bg-red-100 text-red-800
+                {% elif staff.is_staff %}
+                  bg-blue-100 text-blue-800
+                {% else %}
+                  bg-gray-100 text-gray-800
+                {% endif %}">
+                {% if staff.is_superuser %}Admin{% elif staff.is_staff %}Staff{% else %}User{% endif %}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-gray-900">{{ staff.date_joined|date:"m/d/Y" }}</td>
+            <td class="px-6 py-4">
+              <div class="flex gap-2">
+                {% if staff.is_superuser %}
+                  <form method="post" class="inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="staff_id" value="{{ staff.id }}">
+                    <input type="hidden" name="action" value="make_staff">
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-medium hover:bg-blue-700">
+                      Make Staff
+                    </button>
+                  </form>
+                {% else %}
+                  <form method="post" class="inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="staff_id" value="{{ staff.id }}">
+                    <input type="hidden" name="action" value="make_admin">
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-red-600 text-white text-xs font-medium hover:bg-red-700">
+                      Make Admin
+                    </button>
+                  </form>
+                {% endif %}
+                <form method="post" class="inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="staff_id" value="{{ staff.id }}">
+                  <input type="hidden" name="action" value="remove_access">
+                  <button type="submit" class="px-4 py-2 rounded-lg bg-gray-600 text-white text-xs font-medium hover:bg-gray-700">
+                    Remove
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" class="px-6 py-6 text-center text-gray-500">No staff members found.</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

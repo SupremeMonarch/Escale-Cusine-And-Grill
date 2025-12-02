@@ -1,0 +1,64 @@
+{% extends "admin_panel/base_dashboard.html" %}
+
+{% block dashboard_content %}
+
+<h1 class="text-3xl font-bold mb-6">Order #{{ order.id }}</h1>
+
+<div class="bg-white shadow-md rounded-xl p-6 border">
+
+    <!-- Customer Info -->
+    <h2 class="text-xl font-semibold mb-4">Customer Information</h2>
+    <div class="mb-4">
+        <p><strong>Name:</strong> {{ order.user.first_name }} {{ order.user.last_name }}</p>
+        <p><strong>Phone:</strong> {{ order.user.phone }}</p>
+    </div>
+
+    <!-- Order Info -->
+    <h2 class="text-xl font-semibold mb-4">Order Details</h2>
+    <p><strong>Order Type:</strong> {{ order.order_type }}</p>
+    <p><strong>Status:</strong> {{ order.status|title }}</p>
+    <p><strong>Total:</strong> Rs {{ order.total }}</p>
+
+    <hr class="my-6">
+
+    <!-- Items -->
+    <h2 class="text-xl font-semibold mb-4">Items Ordered</h2>
+
+    <table class="w-full text-left">
+        <thead class="bg-gray-100 text-gray-700">
+            <tr>
+                <th class="px-4 py-2">Item</th>
+                <th class="px-4 py-2">Quantity</th>
+                <th class="px-4 py-2">Price</th>
+            </tr>
+        </thead>
+
+        <tbody>
+                {% for item in order.items.all %}
+                <tr class="border-t">
+                    <td class="px-4 py-2">{{ item.item.name }}</td>
+                    <td class="px-4 py-2">{{ item.quantity }}</td>
+                    <td class="px-4 py-2">Rs {{ item.price }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="px-4 py-4 text-center text-gray-500">
+                        No items found.
+                    </td>
+                </tr>
+                {% endfor %}
+
+        </tbody>
+    </table>
+
+    <!-- Back button -->
+    <div class="mt-6">
+        <a href="{% url 'admin-orders' %}"
+           class="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800">
+            ← Back to Orders
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

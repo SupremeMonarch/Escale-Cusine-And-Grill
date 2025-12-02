@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<body class="bg-white text-gray-900">
+
+<div class="flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-white shadow-lg">
+        <div class="p-6 border-b">
+            <h1 class="text-2xl font-bold text-gray-800">Admin Panel</h1>
+        </div>
+
+        <nav class="p-4 space-y-2">
+
+            <a href="{% url 'admin-overview' %}"
+               class="flex items-center px-4 py-3 rounded-lg transition 
+               {% if request.resolver_match.url_name == 'admin-overview' %}
+                   bg-blue-100 text-blue-600 font-semibold
+               {% else %}
+                   text-gray-700 hover:bg-gray-100
+               {% endif %}">
+                Overview
+            </a>
+
+            <a href="{% url 'admin-orders' %}"
+               class="flex items-center px-4 py-3 rounded-lg transition
+               {% if request.resolver_match.url_name == 'admin-orders' %}
+                   bg-blue-100 text-blue-600 font-semibold
+               {% else %}
+                   text-gray-700 hover:bg-gray-100
+               {% endif %}">
+                Orders
+            </a>
+
+            <a href="{% url 'admin-reservations' %}"
+               class="flex items-center px-4 py-3 rounded-lg transition
+               {% if request.resolver_match.url_name == 'admin-reservations' %}
+                   bg-blue-100 text-blue-600 font-semibold
+               {% else %}
+                   text-gray-700 hover:bg-gray-100
+               {% endif %}">
+                Reservations
+            </a>
+
+            <a href="{% url 'admin-menu' %}"
+               class="flex items-center px-4 py-3 rounded-lg transition
+               {% if request.resolver_match.url_name == 'admin-menu' %}
+                   bg-blue-100 text-blue-600 font-semibold
+               {% else %}
+                   text-gray-700 hover:bg-gray-100
+               {% endif %}">
+                Menu
+            </a>
+
+            <a href="{% url 'admin-customers' %}"
+               class="flex items-center px-4 py-3 rounded-lg transition
+               {% if request.resolver_match.url_name == 'admin-customers' %}
+                   bg-blue-100 text-blue-600 font-semibold
+               {% else %}
+                   text-gray-700 hover:bg-gray-100
+               {% endif %}">
+                Customers
+            </a>
+
+            <a href="{% url 'admin-staffs' %}"
+               class="flex items-center px-4 py-3 rounded-lg transition
+               {% if request.resolver_match.url_name == 'admin-staffs' %}
+                   bg-blue-100 text-blue-600 font-semibold
+               {% else %}
+                   text-gray-700 hover:bg-gray-100
+               {% endif %}">
+                Staff
+            </a>
+
+            <a href="{% url 'admin-reviews' %}"
+               class="flex items-center px-4 py-3 rounded-lg transition
+               {% if request.resolver_match.url_name == 'admin-reviews' %}
+                   bg-blue-100 text-blue-600 font-semibold
+               {% else %}
+                   text-gray-700 hover:bg-gray-100
+               {% endif %}">
+                Reviews
+            </a>
+
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 p-10">
+        {% block dashboard_content %}{% endblock %}
+    </main>
+
+</div>
+
+</body>
+{% endblock %}

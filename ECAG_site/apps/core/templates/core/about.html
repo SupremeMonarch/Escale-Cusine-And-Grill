@@ -1,3 +1,193 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}About | Escale{% endblock %}
+{% block content %}
+
+<!-- Our Story Section -->
+<div class="w-full h-[300px] md:h-[400px] lg:h-[500px] bg-cover bg-center flex items-center justify-center px-4"
+     style="background-image: url('{% static "core/img/our-story-section.png" %}');">
+
+    <div class="max-w-3xl text-center text-white">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">Our Story</h1>
+
+        <p class="text-base md:text-lg font-medium">
+            Inspired by the flavors of Mauritius and the love for authentic grilled cuisine,
+            we set out to build more than just a restaurant. We wanted to create an escape —
+            a place where guests can pause from their busy lives, share a meal, and feel at home.
+        </p>
+    </div>
+</div>
+
+
+<!-- Escale Legacy -->
+<div class="w-full bg-white py-16 px-4">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+        
+        <!-- Text -->
+        <div>
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">The Escale Legacy</h2>
+
+            <p class="text-gray-700 mb-4">
+                Founded in 1985 by the Rossi family, Bella Vista began as a small trattoria with a 
+                simple dream: to bring authentic flavors to life.
+            </p>
+
+            <p class="text-gray-700 mb-4">
+                Our recipes have been passed down through three generations, each adding their own 
+                touch while preserving the soul of our cuisine.
+            </p>
+
+            <p class="text-gray-700">
+                Today, we honor our roots while embracing innovation, sourcing the finest local 
+                ingredients to craft unforgettable dining experiences.
+            </p>
+        </div>
+
+        <!-- Image -->
+        <div>
+            <img 
+                src="{% static 'core/img/IMG-70.png' %}" 
+                class="w-full h-80 md:h-full rounded-lg object-cover shadow-lg"
+            />
+
+        </div>
+
+    </div>
+</div>
+
+<!-- Mission -->
+<div class="w-full bg-gray-50 py-16 px-4">
+    <div class="max-w-5xl mx-auto text-center">
+        
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Our Mission</h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto mb-12">
+            To create memorable dining experiences through authentic Mauritian cuisine,
+            warm hospitality, and a commitment to quality that honors our heritage.
+        </p>
+
+        <!-- Icons Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-10">
+
+            <!-- Passion -->
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto bg-amber-600 rounded-full flex items-center justify-center mb-4">
+                    ❤️
+                </div>
+                <h3 class="text-xl font-bold mb-2">Passion</h3>
+                <p class="text-gray-600 text-base">
+                    Every dish is prepared with love and time-honored recipes passed down through our family.
+                </p>
+            </div>
+
+            <!-- Quality -->
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto bg-amber-600 rounded-full flex items-center justify-center mb-4">
+                    ✔️
+                </div>
+                <h3 class="text-xl font-bold mb-2">Quality</h3>
+                <p class="text-gray-600 text-base">
+                    We source only the finest local ingredients to ensure exceptional flavor in every bite.
+                </p>
+            </div>
+
+            <!-- Community -->
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto bg-amber-600 rounded-full flex items-center justify-center mb-4">
+                    👥
+                </div>
+                <h3 class="text-xl font-bold mb-2">Community</h3>
+                <p class="text-gray-600 text-base">
+                    We bring people together, creating a warm and welcoming atmosphere for all.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<!-- Meet Our Chefs -->
+<div class="w-full py-16 bg-white px-4">
+    <div class="max-w-5xl mx-auto text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Meet Our Chefs</h2>
+        <p class="text-lg text-gray-600">
+            Our talented culinary team brings decades of experience and a true love for cooking.
+        </p>
+    </div>
+
+    <div class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+
+        <!-- Chef Card -->
+        <div class="bg-white border rounded-xl shadow-xl overflow-hidden">
+            <img src="{% static 'core/img/Front-img.png' %}"  class="h-65 w-full object-cover">
+            <div class="p-6 text-center">
+                <h3 class="text-xl font-semibold">Manoj Rousse</h3>
+                <p class="text-amber-500 text-lg font-semibold mb-3">Junior Chef</p>
+                <p class="text-gray-600 text-sm">
+                    Our chef brings 15 years of experience blending Mauritian and international cuisine.
+                </p>
+            </div>
+        </div>
+
+        <div class="bg-white border rounded-xl shadow-xl overflow-hidden">
+            <img src="{% static 'core/img/Front-img.png' %}"  class="h-65 w-full object-cover">
+            <div class="p-6 text-center">
+                <h3 class="text-xl font-semibold">Manoj Rousse</h3>
+                <p class="text-amber-500 text-lg font-semibold mb-3">Junior Chef</p>
+                <p class="text-gray-600 text-sm">
+                    Our chef brings 15 years of experience blending Mauritian and international cuisine.
+                </p>
+            </div>
+        </div>
+
+        <div class="bg-white border rounded-xl shadow-xl overflow-hidden">
+            <img src="{% static 'core/img/Front-img.png' %}"  class="h-65 w-full object-cover">
+            <div class="p-6 text-center">
+                <h3 class="text-xl font-semibold">Manoj Rousse</h3>
+                <p class="text-amber-500 text-lg font-semibold mb-3">Junior Chef</p>
+                <p class="text-gray-600 text-sm">
+                    Our chef brings 15 years of experience blending Mauritian and international cuisine.
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- Awards -->
+<div class="w-full bg-amber-50 py-16 px-4">
+    <div class="max-w-5xl mx-auto text-center mb-10">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Awards & Recognition</h2>
+        <p class="text-lg text-gray-600">
+            We're honored to be recognized for our commitment to culinary excellence.
+        </p>
+    </div>
+
+    <div class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+
+        <div class="text-center">
+            <div class="w-16 h-16 mx-auto bg-amber-600 rounded-full flex items-center justify-center mb-4">🏆</div>
+            <p class="text-gray-700">Best Local Cuisine Award 2022</p>
+        </div>
+
+        <div class="text-center">
+            <div class="w-16 h-16 mx-auto bg-amber-600 rounded-full flex items-center justify-center mb-4">⭐</div>
+            <p class="text-gray-700">Chef Excellence Award</p>
+        </div>
+
+        <div class="text-center">
+            <div class="w-16 h-16 mx-auto bg-amber-600 rounded-full flex items-center justify-center mb-4">🍽️</div>
+            <p class="text-gray-700">Top Restaurant 2023</p>
+        </div>
+
+        <div class="text-center">
+            <div class="w-16 h-16 mx-auto bg-amber-600 rounded-full flex items-center justify-center mb-4">🔥</div>
+            <p class="text-gray-700">Best Grilled Cuisine</p>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

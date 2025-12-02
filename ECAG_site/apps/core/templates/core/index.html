@@ -35,149 +35,34 @@
 
 
 
-<!-- Featured Dishes  -->
-<section class="w-full bg-white py-16">
-  <div class="max-w-7xl mx-auto px-6">
-    <!-- Heading -->
-    <div class="text-center mb-12">
-      <h2 class="text-4xl font-bold text-gray-900">Featured Dishes</h2>
-      <p class="text-lg text-gray-600 mt-3">
-        Discover our chef's signature creations, crafted with the finest ingredients and traditional techniques.
-      </p>
-    </div>
-
-    <!-- Grid of dishes -->
+<!-- Featured Dishes Section -->
+<section class="py-16 bg-gray-50">
+  <div class="max-w-6xl mx-auto px-4">
+    <h2 class="text-4xl font-bold text-center mb-12 text-gray-900">Featured Dishes</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <!-- Example dish card -->
-      <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
-        <img src="{% static 'menu/img/Crispy/Calamari.png' %}" alt="Crispy Calamari" class="w-full h-64 object-cover">
-        <div class="p-6">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="text-xl font-bold text-gray-900">Crispy Calamari</h3>
-            <span class="text-amber-600 font-bold text-lg">Rs 450</span>
+      {% for dish in featured_dishes %}
+        <article class="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition">
+          {% if dish.menu_img %}
+            <img src="{{ dish.menu_img.url }}" alt="{{ dish.name }}" class="w-full h-56 object-cover">
+          {% else %}
+            <img src="{% static 'core/img/placeholder-dish.jpg' %}" alt="{{ dish.name }}" class="w-full h-56 object-cover">
+          {% endif %}
+          <div class="p-6">
+            <h3 class="text-xl font-semibold text-gray-900">{{ dish.name }}</h3>
+            <p class="text-gray-600 mt-2">{{ dish.desc|truncatewords:25 }}</p>
+            <div class="mt-4 flex items-center justify-between">
+              <span class="text-2xl font-bold text-amber-600">Rs {{ dish.price }}</span>
+              <a href="/menu/" class="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700">Order</a>
+            </div>
           </div>
-          <p class="text-gray-600 mb-4">Golden fried calamari served with aioli sauce and lemon.</p>
-          <a href="#" 
-             class="block text-center px-4 py-2 rounded-lg font-medium text-white 
-                    bg-gradient-to-r from-[#E97820] to-[#EF4444] hover:opacity-90 transition">
-            Order Now
-          </a>
-        </div>
-      </div>
-
-      <!-- Repeat for now -->
-      <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
-        <img src="{% static 'enu/img/Crispy/arouille.png' %}" alt="Gato Arouille" class="w-full h-64 object-cover">
-        <div class="p-6">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="text-xl font-bold text-gray-900">Gato Arouille</h3>
-            <span class="text-amber-600 font-bold text-lg">Rs 225</span>
-          </div>
-          <p class="text-gray-600 mb-4">Crispy taro fritters — a Mauritian street food favorite.</p>
-          <a href="#" class="block text-center px-4 py-2 rounded-lg font-medium text-white bg-gradient-to-r from-[#E97820] to-[#EF4444] hover:opacity-90 transition">Order Now</a>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
-        <img src="{% static 'core/img/dish3.jpg' %}" alt="Marlin Salad" class="w-full h-64 object-cover">
-        <div class="p-6">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="text-xl font-bold text-gray-900">Marlin Salad</h3>
-            <span class="text-amber-600 font-bold text-lg">Rs 450</span>
-          </div>
-          <p class="text-gray-600 mb-4">Fresh smoked marlin with greens and citrus dressing.</p>
-          <a href="#" class="block text-center px-4 py-2 rounded-lg font-medium text-white bg-gradient-to-r from-[#E97820] to-[#EF4444] hover:opacity-90 transition">Order Now</a>
-        </div>
-      </div>
+        </article>
+      {% empty %}
+        <p class="col-span-3 text-center text-gray-500">No dishes available yet</p>
+      {% endfor %}
     </div>
   </div>
 </section>
 
-<!--Review section-->
-<section class="w-full bg-white py-16">
-  <div class="max-w-7xl mx-auto px-6">
-    <!-- Heading -->
-    <div class="text-center mb-10">
-      <h2 class="text-4xl font-bold text-gray-900">Our Reviews</h2>
-      <p class="text-lg text-gray-600 mt-2">
-        Don’t hear from us, look at our client reviews and see for yourself
-      </p>
-    </div>
-
-    <!-- Grid of reviews -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <!-- Review Card -->
-      <div class="flex flex-col gap-4 p-6 rounded-lg border border-gray-300 bg-gradient-to-b from-red-500/0 to-red-500/80 shadow-sm">
-        <!-- Stars -->
-        <div class="flex space-x-1 text-amber-400">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 1.67l2.58 5.21 5.75.84-4.16 4.05.98 5.73L10 14.8l-5.15 2.7.98-5.73-4.17-4.05 5.76-.84L10 1.67z"/></svg>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 1.67l2.58 5.21 5.75.84-4.16 4.05.98 5.73L10 14.8l-5.15 2.7.98-5.73-4.17-4.05 5.76-.84L10 1.67z"/></svg>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 1.67l2.58 5.21 5.75.84-4.16 4.05.98 5.73L10 14.8l-5.15 2.7.98-5.73-4.17-4.05 5.76-.84L10 1.67z"/></svg>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 1.67l2.58 5.21 5.75.84-4.16 4.05.98 5.73L10 14.8l-5.15 2.7.98-5.73-4.17-4.05 5.76-.84L10 1.67z"/></svg>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current text-gray-300" viewBox="0 0 20 20"><path d="M10 1.67l2.58 5.21 5.75.84-4.16 4.05.98 5.73L10 14.8l-5.15 2.7.98-5.73-4.17-4.05 5.76-.84L10 1.67z"/></svg>
-        </div>
-
-        <!-- Content -->
-        <h3 class="text-xl font-semibold text-gray-900">Amazing Food!</h3>
-        <p class="text-gray-700">The calamari was super crispy and the service was excellent. Definitely coming back!</p>
-
-        <!-- Reviewer -->
-        <div class="flex items-center gap-3 mt-4">
-          <img src="{% static 'core/img/user1.jpg' %}" alt="Reviewer" class="w-10 h-10 rounded-full object-cover">
-          <div>
-            <p class="text-black-500 font-semibold">John Doe</p>
-            <p class="text-sm text-gray-500">Feb 2025</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Repeat Review Card -->
-      <div class="flex flex-col gap-4 p-6 rounded-lg border border-gray-300 bg-gradient-to-b from-red-500/0 to-red-500/80 shadow-sm">
-        <div class="flex space-x-1 text-amber-400">
-          <!-- 5 filled stars -->
-          {% for i in "12345" %}
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 1.67l2.58 5.21 5.75.84-4.16 4.05.98 5.73L10 14.8l-5.15 2.7.98-5.73-4.17-4.05 5.76-.84L10 1.67z"/></svg>
-          {% endfor %}
-        </div>
-        <h3 class="text-xl font-semibold text-gray-900">Lovely Atmosphere</h3>
-        <p class="text-gray-700">The ambience is cozy and the staff are friendly. Highly recommend!</p>
-        <div class="flex items-center gap-3 mt-4">
-          <img src="{% static 'core/img/user2.jpg' %}" alt="Reviewer" class="w-10 h-10 rounded-full object-cover">
-          <div>
-            <p class="text-black-500 font-semibold">Marie Dupont</p>
-            <p class="text-sm text-gray-500">Jan 2025</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex flex-col gap-4 p-6 rounded-lg border border-gray-300 bg-gradient-to-b from-red-500/0 to-red-500/80 shadow-sm">
-        <div class="flex space-x-1 text-amber-400">
-          <!-- 4 stars -->
-          {% for i in "1234" %}
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 1.67l2.58 5.21 5.75.84-4.16 4.05.98 5.73L10 14.8l-5.15 2.7.98-5.73-4.17-4.05 5.76-.84L10 1.67z"/></svg>
-          {% endfor %}
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current text-gray-300" viewBox="0 0 20 20"><path d="M10 1.67l2.58 5.21 5.75.84-4.16 4.05.98 5.73L10 14.8l-5.15 2.7.98-5.73-4.17-4.05 5.76-.84L10 1.67z"/></svg>
-        </div>
-        <h3 class="text-xl font-semibold text-gray-900">Great Value</h3>
-        <p class="text-gray-700">Affordable prices for such high quality food. Totally worth it.</p>
-        <div class="flex items-center gap-3 mt-4">
-          <img src="{% static 'core/img/user3.jpg' %}" alt="Reviewer" class="w-10 h-10 rounded-full object-cover">
-          <div>
-            <p class="text-black-500 font-semibold">Akash Kumar</p>
-            <p class="text-sm text-gray-500">Dec 2024</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CTA -->
-    <div class="mt-12 flex justify-center">
-      <a href="#" class="px-6 py-3 rounded-lg font-medium text-white bg-gradient-to-r from-[#E97820] to-[#EF4444] hover:opacity-90 transition">
-        View All Reviews
-      </a>
-    </div>
-  </div>
-</section>
 
 <!--Contact section-->
 <section class="w-full bg-gray-50 py-16">

@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'apps.Customer',
     'apps.Staff',
     'apps.review',
-    'apps.login_registration'
+    'apps.login_registration',
+    'apps.admin_panel'
 ]
 
 if DEBUG:
@@ -147,3 +148,24 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST_USER = 'info@escalecuisine.com'
+DEFAULT_FROM_EMAIL = 'noreply@escalecuisine.com'
+  # For testing
