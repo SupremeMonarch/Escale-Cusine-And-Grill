@@ -87,6 +87,14 @@
                     <div class="flex flex-col items-center"><span class="text-xs font-medium text-gray-600 mb-1">Table</span><p class="text-ms font-semibold text-gray-900 w-full flex justify-center">{{ res.table_id.table_number|default:"N/A" }}</p></div>
                     <div class="flex flex-col items-center"><span class="text-xs font-medium text-gray-600 mb-1">{{ res.date|date:"F d"}}</span><p class="text-ms font-semibold text-gray-900 w-full flex justify-center">{{ res.time|time:"g:i A" }}</p></div>
                 </div>
+                {% if res.special_requests %}
+                    <div class="w-full mt-4">
+                        <div class="p-3 rounded-lg bg-amber-50">
+                            <p class="text-sm font-medium text-amber-800 pb-1">Special Requests:</p>
+                            <p class="text-sm text-amber-700">{{ res.special_requests }}</p>
+                        </div>
+                    </div>
+                {% endif %}
                 <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center pt-4 pr-4 w-full">
                     <div class="action-buttons flex gap-3 w-full sm:w-auto mt-4 sm:mt-0">
                         {% if res.status == 'confirmed' or res.status == 'pending' %}

@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST
 import json
 import datetime
 
-from apps.menu.models import Order, Delivery
+from apps.menu.models import Order, Delivery, Takeout
 from apps.reservations.models import Reservation, Table
 
 def is_staff_user(user):
@@ -37,11 +37,10 @@ def staff_overview(request):
 
     context = {
         'todays_orders_count': todays_orders_count,
-        'active_deliveries_count': active_deliveries_count, # New Stat
+        'active_deliveries_count': active_deliveries_count,
 
         'active_reservations_count': active_reservations_count,
         'upcoming_reservations_count': upcoming_reservations_count,
-
 
         'active_orders': recent_orders,
         'reservations_active': reservations_active_list,
@@ -74,28 +73,45 @@ def staff_orders(request):
     }
     return render(request, 'staff/order.html', context)
 
+
 @login_required
 @user_passes_test(is_staff_user)
 def staff_reservations(request):
     today = timezone.now().date()
 
     selected_date_str = request.GET.get('date')
+    sort_param = request.GET.get('sort', 'time_asc') # Default sort
     selected_date = None
 
+    # Filter Reservations by Date
     if selected_date_str:
         try:
             selected_date = datetime.datetime.strptime(selected_date_str, '%Y-%m-%d').date()
-            reservations = Reservation.objects.filter(date=selected_date).order_by('time')
+            reservations = Reservation.objects.filter(date=selected_date)
             view_title = f"Reservations for {selected_date.strftime('%b %d, %Y')}"
             view_subtitle = "Viewing specific date"
         except ValueError:
-            reservations = Reservation.objects.filter(date__gte=today).order_by('date', 'time')
+            reservations = Reservation.objects.filter(date__gte=today)
             view_title = "Upcoming Reservations"
             view_subtitle = f"Manage dining reservations from {today.strftime('%b %d, %Y')} onwards"
     else:
-        reservations = Reservation.objects.filter(date__gte=today).order_by('date', 'time')
+        reservations = Reservation.objects.filter(date__gte=today)
         view_title = "Upcoming Reservations"
         view_subtitle = f"Manage dining reservations from {today.strftime('%b %d, %Y')} onwards"
+
+    # Sorting
+    if sort_param == 'time_desc':
+        reservations = reservations.order_by('-date', '-time')
+    elif sort_param == 'guests_asc':
+        reservations = reservations.order_by('guest_count', 'date', 'time')
+    elif sort_param == 'guests_desc':
+        reservations = reservations.order_by('-guest_count', 'date', 'time')
+    elif sort_param == 'table_asc':
+        reservations = reservations.order_by('table_id', 'date', 'time')
+    elif sort_param == 'table_desc':
+        reservations = reservations.order_by('-table_id', 'date', 'time')
+    else: # Default: time_asc
+        reservations = reservations.order_by('date', 'time')
 
     total_reservations = reservations.count()
     pending_count = reservations.filter(status='pending').count()
@@ -103,13 +119,13 @@ def staff_reservations(request):
     seated_count = reservations.filter(status='seated').count()
     completed_count = reservations.filter(status='completed').count()
     cancelled_count = reservations.filter(status='cancelled').count()
-
     total_guests = reservations.aggregate(total=Sum('guest_count'))['total'] or 0
 
     context = {
         'reservations': reservations,
         'today_date': today,
         'selected_date': selected_date_str,
+        'current_sort': sort_param,
         'view_title': view_title,
         'view_subtitle': view_subtitle,
         'total_reservations': total_reservations,
@@ -126,15 +142,18 @@ def staff_reservations(request):
 @require_POST
 def update_order_status(request, order_id):
     """
-    Updates status ONLY for Delivery orders using the Delivery model status.
+    Updates status for Delivery OR Takeout orders.
     """
     try:
         data = json.loads(request.body)
         new_status = data.get('status')
         order = Order.objects.get(id=order_id)
 
-        # Check if it is a delivery order
-        if order.order_type.lower() == 'delivery':
+        # Normalize type for comparison
+        order_type_lower = order.order_type.lower()
+
+        # --- LOGIC FOR DELIVERY ---
+        if order_type_lower == 'delivery':
             if hasattr(order, 'delivery'):
                 valid_statuses = [choice[0] for choice in Delivery.Status.choices]
 
@@ -146,13 +165,29 @@ def update_order_status(request, order_id):
                     return JsonResponse({'success': False, 'error': f'Invalid delivery status. Allowed: {valid_statuses}'}, status=400)
             else:
                  return JsonResponse({'success': False, 'error': 'Delivery details missing for this order'}, status=400)
+
+        # --- LOGIC FOR TAKEOUT (Pick Up) ---
+        elif order_type_lower in ['pick up', 'pickup', 'takeout']:
+            if hasattr(order, 'takeout'):
+                valid_statuses = [choice[0] for choice in Takeout.Status.choices]
+
+                if new_status in valid_statuses:
+                    order.takeout.pickup_status = new_status
+                    order.takeout.save()
+                    return JsonResponse({'success': True, 'status': new_status})
+                else:
+                    return JsonResponse({'success': False, 'error': f'Invalid takeout status. Allowed: {valid_statuses}'}, status=400)
+            else:
+                return JsonResponse({'success': False, 'error': 'Takeout details missing for this order'}, status=400)
+
         else:
-            return JsonResponse({'success': False, 'error': 'Status updates are only available for Delivery orders'}, status=400)
+            return JsonResponse({'success': False, 'error': 'Status updates are only available for Delivery or Takeout orders'}, status=400)
 
     except Order.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Order not found'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
 
 @require_POST
 def update_reservation_status(request, reservation_id):

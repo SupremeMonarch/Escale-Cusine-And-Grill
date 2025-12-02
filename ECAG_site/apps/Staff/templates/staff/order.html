@@ -43,7 +43,8 @@
     }
 
     .modal-backdrop {
-        background-color: rgba(0, 0, 0, 0.2);
+        background-color: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(1px);
     }
 
     @keyframes slide-up {
@@ -81,7 +82,6 @@
     </header>
 
     <!-- Filter Controls Container -->
-    <!-- Simplified: Removed Status Filters, Kept only Type Filters -->
     <div class="mb-6 space-y-4 pl-4">
         <div id="type-filters">
             <div class="filter-group" data-filter-group="type">
@@ -110,38 +110,42 @@
         {% for order in orders %}
         <div id="order-{{ order.order_id_str }}"
              class="order-card relative flex flex-col w-full p-6 rounded-lg bg-white border border-gray-200 shadow-sm scroll-mt-24 transition-colors duration-300 overflow-hidden"
-             data-type="{{ order.order_type }}"> <!-- Removed data-status -->
+             data-type="{{ order.order_type }}">
 
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-gray-200 px-4 gap-2">
-                <div class="flex flex-col justify-start items-start">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-2 border-b border-gray-200 px-4 gap-2">
+                <div class="flex flex-col justify-start items-start space-y-1">
                     <p class="text-base font-semibold text-gray-900 ">#{{ order.order_id_str }}</p>
                     <p class="text-sm text-left text-gray-600">{{ order.order_date|date:"F d, Y \a\t g:i A" }}</p>
                 </div>
 
                 <div class="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
-                    {% if order.order_type == 'Dine in' or order.order_type == 'dine in' %}
+                    {% if order.order_type == 'dine in' %}
                         <div class="px-3 py-1 rounded-lg bg-yellow-100 text-sm font-medium text-yellow-800">Dine-in</div>
-                    {% elif order.order_type == 'Pick up' or order.order_type == 'pick up' %}
+                    {% elif order.order_type == 'pick up' %}
                         <div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Takeout</div>
-                    {% elif order.order_type == 'Delivery' or order.order_type == 'delivery' %}
+                    {% elif order.order_type == 'delivery' %}
                         <div class="px-3 py-1 rounded-lg bg-blue-100 text-sm font-medium text-blue-800">Delivery</div>
                     {% endif %}
 
-                    <!-- Only show status badge for Delivery -->
-                    {% if order.order_type == 'Delivery' or order.order_type == 'delivery' %}
                     <div class="status-badge-container">
-                        {% if order.delivery.delivery_status == 'preparing_order' %}
-                            <div class="px-3 py-1 rounded-lg bg-orange-100 text-sm font-medium text-orange-800">Preparing Order</div>
-                        {% elif order.delivery.delivery_status == 'in_progress' %}
-                            <div class="px-3 py-1 rounded-lg bg-blue-100 text-sm font-medium text-blue-800">Out for Delivery</div>
-                        {% elif order.delivery.delivery_status == 'delivered' %}
-                            <div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Delivered</div>
-                        {% else %}
-                             <!-- Fallback for legacy data -->
-                            <div class="px-3 py-1 rounded-lg bg-gray-100 text-sm font-medium text-gray-800">{{ order.delivery.get_delivery_status_display }}</div>
+                        {% if order.order_type == 'delivery' %}
+                            {% if order.delivery.delivery_status == 'preparing_order' %}
+                                <div class="px-3 py-1 rounded-lg bg-orange-100 text-sm font-medium text-orange-800">Preparing Order</div>
+                            {% elif order.delivery.delivery_status == 'in_progress' %}
+                                <div class="px-3 py-1 rounded-lg bg-blue-100 text-sm font-medium text-blue-800">Out for Delivery</div>
+                            {% elif order.delivery.delivery_status == 'delivered' %}
+                                <div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Delivered</div>
+                            {% endif %}
+                        {% elif order.order_type == 'pick up' %}
+                            {% if order.takeout.pickup_status == 'preparing_order' %}
+                                <div class="px-3 py-1 rounded-lg bg-orange-100 text-sm font-medium text-orange-800">Preparing Order</div>
+                            {% elif order.takeout.pickup_status == 'ready_for_pickup' %}
+                                <div class="px-3 py-1 rounded-lg bg-blue-100 text-sm font-medium text-blue-800">Ready for Pickup</div>
+                            {% elif order.takeout.pickup_status == 'picked_up' %}
+                                <div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Picked Up</div>
+                            {% endif %}
                         {% endif %}
                     </div>
-                    {% endif %}
                 </div>
 
             </div>
@@ -191,7 +195,6 @@
             <!-- Card Footer Actions -->
             <div class="flex flex-wrap justify-between items-center w-full pt-4 gap-3 border-t border-gray-200 pr-4">
                 <div class="flex gap-3">
-                    <!-- Update Status Button (ONLY FOR DELIVERY) -->
                     {% if order.order_type == 'delivery' %}
                     <button onclick="toggleStatusModal('status-overlay-{{ order.order_id_str }}', '{{ order.delivery.delivery_status }}')"
                         class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-green-600 text-sm font-medium text-white hover:bg-green-700"
@@ -199,7 +202,13 @@
                         Update Delivery Status</button>
                     {% endif %}
 
-                    <!-- View Receipt Button (FOR ALL) -->
+                    {% if order.order_type == 'pick up' %}
+                    <button onclick="toggleStatusModal('status-overlay-{{ order.order_id_str }}', '{{ order.takeout.pickup_status }}')"
+                        class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-green-600 text-sm font-medium text-white hover:bg-green-700"
+                        data-current-status="{{ order.takeout.pickup_status }}">
+                        Update Pickup Status</button>
+                    {% endif %}
+
                     <button onclick="openReceiptModal('receipt-modal-{{ order.order_id_str }}')"
                         class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors">
                         View Receipt</button>
@@ -234,6 +243,35 @@
                     <button onclick="updateOrderStatus('{{ order.id }}', 'delivered', '{{ order.order_id_str }}')"
                             class="flex justify-center items-center py-2 rounded-lg border border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 hover:text-green-900 transition-all duration-200 text-sm font-medium shadow-sm">
                         Delivered
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- STATUS UPDATE OVERLAY (ONLY FOR TAKEOUTS) -->
+            {% if order.order_type == 'pick up' %}
+            <div id="status-overlay-{{ order.order_id_str }}"
+                    class="hidden absolute bottom-0 left-0 w-full bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-10 p-4 animate-slide-up">
+                <div class="flex justify-between items-center mb-3">
+                    <p class="text-sm font-semibold text-gray-700">Update Pickup Status</p>
+                    <button onclick="toggleStatusModal('status-overlay-{{ order.order_id_str }}')" class="text-gray-400 hover:text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="updateOrderStatus('{{ order.id }}', 'preparing_order', '{{ order.order_id_str }}')"
+                            class="flex justify-center items-center py-2 rounded-lg border border-orange-200 text-orange-700 hover:bg-orange-100 hover:border-orange-300 hover:text-orange-900 transition-all duration-200 text-sm font-medium shadow-sm">
+                        Preparing
+                    </button>
+                    <button onclick="updateOrderStatus('{{ order.id }}', 'ready_for_pickup', '{{ order.order_id_str }}')"
+                            class="flex justify-center items-center py-2 rounded-lg border border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-900 transition-all duration-200 text-sm font-medium shadow-sm">
+                        Ready
+                    </button>
+                    <button onclick="updateOrderStatus('{{ order.id }}', 'picked_up', '{{ order.order_id_str }}')"
+                            class="flex justify-center items-center py-2 rounded-lg border border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 hover:text-green-900 transition-all duration-200 text-sm font-medium shadow-sm">
+                        Picked Up
                     </button>
                 </div>
             </div>
@@ -385,16 +423,26 @@
         const card = document.getElementById(`order-${domOrderId}`);
         if (!card) return;
 
-        // Update badge (Only for delivery orders)
+        // Update badge (For Delivery AND Takeout)
         const badgeContainer = card.querySelector('.status-badge-container');
         if (badgeContainer) {
             let badgeHtml = '';
+
+            // Common / Delivery Statuses
             if (status === 'preparing_order') {
                 badgeHtml = '<div class="px-3 py-1 rounded-lg bg-orange-100 text-sm font-medium text-orange-800">Preparing Order</div>';
-            } else if (status === 'in_progress') {
+            } else if (status === 'in_progress') { // Delivery: Out for Delivery
                 badgeHtml = '<div class="px-3 py-1 rounded-lg bg-blue-100 text-sm font-medium text-blue-800">Out for Delivery</div>';
-            } else if (status === 'delivered') {
+            } else if (status === 'delivered') {   // Delivery: Delivered
                 badgeHtml = '<div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Delivered</div>';
+
+            // Takeout Specific Statuses
+            } else if (status === 'ready_for_pickup') { // Takeout: Ready
+                badgeHtml = '<div class="px-3 py-1 rounded-lg bg-blue-100 text-sm font-medium text-blue-800">Ready for Pickup</div>';
+            } else if (status === 'picked_up') {        // Takeout: Completed
+                badgeHtml = '<div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Picked Up</div>';
+
+            // Fallback
             } else {
                 badgeHtml = `<div class="px-3 py-1 rounded-lg bg-gray-100 text-sm font-medium text-gray-800">${status}</div>`;
             }

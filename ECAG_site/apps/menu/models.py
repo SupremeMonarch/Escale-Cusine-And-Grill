@@ -5,7 +5,7 @@ from django.db.models import Sum
 from decimal import Decimal, ROUND_HALF_UP
 from django.utils import timezone
 from datetime import timedelta
-    
+
 def default_arrival_time():
     return (timezone.now() + timedelta(minutes=15)).time() #adds 15 min to current time when entering a default arrival time for delivery
 
@@ -57,7 +57,7 @@ class MenuItem(models.Model):
     subcategory_id = models.ForeignKey(MenuSubCategory, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.name    
+        return self.name
 
 class Promotion(models.Model):
     item = models.ForeignKey(MenuItem, on_delete=models.CASCADE, related_name="promotions")
@@ -71,10 +71,10 @@ class Promotion(models.Model):
         if self.end_date and self.start_date and self.end_date < self.start_date:
             raise ValueError("end date cannot be before start date")
         super().save(*args, **kwargs)
-    
+
     def __str__(self): #this is so only the user's name appears on the admin page when an order is added
         return self.title
-    
+
 class Order(models.Model):
     # allow anonymous orders by permitting a NULL user
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
@@ -108,12 +108,12 @@ class Order(models.Model):
     def save(self, *args, **kwargs):
         is_new = self.pk is None
         update_fields = kwargs.get('update_fields')
-        
+
         super().save(*args, **kwargs) # Save first to get a primary key (self.id)
         if not self.order_id_str:
             self.order_id_str = f"ORD-{self.id:03d}"
             super(Order, self).save(update_fields=['order_id_str'])
-        
+
         # Handle order_type changes and create/delete Delivery/Takeout accordingly
         # Only run this when it's not a new order AND we're not in the middle of updating specific fields
         if not is_new and update_fields is None:
@@ -150,7 +150,7 @@ class Order(models.Model):
         """Handle order_type changes and sync Delivery/Takeout records accordingly."""
         # Import locally to avoid circular dependency since these are defined later in the file
         from apps.menu import models as menu_models
-        
+
         if self.order_type == self.Ordertype.DELIVERY:
             # Ensure Delivery exists, remove Takeout
             try:
@@ -189,7 +189,7 @@ class Order(models.Model):
                 pass
             except Exception:
                 pass
-        
+
         # Recalculate total after order_type changes
         self.update_total()
 
@@ -310,6 +310,13 @@ class Order(models.Model):
 
         return order
 
+    @property
+    def get_item_summary(self):
+        items = self.items.all()
+        if not items:
+            return "No items"
+        return ", ".join([f"{item.quantity}x {item.item.name}" for item in items])
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
@@ -356,7 +363,7 @@ class OrderItem(models.Model):
 
     def __str__(self): #this is so only the user's name appears on the admin page when an order is added
         return f"{self.quantity} x {self.item.name}(s)"
-    
+
     @property
     def discounted_price(self):
         """
@@ -367,6 +374,26 @@ class OrderItem(models.Model):
         discounted = self.item.price * (Decimal("1") - self.promo.discountpercent)
         return roundup(discounted)
 
+    @property
+    def toppings_list(self):
+        """Returns a list of dictionaries [{'name': 'Beef', 'price': 15}, ...] for template iteration."""
+        results = []
+
+        # Meat topping
+        if self.meat_topping:
+            price = TOPPING_PRICES.get(self.meat_topping, Decimal("0.00"))
+            results.append({'name': self.meat_topping, 'price': price})
+
+        # Extra toppings
+        if self.extra_toppings:
+            extras = [x.strip() for x in self.extra_toppings.split(',') if x.strip()]
+            for x in extras:
+                price = TOPPING_PRICES.get(x, Decimal("0.00"))
+                results.append({'name': x, 'price': price})
+
+        return results
+
+
 class Delivery(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="delivery")
     address = models.TextField(max_length=300)
@@ -375,7 +402,7 @@ class Delivery(models.Model):
         PREPARING_ORDER = "preparing_order" , "Preparing Order"
         IN_PROGRESS = "in_progress", "In Progress"
         DELIVERED   = "delivered",   "Delivered"
-    
+
     delivery_status = models.CharField(
         max_length=20,
         choices=Status.choices,
@@ -400,6 +427,16 @@ class Delivery(models.Model):
 class Takeout(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="takeout")
     fee = models.DecimalField(max_digits=8, decimal_places=2, validators=[MinValueValidator(Decimal("0.00"))], default=Decimal("50.00"))
+    class Status(models.TextChoices): #enum data type
+        PREPARING_ORDER = "preparing_order" , "Preparing Order"
+        READY_FOR_PICKUP = "ready_for_pickup", "Ready for Pickup"
+        PICKED_UP   = "picked_up",   "Picked Up"
+
+    pickup_status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PREPARING_ORDER,
+    )
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -432,7 +469,7 @@ class Transaction(models.Model):
     card_number = models.CharField(max_length=19, blank=True, help_text="PAN without spaces, typically 13-19 digits")
     exp_date = models.DateField(null=True, blank=True)
     cvv = models.CharField(max_length=4, blank=True)
-    transaction_date = models.DateTimeField(auto_now_add=True, editable=False)  
+    transaction_date = models.DateTimeField(auto_now_add=True, editable=False)
     class Status(models.TextChoices): #enum data type
         IN_PROGRESS = "in_progress", "In Progress"
         COMPLETED   = "completed",   "Completed"

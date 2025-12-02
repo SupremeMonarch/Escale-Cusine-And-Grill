@@ -1,7 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Sum
+from django.contrib import messages
+from .forms import UserUpdateForm
 
 from apps.menu.models import Order
 from apps.reservations.models import Reservation
@@ -64,7 +66,25 @@ def profile(request):
     customer = get_current_user(request)
     context = {
         'user': customer,
-        'profile': customer.profile,
         'active_page': 'profile'
     }
     return render(request, 'customer/profile.html', context)
+
+@login_required
+def edit_profile(request):
+    customer = get_current_user(request)
+
+    if request.method == 'POST':
+        form = UserUpdateForm(request.POST, instance=customer)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your profile has been updated successfully!')
+            return redirect('profile')
+    else:
+        form = UserUpdateForm(instance=customer)
+
+    context = {
+        'form': form,
+        'active_page': 'profile'
+    }
+    return render(request, 'customer/edit_profile.html', context)

@@ -4,16 +4,28 @@
 
 {% block dashboard_content %}
     <div class="p-4 sm:p-6 lg:p-8 w-full max-w-[850px] mx-auto space-y-6">
+
+        <!-- Messages Section -->
+        {% if messages %}
+        <div class="w-full mb-4">
+            {% for message in messages %}
+            <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50" role="alert">
+                <span class="font-medium">Success!</span> {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <!-- Header Section -->
         <div class="flex justify-between items-center w-full w-full h-14 mx-auto mb-6 pl-4 pr-4 pt-4">
             <div class="flex flex-col justify-start items-start h-auto w-full sm:w-auto pl-2">
                 <h1 class="text-xl font-bold text-gray-900">My Profile</h1>
                 <p class="text-xs text-gray-600">Manage personal information</p>
             </div>
-            <button class="flex items-center justify-center gap-2 w-32 h-12 px-4 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition">
+            <a href="{% url 'edit_profile' %}" class="flex items-center justify-center gap-2 w-32 h-12 px-4 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition decoration-0">
                 <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" preserveAspectRatio="none"><path d="M4.6147 10.6533L11.3768 3.89334L10.4298 2.94667L3.66773 9.72V10.6533H4.6147ZM5.16153 11.9867H2.33398V9.16L9.96303 1.53334C10.0875 1.40889 10.2431 1.34667 10.4298 1.34667C10.6166 1.34667 10.7722 1.40889 10.8967 1.53334L12.7906 3.42667C12.924 3.55111 12.9906 3.70667 12.9906 3.89334C12.9906 4.08 12.924 4.24 12.7906 4.37334L5.16153 11.9867ZM2.33398 13.32H14.3377V14.6533H2.33398V13.32Z" fill="white"></path></svg>
                 <span class="text-sm font-medium">Edit Profile</span>
-            </button>
+            </a>
         </div>
 
         <!-- Main Card Container -->
@@ -34,37 +46,8 @@
                     <label class="text-gray-700 text-sm font-medium">Email</label>
                     <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ user.email|default:"..." }}</div>
                 </div>
-                <div class="space-y-1">
-                    <label class="text-gray-700 text-sm font-medium">Phone</label>
-                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ profile.phone|default:"..." }}</div>
-                </div>
-                <div class="space-y-1">
-                    <label class="text-gray-700 text-sm font-medium">Birthday</label>
-                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ profile.birthday|date:"F d, Y"|default:"..." }}</div>
-                </div>
-            </div>
 
-            <!-- Address Information -->
-            <h2 class="text-xl font-semibold mt-8 mb-6 border-b pb-2 text-gray-800">Address Information</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
-                <div class="space-y-1">
-                    <label class="text-gray-700 text-sm font-medium">Street Address</label>
-                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ profile.street_address|default:"..." }}</div>
-                </div>
-                <div class="space-y-1">
-                    <label class="text-gray-700 text-sm font-medium">City</label>
-                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ profile.city|default:"..." }}</div>
-                </div>
-                <div class="space-y-1">
-                    <label class="text-gray-700 text-sm font-medium">District</label>
-                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ profile.district|default:"..." }}</div>
-                </div>
-                <div class="space-y-1">
-                    <label class="text-gray-700 text-sm font-medium">ZIP Code</label>
-                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ profile.zip_code|default:"..." }}</div>
-                </div>
             </div>
-
         </div>
     </div>
 {% endblock dashboard_content %}

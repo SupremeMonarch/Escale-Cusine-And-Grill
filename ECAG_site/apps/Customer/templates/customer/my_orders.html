@@ -25,7 +25,8 @@
 
     /* Modal Backdrop */
     .modal-backdrop {
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(1px);
     }
 
     /* Modal Animation */
@@ -71,7 +72,9 @@
                         <p class="text-sm text-gray-500">{{ order.order_date|date:"F d, Y \a\t g:i A" }}</p>
                     </div>
                     <div class="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
-                        {% if order.order_type == 'delivery' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-amber-100 text-sm font-medium text-amber-800">Esimated Arrival: {{ order.delivery.arrival_time }}</p></div>{% endif %}
+                        {% if order.order_type == 'delivery' %}
+                            <div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-amber-100 text-sm font-medium text-amber-800">ETA: {{ order.delivery.arrival_time }}</div>
+                        {% endif %}
 
                         <!-- Order Type -->
                         {% if order.order_type == 'dine in' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-yellow-100"><p class="text-sm font-medium text-yellow-800">Dine-in</p></div>
@@ -80,15 +83,25 @@
                         {% else %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-gray-100"><p class="text-sm font-medium text-gray-800">{{ order_type_display }}</p></div>
                         {% endif %}
 
-                        <!-- Delivery Status (Only for Delivery) -->
-                        {% if order.order_type == 'delivery' %}
                         <div class="status-badge-container">
-                            {% if order.delivery.delivery_status == 'preparing_order' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-orange-100 text-sm font-medium text-orange-800">Preparing</p></div>
-                            {% elif order.delivery.delivery_status == 'in_progress' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-blue-100 text-sm font-medium text-blue-800">Out for Delivery</p></div>
-                            {% elif order.delivery.delivery_status == 'delivered' %}<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Delivered</p></div>
+                        {% if order.order_type == 'delivery' %}
+                            {% if order.delivery.delivery_status == 'preparing_order' %}
+                                <div class="px-3 py-1 rounded-lg bg-orange-100 text-sm font-medium text-orange-800">Preparing Order</div>
+                            {% elif order.delivery.delivery_status == 'in_progress' %}
+                                <div class="px-3 py-1 rounded-lg bg-blue-100 text-sm font-medium text-blue-800">Out for Delivery</div>
+                            {% elif order.delivery.delivery_status == 'delivered' %}
+                                <div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Delivered</div>
                             {% endif %}
-                        </div>
+                        {% elif order.order_type == 'pick up' %}
+                            {% if order.takeout.pickup_status == 'preparing_order' %}
+                                <div class="px-3 py-1 rounded-lg bg-orange-100 text-sm font-medium text-orange-800">Preparing Order</div>
+                            {% elif order.takeout.pickup_status == 'ready_for_pickup' %}
+                                <div class="px-3 py-1 rounded-lg bg-blue-100 text-sm font-medium text-blue-800">Ready for Pickup</div>
+                            {% elif order.takeout.pickup_status == 'picked_up' %}
+                                <div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Picked Up</div>
+                            {% endif %}
                         {% endif %}
+                    </div>
                     </div>
                 </div>
                 <div class="flex flex-col pt-4">
@@ -112,12 +125,12 @@
                         <p class="text-sm font-medium text-gray-900">Rs {{ item.subtotal|floatformat:2 }}</p>
                     </div>
                     {% endfor %}
-                    {% if order.order_type == 'pick up' or order.order_type == 'Takeout' %}
+                    {% if order.order_type == 'pick up' %}
                     <div  class="flex justify-between items-start px-6">
                         <p class="text-sm text-gray-700">Takeout Fee: </p>
                         <p class="text-sm font-medium text-gray-900">Rs {{ order.takeout_fee|floatformat:2 }}</p>
                     </div>
-                    {% elif order.order_type == 'Delivery' or order.order_type == 'delivery' %}
+                    {% elif order.order_type == 'delivery' %}
                     <div  class="flex justify-between items-start px-6">
                         <p class="text-sm text-gray-700">Delivery Fee: </p>
                         <p class="text-sm font-medium text-gray-900">Rs {{ order.delivery_fee|floatformat:2 }}</p>
@@ -152,7 +165,6 @@
                             <span>Time: {{ order.order_date|time:"H:i" }}</span>
                         </div>
                         <div class="text-xs text-gray-600 border-b border-dashed border-gray-300 pb-4">
-                            <p>Customer:</p>
                             <p>Type: {{ order.order_type }}</p>
                         </div>
                         <div class="space-y-2">

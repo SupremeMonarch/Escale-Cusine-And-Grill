@@ -73,11 +73,13 @@
     </header>
 
     <!-- Filter Buttons Container -->
-    <div class="flex flex-wrap justify-start gap-2 items-center w-full mb-5 px-3">
+<div class="flex flex-wrap justify-start gap-2 items-center w-full mb-5 px-3 z-20 relative">
 
-        <!-- DATE FILTER -->
-        <div class="relative group">
-            <form id="date-filter-form" method="GET" action="{% url 'staff_reservations' %}">
+        <form id="filter-form" method="GET" action="{% url 'staff_reservations' %}" class="flex flex-wrap gap-2 items-center">
+
+            <input type="hidden" name="sort" id="sort-input" value="{{ current_sort }}">
+
+            <div class="relative group">
                 <div class="flex items-center h-9 px-3 py-2 rounded-lg shadow-sm border transition-all cursor-pointer whitespace-nowrap
                             {% if selected_date %}
                                 bg-white border-orange-500 ring-1 ring-orange-500 text-gray-900
@@ -99,18 +101,71 @@
                         {% endif %}
                     </span>
                 </div>
-                <!-- Native Date Input Overlaid -->
                 <input type="date"
                        name="date"
                        value="{{ selected_date|default:'' }}"
                        onchange="this.form.submit()"
-                       class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 date-input">
-            </form>
-        </div>
+                       class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 date-input ">
+            </div>
 
-        <!-- Clear Date Button (Only visible if date selected) -->
+            <div class="relative">
+                <button type="button"
+                        onclick="toggleSortMenu()"
+                        class="flex justify-center items-center h-9 px-3 rounded-lg border bg-gray-100 border text-gray-700 hover:bg-gray-200 shadow-sm transition-colors"
+                        title="Sort Reservations">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                    </svg>
+                    <span class="text-sm font-medium ml-1">Sort</span>
+                </button>
+
+                <div id="sort-menu" class="hidden absolute top-10 left-0 w-56 bg-gray-100 rounded-lg shadow-xl border border py-1 z-50">
+                    <p class="px-4 py-2 text-xs font-semibold text-gray-600 uppercase tracking-wider">Sort Order</p>
+
+                    <div class="border-t border-gray-300 my-1"></div>
+
+                    <button type="button" onclick="applySort('time_asc')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
+                        <span class="{% if current_sort == 'time_asc' %}text-orange-600 font-medium{% else %}text-gray-700{% endif %}">Time: Earliest First</span>
+                        {% if current_sort == 'time_asc' %}<svg class="h-4 w-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{% endif %}
+                    </button>
+
+                    <button type="button" onclick="applySort('time_desc')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
+                        <span class="{% if current_sort == 'time_desc' %}text-orange-600 font-medium{% else %}text-gray-700{% endif %}">Time: Latest First</span>
+                        {% if current_sort == 'time_desc' %}<svg class="h-4 w-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{% endif %}
+                    </button>
+
+                    <div class="border-t border-gray-300 my-1"></div>
+
+                    <button type="button" onclick="applySort('guests_desc')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
+                        <span class="{% if current_sort == 'guests_desc' %}text-orange-600 font-medium{% else %}text-gray-700{% endif %}">Guests: High to Low</span>
+                        {% if current_sort == 'guests_desc' %}<svg class="h-4 w-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{% endif %}
+                    </button>
+
+                    <button type="button" onclick="applySort('guests_asc')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
+                        <span class="{% if current_sort == 'guests_asc' %}text-orange-600 font-medium{% else %}text-gray-700{% endif %}">Guests: Low to High</span>
+                        {% if current_sort == 'guests_asc' %}<svg class="h-4 w-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{% endif %}
+                    </button>
+
+                    <div class="border-t border-gray-300 my-1"></div>
+
+                    <button type="button" onclick="applySort('table_desc')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
+                        <span class="{% if current_sort == 'guests_desc' %}text-orange-600 font-medium{% else %}text-gray-700{% endif %}">Table id: High to Low</span>
+                        {% if current_sort == 'table_desc' %}<svg class="h-4 w-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{% endif %}
+                    </button>
+
+                    <button type="button" onclick="applySort('table_asc')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
+                        <span class="{% if current_sort == 'guests_desc' %}text-orange-600 font-medium{% else %}text-gray-700{% endif %}">Table id: Low to High</span>
+                        {% if current_sort == 'table_asc' %}<svg class="h-4 w-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{% endif %}
+                    </button>
+                </div>
+            </div>
+
+        </form>
+
         {% if selected_date %}
-        <a href="{% url 'staff_reservations' %}" class="flex justify-center items-center h-9 w-9 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition" title="Clear Date Filter">
+        <a href="{% url 'staff_reservations' %}?sort={{ current_sort }}"
+           class="flex justify-center items-center h-9 w-9 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition"
+           title="Clear Date Filter">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -119,14 +174,11 @@
 
         <div class="w-[1.5px] h-6 bg-gray-300 mx-1"></div>
 
-        <!-- STATUS FILTERS -->
         <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-900 text-white hover:bg-gray-700 shadow-sm border" data-status="All">All ({{total_reservations}})</button>
         <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border" data-status="confirmed">Confirmed ({{confirmed_count}})</button>
         <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border" data-status="seated">Seated ({{seated_count}})</button>
         <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border" data-status="completed">Completed ({{completed_count}})</button>
         <button class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border" data-status="cancelled">Cancelled ({{cancelled_count}})</button>
-
-
 
     </div>
 
@@ -138,7 +190,7 @@
            data-reservation-db-id="{{ res.reservation_id }}"
            class="reservation-card relative w-full flex flex-col justify-between items-start p-6 rounded-lg bg-white border border-gray-200 shadow-sm scroll-mt-24 transition-colors duration-300 overflow-hidden">
 
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center self-stretch pb-4 gap-3 border-b border-gray-200">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center self-stretch pb-2 gap-3 border-b border-gray-200">
             <p class="text-base font-semibold text-gray-900">#RES-{{ res.reservation_id }} - {{ res.full_name }}</p>
 
             <!-- Status Badge Container -->
@@ -151,6 +203,7 @@
                 {% endif %}
             </div>
         </div>
+
         <div class="grid grid-cols-3 gap-4 py-4 border-b border-gray-200 w-full">
             <div class="flex flex-col items-center"><span class="text-xs font-medium text-gray-600 mb-1">Guests</span><p class="text-ms font-semibold text-gray-900 w-full flex justify-center">{{ res.guest_count }} people</p></div>
             <div class="flex flex-col items-center"><span class="text-xs font-medium text-gray-600 mb-1">Table</span><p class="text-ms font-semibold text-gray-900 w-full flex justify-center">{{ res.table_id.table_number|default:"N/A" }}</p></div>
@@ -423,6 +476,33 @@
         if (event.key === "Escape") {
             const openOverlays = document.querySelectorAll('[id^="status-overlay-"]:not(.hidden)');
             openOverlays.forEach(overlay => overlay.classList.add('hidden'));
+        }
+    });
+    // --- Sort Menu Toggle Logic ---
+    function toggleSortMenu() {
+        const menu = document.getElementById('sort-menu');
+        if (menu.classList.contains('hidden')) {
+            menu.classList.remove('hidden');
+        } else {
+            menu.classList.add('hidden');
+        }
+    }
+
+    function applySort(sortValue) {
+        // Set the hidden input value
+        document.getElementById('sort-input').value = sortValue;
+        // Submit the form
+        document.getElementById('filter-form').submit();
+    }
+
+    // Close sort menu if clicking outside
+    window.addEventListener('click', function(e) {
+        const menu = document.getElementById('sort-menu');
+        const button = e.target.closest('button[onclick="toggleSortMenu()"]');
+
+        // If the click is NOT on the menu and NOT on the button, hide the menu
+        if (!menu.contains(e.target) && !button && !menu.classList.contains('hidden')) {
+            menu.classList.add('hidden');
         }
     });
 </script>

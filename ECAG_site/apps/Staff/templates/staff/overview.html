@@ -46,15 +46,15 @@
             <div class="flex flex-col p-6 space-y-4 max-h-[525px] overflow-y-auto hide-scrollbar">
                 {% for order in active_orders %}
                 <div onclick="window.location.href='{% url 'staff_orders' %}#order-{{ order.order_id_str }}'"
-                     class="flex flex-col w-full p-4 rounded-lg bg-white border border-gray-200 space-y-2 cursor-pointer hover:bg-orange-50 hover:border-orange-400 transition-all duration-200 group">
+                     class="flex flex-col w-full p-4 rounded-lg bg-white border border-gray-200 space-y-1 cursor-pointer hover:bg-orange-50 hover:border-orange-400 transition-all duration-200 group">
                     <div class="flex justify-between items-center w-full">
                         <p class="text-base font-medium text-gray-900 group-hover:text-orange-700 transition-colors">#{{ order.order_id_str }}</p>
                         <p class="text-sm text-gray-500">{{ order.order_date|time:"g:i A" }}</p>
                     </div>
                     <p class="text-sm text-gray-600"></p>
                     <p class="text-sm text-gray-600 truncate">{{ order.get_item_summary }}</p>
-                    <div class="flex justify-between items-center w-full pt-2">
-                        <button class="text-sm font-medium text-green-600 hover:text-green-500 z-10" onclick="event.stopPropagation()">Update Status</button>
+                    <div class="flex justify-between items-center w-full">
+                        <button class="text-sm font-medium text-green-600 hover:text-green-500 z-10">Update Status</button>
                         <div class="flex items-center gap-2">
                             {% if order.order_type == 'Dine in' or order.order_type == 'dine in' %}
                                 <div class="px-3 py-1 rounded-lg bg-yellow-100 text-xs font-medium text-yellow-800">Dine-in</div>
@@ -82,7 +82,7 @@
                  {% for res in reservations_active %}
 
                 <div onclick="window.location.href='{% url 'staff_reservations' %}#reservation-{{ res.reservation_id }}'"
-                     class="flex flex-col w-full p-4 rounded-lg bg-white border border-gray-200 space-y-2 cursor-pointer hover:bg-orange-50 hover:border-orange-400 transition-all duration-200 group">
+                     class="flex flex-col w-full p-4 rounded-lg bg-white border border-gray-200 space-y-1 cursor-pointer hover:bg-orange-50 hover:border-orange-400 transition-all duration-200 group">
                     <div class="flex justify-between items-center w-full">
                         <p class="text-base font-medium text-gray-900 group-hover:text-orange-700 transition-colors">#RES-{{ res.reservation_id }}</p>
                         <p class="text-sm text-gray-500">{{ res.time|time:"g:i A" }}</p>
@@ -92,7 +92,7 @@
                         <p class="text-sm font-medium text-gray-700">{{ res.guest_count }} guests</p>
                     </div>
                      <p class="text-sm text-gray-600">Table {{ res.table_id.table_number|default:"N/A" }}</p>
-                    <div class="flex justify-between items-center w-full pt-1">
+                    <div class="flex justify-between items-center w-full">
 
                         <button class="text-sm font-medium text-green-600 hover:text-green-500 z-10" >Update Status</button>
                         {% if res.status == 'confirmed' %}
