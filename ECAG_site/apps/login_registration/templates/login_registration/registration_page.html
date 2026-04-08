@@ -1,23 +1,85 @@
-{% extends "base.html" %}
-{% load static %}
-{% block title %}Home | Escale{% endblock %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account - Django App</title>
+  <script src="https://cdn.tailwindcss.com"></script>  <!-- Tailwind CSS CDN -->
+</head>
+<body class="bg-gray-100">
 
-<body>
-    <h2>Register</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Register</button>
+  <!-- Main Container -->
+  <div class="max-w-lg mx-auto p-8 bg-white shadow-xl rounded-xl mt-12">
+    <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Create Your Account</h2>
+
+    <!-- Registration Form -->
+    <form method="POST">
+      {% csrf_token %}
+      <div class="space-y-4">
+        <!-- First Name -->
+        <div class="space-y-2">
+          <label for="first_name" class="block text-gray-600">First Name</label>
+          <input type="text" name="first_name" class="input-field border-2 border-gray-300 p-2 rounded-md w-full focus:outline-none focus:border-blue-500" placeholder="First Name">
+        </div>
+
+        <!-- Last Name -->
+        <div class="space-y-2">
+          <label for="last_name" class="block text-gray-600">Last Name</label>
+          <input type="text" name="last_name" class="input-field border-2 border-gray-300 p-2 rounded-md w-full focus:outline-none focus:border-blue-500" placeholder="Last Name">
+        </div>
+
+        <!-- Email -->
+        <div class="space-y-2">
+          <label for="email" class="block text-gray-600">Email</label>
+          <input type="email" name="email" class="input-field border-2 border-gray-300 p-2 rounded-md w-full focus:outline-none focus:border-blue-500" placeholder="Email">
+        </div>
+
+        <!-- Phone Number -->
+        <div class="space-y-2">
+          <label for="phone_number" class="block text-gray-600">Mobile Number</label>
+          <input type="text" name="phone_number" class="input-field border-2 border-gray-300 p-2 rounded-md w-full focus:outline-none focus:border-blue-500" placeholder="Mobile Number">
+        </div>
+
+        <!-- Address -->
+        <div class="space-y-2">
+          <label for="address" class="block text-gray-600">Address</label>
+          <input type="text" name="address" class="input-field border-2 border-gray-300 p-2 rounded-md w-full focus:outline-none focus:border-blue-500" placeholder="Address">
+        </div>
+
+        <!-- Date of Birth -->
+        <div class="space-y-2">
+          <label for="date_of_birth" class="block text-gray-600">Date of Birth</label>
+          <input type="date" name="date_of_birth" class="input-field border-2 border-gray-300 p-2 rounded-md w-full focus:outline-none focus:border-blue-500">
+        </div>
+
+        <!-- Password -->
+        <div class="space-y-2">
+          <label for="password" class="block text-gray-600">Password</label>
+          <input type="password" name="password" class="input-field border-2 border-gray-300 p-2 rounded-md w-full focus:outline-none focus:border-blue-500" placeholder="Password">
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="space-y-2">
+          <label for="confirm_password" class="block text-gray-600">Confirm Password</label>
+          <input type="password" name="confirm_password" class="input-field border-2 border-gray-300 p-2 rounded-md w-full focus:outline-none focus:border-blue-500" placeholder="Confirm Password">
+        </div>
+
+        <div class="mt-6">
+          <button type="submit" class="w-full py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none">Create Account</button>
+        </div>
+      </div>
     </form>
 
     {% if messages %}
-        <ul>
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
+      <div class="mt-4">
+        <ul class="space-y-2">
+          {% for message in messages %}
+            <li class="bg-red-100 text-red-600 p-2 rounded-md">{{ message }}</li>
+          {% endfor %}
         </ul>
+      </div>
     {% endif %}
-</body>
+  </div>
 
-{% endblock %}
+</body>
+</html>

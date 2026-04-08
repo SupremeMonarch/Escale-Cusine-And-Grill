@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from .forms import CustomerRegistrationForm, LoginForm
 from django.contrib.auth.hashers import check_password,make_password
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login,logout
 from .models import Customer
 
 # v1 and v2
@@ -37,7 +37,7 @@ def register(request):
         if form.is_valid():
             customer = form.save()  # save() now automatically hashes password
             messages.success(request, "Registration successful! You can now log in.")
-            return redirect('login')
+            return redirect('login_registration:login')
     else:
         form = CustomerRegistrationForm()
 
@@ -55,34 +55,35 @@ def login_view(request):
     if request.method == "POST":
         form = LoginForm(request.POST)
         if form.is_valid():
-            # Get and strip the data
             email = form.cleaned_data["email"].strip()
             password = form.cleaned_data["password"].strip()
-            
-            # # DEBUG: print form data
-            # print("Email entered:", email)
-            # print("Password entered:", password)
-            
+
             try:
-                # Case-insensitive lookup
-                customer = Customer.objects.get(email__iexact=email)
-                # print("Customer found:", customer)
-                # print("Password hash in DB:", customer.password)
+                user = Customer.objects.get(email=email)
             except Customer.DoesNotExist:
-                customer = None
-                print("No customer found with that email")
-            
-            # Check password
-            if customer and check_password(password, customer.password):
-                print("Password check passed")
-                request.session['customer_id'] = customer.customer_id
+                messages.error(request, "Invalid email or password.")
+                return render(request, "login_registration/login.html", {"form": form})
+
+            # Check hashed password manually
+            if check_password(password, user.password):
+                # Store user ID in session manually
+                request.session["customer_id"] = user.customer_id
+                request.session["customer_name"] = f"{user.first_name} {user.last_name}"
+
                 messages.success(request, "Login successful!")
-                return redirect("home")
+                return redirect('core:home')
             else:
-                print("Password check failed")
                 messages.error(request, "Invalid email or password.")
     else:
         form = LoginForm()
 
     return render(request, "login_registration/login.html", {"form": form})
 
+def logout_view(request):
+    if "customer_id" in request.session:
+        del request.session["customer_id"]
+
+    # Optional
+    messages.success(request, "Logged out successfully.")
+
+    return redirect("core:home")  

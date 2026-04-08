@@ -12,7 +12,7 @@
     {% endblock styles %}
 
 </head>
-<body class="font-sans bg-white text-gray-800" style="--nav-h: 64px;">
+<body class="font-sans text-gray-800" style="--nav-h: 64px;">
   <!-- Navbar -->
   <nav class="w-full fixed z-50 bg-gradient-to-r from-[#DC5E16] to-[#EF4444] shadow-none" style="height:var(--nav-h); box-shadow: 0 8px 18px rgba(0,0,0,0.10);">
   <div class="w-full px-8" style="height:var(--nav-h); display:flex; align-items:center; justify-content:space-between;">
@@ -88,20 +88,53 @@
         </div>
 
         <!-- Auth Button -->
-        {% if user.is_authenticated %}
-            <a href="{% url 'overview' %}"
-            class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500
-                    bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
-            My Account
-            </a>
-        {% else %}
-            <a href="{% url 'login_registration:login' %}"
-            class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500
-                    bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
-            Sign in
-            </a>
-        {% endif %}
+      {% if request.session.customer_id %}
+        <div class="flex items-center space-x-3">
+          <span class="text-white text-lg">
+            Welcome, {{ request.session.customer_name }}
+          </span>
+
+        <a href="{% url 'login_registration:logout' %}"
+           class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500
+                  bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
+            Logout
+        </a>
+
         </div>
+      {% else %}
+        <a href="{% url 'login_registration:login' %}"
+          class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500
+             bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
+          Sign in
+        </a>
+      {% endif %}
+
+
+
+
+        </div>
+        
+
+        <!--
+        {% if user.is_authenticated %}
+          <div class="flex items-center space-x-3">
+            <span class="text-white text-lg">Welcome, {{ user.get_full_name }}</span>
+         Logout Button
+          <a href="{% url 'logout' %}"  
+           class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500
+                  bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
+            Logout
+          </a>
+        </div>
+        {% else %}
+          <a href="{% url 'login_registration:login' %}"
+            class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500
+              bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
+              Sign in
+        </a>
+        {% endif %}
+        -->
+
     </div>
     </nav>
 

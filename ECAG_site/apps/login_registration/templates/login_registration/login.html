@@ -1,27 +1,76 @@
-{% extends "base.html" %}
-{% load static %}
-{% block title %}Home | Escale{% endblock %}
-{% block content %}
-<body>
-    <h2>Login</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
 
-    {% if messages %}
-        {% for message in messages %}
-            <p style="color:red;">{{ message }}</p>
-        {% endfor %}
-    {% endif %}
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Login</button>
-    </form>
+    <style>
+        .gradient-btn {
+            background: linear-gradient(to right, #f97316, #dc2626);
+        }
+    </style>
+</head>
 
-    <br>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
 
-    <a href="{% url 'login_registration:register' %}" class="btn btn-primary">
-    Register Here!
-</a>
+    <div class="bg-white w-96 p-8 rounded-2xl shadow-xl">
+
+        <h2 class="text-2xl font-bold text-center mb-1">Welcome Back</h2>
+        <p class="text-gray-500 text-center mb-6">Sign in to your account</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <p class="text-red-500 text-center mb-2">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" class="mt-4">
+            {% csrf_token %}
+
+            <label class="text-sm font-semibold">Email Address</label>
+            <input
+                type="email"
+                name="email"
+                class="w-full mt-1 p-2 border rounded-lg mb-4"
+                placeholder="you@example.com"
+                required
+            >
+
+            <label class="text-sm font-semibold">Password</label>
+            <input
+                type="password"
+                name="password"
+                class="w-full mt-1 p-2 border rounded-lg mb-4"
+                placeholder="********"
+                required
+            >
+
+            <div class="text-right mb-4">
+                <a href="#" class="text-orange-600 text-sm hover:underline">
+                    Forgot your password?
+                </a>
+            </div>
+
+            <button
+                type="submit"
+                class="w-full text-white py-2 rounded-lg font-semibold gradient-btn"
+            >
+                Sign In
+            </button>
+        </form>
+
+        <p class="text-center text-sm mt-4">
+            Don’t have an account?
+            <a href="{% url 'login_registration:register' %}" class="text-orange-600 font-semibold hover:underline">
+                Create an account
+            </a>
+        </p>
+
+    </div>
 
 </body>
-{% endblock %}
+</html>
