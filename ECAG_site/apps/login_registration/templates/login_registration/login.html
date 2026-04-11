@@ -9,7 +9,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        .gradient-btn {
+        .gradient-btn 
+        {
             background: linear-gradient(to right, #f97316, #dc2626);
         }
     </style>
@@ -19,28 +20,54 @@
 
     <div class="bg-white w-96 p-8 rounded-2xl shadow-xl">
 
-        <h2 class="text-2xl font-bold text-center mb-1">Welcome Back</h2>
-        <p class="text-gray-500 text-center mb-6">Sign in to your account</p>
+        <h2 class="text-2xl font-bold text-center mb-1">
+            Welcome Back
+        </h2>
+
+        <p class="text-gray-500 text-center mb-6">
+            Sign in to your account
+        </p>
+
 
         {% if messages %}
             {% for message in messages %}
-                <p class="text-red-500 text-center mb-2">{{ message }}</p>
+                <p class="text-red-500 text-center mb-2">
+                    {{ message }}
+                </p>
             {% endfor %}
         {% endif %}
+
 
         <form method="POST" class="mt-4">
             {% csrf_token %}
 
-            <label class="text-sm font-semibold">Email Address</label>
+
+            <label for="username" class="text-sm font-semibold">
+                Username
+            </label>
+            
             <input
-                type="email"
-                name="email"
+                type="text"
+                name="username"
+                value="{{ form.username.value }}"
                 class="w-full mt-1 p-2 border rounded-lg mb-4"
-                placeholder="you@example.com"
+                placeholder="Your Username"
                 required
             >
 
-            <label class="text-sm font-semibold">Password</label>
+            {% if form.username.errors %}
+                <div class="text-red-500 text-sm">
+                    {% for error in form.username.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+
+            <label for="password" class="text-sm font-semibold">
+                Password
+            </label>
+            
             <input
                 type="password"
                 name="password"
@@ -49,18 +76,25 @@
                 required
             >
 
+            {% if form.password.errors %}
+                <div class="text-red-500 text-sm">
+                    {% for error in form.password.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+
             <div class="text-right mb-4">
                 <a href="#" class="text-orange-600 text-sm hover:underline">
                     Forgot your password?
                 </a>
             </div>
 
-            <button
-                type="submit"
-                class="w-full text-white py-2 rounded-lg font-semibold gradient-btn"
-            >
+            <button type="submit" class="w-full text-white py-2 rounded-lg font-semibold gradient-btn">
                 Sign In
             </button>
+
         </form>
 
         <p class="text-center text-sm mt-4">
@@ -74,3 +108,15 @@
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
