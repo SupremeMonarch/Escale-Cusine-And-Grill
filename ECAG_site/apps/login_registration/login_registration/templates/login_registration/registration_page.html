@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account - Django App</title>
+  <script src="https://cdn.tailwindcss.com"></script>  <!-- Tailwind CSS CDN -->
+</head>
+<body class="bg-gray-100">
+
+
+  <div class="max-w-lg mx-auto p-8 bg-white shadow-xl rounded-xl mt-12">
+    <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Create Your Account</h2>
+
+    <!-- Registration Form -->
+    <form method="POST">
+      {% csrf_token %}
+      <div class="space-y-4">
+        
+        <div class="space-y-2">
+          <label for="username" class="block text-gray-600">Username</label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <div class="text-red-600 text-sm">
+              {% for error in form.username.errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        
+        <div class="space-y-2">
+          <label for="first_name" class="block text-gray-600">First Name</label>
+          {{ form.first_name }}
+          {% if form.first_name.errors %}
+            <div class="text-red-600 text-sm">
+              {% for error in form.first_name.errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Last Name -->
+        <div class="space-y-2">
+          <label for="last_name" class="block text-gray-600">Last Name</label>
+          {{ form.last_name }}
+          {% if form.last_name.errors %}
+            <div class="text-red-600 text-sm">
+              {% for error in form.last_name.errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Email -->
+        <div class="space-y-2">
+          <label for="email" class="block text-gray-600">Email</label>
+          {{ form.email }}
+          {% if form.email.errors %}
+            <div class="text-red-600 text-sm">
+              {% for error in form.email.errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Phone Number -->
+        <div class="space-y-2">
+          <label for="phone_number" class="block text-gray-600">Mobile Number</label>
+          {{ form.phone_number }}
+          {% if form.phone_number.errors %}
+            <div class="text-red-600 text-sm">
+              {% for error in form.phone_number.errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Address -->
+        <div class="space-y-2">
+          <label for="address" class="block text-gray-600">Address</label>
+          {{ form.address }}
+          {% if form.address.errors %}
+            <div class="text-red-600 text-sm">
+              {% for error in form.address.errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Date of Birth -->
+        <div class="space-y-2">
+          <label for="date_of_birth" class="block text-gray-600">Date of Birth</label>
+          {{ form.date_of_birth }}
+          {% if form.date_of_birth.errors %}
+            <div class="text-red-600 text-sm">
+              {% for error in form.date_of_birth.errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Password -->
+        <div class="space-y-2">
+          <label for="password" class="block text-gray-600">Password</label>
+          {{ form.password1 }}
+          {% if form.password1.errors %}
+            <div class="text-red-600 text-sm">
+              {% for error in form.password1.errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="space-y-2">
+          <label for="confirm_password" class="block text-gray-600">Confirm Password</label>
+          {{ form.password2 }}
+          {% if form.password2.errors %}
+            <div class="text-red-600 text-sm">
+              {% for error in form.password2.errors %}
+                <p>{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="mt-6">
+          <button type="submit" class="w-full py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none">Create Account</button>
+        </div>
+      </div>
+    </form>
+
+    {% if messages %}
+      <div class="mt-4">
+        <ul class="space-y-2">
+          {% for message in messages %}
+            <li class="bg-red-100 text-red-600 p-2 rounded-md">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  </div>
+
+</body>
+</html>
