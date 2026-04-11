@@ -88,53 +88,24 @@
         </div>
 
         <!-- Auth Button -->
-      {% if request.session.customer_id %}
-        <div class="flex items-center space-x-3">
-          <span class="text-white text-lg">
-            Welcome, {{ request.session.customer_name }}
-          </span>
-
-        <a href="{% url 'login_registration:logout' %}"
-           class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500
-                  bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
-            Logout
-        </a>
-
-        </div>
-      {% else %}
-        <a href="{% url 'login_registration:login' %}"
-          class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500
-             bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
-          Sign in
-        </a>
-      {% endif %}
-
-
-
-
-        </div>
-        
-
-        <!--
-        {% if user.is_authenticated %}
+         {% if user.is_authenticated %}
           <div class="flex items-center space-x-3">
-            <span class="text-white text-lg">Welcome, {{ user.get_full_name }}</span>
-         Logout Button
-          <a href="{% url 'logout' %}"  
-           class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500
-                  bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
-            Logout
-          </a>
-        </div>
-        {% else %}
-          <a href="{% url 'login_registration:login' %}"
-            class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500
-              bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
-              Sign in
-        </a>
-        {% endif %}
-        -->
+            <span class="text-white text-lg">
+              Welcome, {{ user.first_name }}  <!-- Displaying first name or another field -->
+            </span>
 
+            <a href="{% url 'login_registration:logout' %}" class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500 bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
+              Logout
+            </a>
+
+          </div>
+
+          {% else %}
+            <a href="{% url 'login_registration:login' %}" class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500 bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
+              Sign in
+            </a>
+          {% endif %}
+ 
     </div>
     </nav>
 
