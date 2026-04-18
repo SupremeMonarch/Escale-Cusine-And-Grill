@@ -1,6 +1,7 @@
 <!-- theme/templates/base.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Escale Cuisine & Grill{% endblock %}</title>
@@ -12,218 +13,218 @@
     {% endblock styles %}
 
 </head>
+
 <body class="font-sans text-gray-800" style="--nav-h: 64px;">
-  <!-- Navbar -->
-  <nav class="w-full fixed z-50 bg-gradient-to-r from-[#DC5E16] to-[#EF4444] shadow-none" style="height:var(--nav-h); box-shadow: 0 8px 18px rgba(0,0,0,0.10);">
-  <div class="w-full px-8" style="height:var(--nav-h); display:flex; align-items:center; justify-content:space-between;">
+    <!-- Navbar -->
+    <nav class="w-full fixed z-50 bg-gradient-to-r from-[#DC5E16] to-[#EF4444] shadow-none"
+        style="height:var(--nav-h); box-shadow: 0 8px 18px rgba(0,0,0,0.10);">
+        <div class="w-full px-8"
+            style="height:var(--nav-h); display:flex; align-items:center; justify-content:space-between;">
 
-        <!-- Logo (Left) -->
-        <a href="{% url 'core:home' %}" class="text-2xl font-bold text-white">
-        Escale
-        </a>
+            <!-- Logo (Left) -->
+            <a href="{% url 'core:home' %}" class="text-2xl font-bold text-white">
+                Escale
+            </a>
 
-        <!-- Links (Center) -->
-        <ul class="hidden md:flex space-x-6 font-medium text-white mx-auto">
-        <li>
-            <a href="{% url 'core:home' %}"
-            class="px-3 py-1 border-b {% if request.resolver_match.url_name == 'home' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
-            Home
-            </a>
-        </li>
-        <li>
-            <a href="{% url 'core:about' %}"
-            class="px-3 py-1 border-b {% if request.resolver_match.url_name == 'about' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
-            About
-            </a>
-        </li>
-        <li>
-          <a href="{% url 'menu:menu_starters' %}"
-          class="px-3 py-1 border-b {% if request.resolver_match.namespace == 'menu' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
-          Menu
-          </a>
-        </li>
-        <li>
-            <a href="{% url 'reservations:reservations' %}"
-            class="px-3 py-1 border-b {% if request.resolver_match.url_name == 'reservations' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
-            Reservations
-            </a>
-        </li>
-        <li>
-            <a href="{% url 'core:contact' %}"
-            class="px-3 py-1 border-b {% if request.resolver_match.url_name == 'contact' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
-            Contact
-            </a>
-        </li>
-        <li>
-          <a href="{% url 'review:review' %}"
-          class="px-3 py-1 border-b {% if request.resolver_match.namespace == 'review' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
-          Reviews
-          </a>
-        </li>
-        </ul>
+            <!-- Links (Center) -->
+            <ul class="hidden md:flex space-x-6 font-medium text-white mx-auto">
+                <li>
+                    <a href="{% url 'core:home' %}"
+                        class="px-3 py-1 border-b {% if request.resolver_match.url_name == 'home' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'core:about' %}"
+                        class="px-3 py-1 border-b {% if request.resolver_match.url_name == 'about' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
+                        About
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'menu:menu_starters' %}"
+                        class="px-3 py-1 border-b {% if request.resolver_match.namespace == 'menu' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
+                        Menu
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'reservations:reservations' %}"
+                        class="px-3 py-1 border-b {% if request.resolver_match.url_name == 'reservations' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
+                        Reservations
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'core:contact' %}"
+                        class="px-3 py-1 border-b {% if request.resolver_match.url_name == 'contact' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
+                        Contact
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'review:review' %}"
+                        class="px-3 py-1 border-b {% if request.resolver_match.namespace == 'review' %}border-white{% else %}border-[#FF6200]{% endif %} hover:text-yellow-200">
+                        Reviews
+                    </a>
+                </li>
+            </ul>
 
-        <!-- Right Side (toggle + auth button) -->
-        <div class="flex items-center space-x-3">
+            <!-- Right Side (toggle + auth button) -->
+            <div class="flex items-center space-x-3">
 
-        <!-- Language Toggle -->
-        <div class="flex items-center rounded-full border border-black overflow-hidden text-sm font-medium">
-            <a href="?lang=fr"
-            class="px-4 py-1 transition
+                <!-- Language Toggle -->
+                <div class="flex items-center rounded-full border border-black overflow-hidden text-sm font-medium">
+                    <a href="?lang=fr" class="px-4 py-1 transition
                     {% if request.LANGUAGE_CODE == 'fr' %}
                         bg-gradient-to-r from-[#FFD692] to-[#F31414] text-white
                     {% else %}
                         bg-gradient-to-r from-[#FFD692] to-[#F31414] text-white
                     {% endif %}">
-            FR
-            </a>
-            <a href="?lang=en"
-            class="px-3 py-1 transition
+                        FR
+                    </a>
+                    <a href="?lang=en" class="px-3 py-1 transition
                     {% if request.LANGUAGE_CODE == 'en' %}
                         bg-gradient-to-r from-[#FFD692] to-[#F31414] text-white
                     {% else %}
                         bg-white text-black
                     {% endif %}">
-            EN
-            </a>
+                        EN
+                    </a>
+                </div>
+
+                <!-- Auth Button -->
+                {% if user.is_authenticated %}
+                <div class="flex items-center space-x-4">
+                    <span class="text-white text-sm font-medium">
+                        Hi, {{ user.first_name|default:user.username }}
+                    </span>
+
+                    <!-- Respective Overview Button -->
+                    {% if user.is_superuser %}
+                    <a href="{% url 'admin-overview' %}"
+                        class="px-4 py-2 rounded-lg text-white font-medium border border-white/30 bg-white/10 hover:bg-white/20 transition text-sm">
+                        Dashboard
+                    </a>
+                    {% elif user.is_staff %}
+                    <a href="{% url 'staff_overview' %}"
+                        class="px-4 py-2 rounded-lg text-white font-medium border border-white/30 bg-white/10 hover:bg-white/20 transition text-sm">
+                        Staff Panel
+                    </a>
+                    {% else %}
+                    <a href="{% url 'overview' %}"
+                        class="px-4 py-2 rounded-lg text-white font-medium border border-white/30 bg-white/10 hover:bg-white/20 transition text-sm">
+                        My Account
+                    </a>
+                    {% endif %}
+
+                    <a href="{% url 'login_registration:logout' %}"
+                        class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500
+                bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition"">
+                        Logout
+                    </a>
+
+                </div>
+                {% else %}
+                <a href="{% url 'login_registration:login' %}" class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500
+                bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
+                    Sign in
+                </a>
+                {% endif %}
+            </div>
         </div>
-
-        <!-- Auth Button -->
-      {% if request.session.customer_id %}
-        <div class="flex items-center space-x-3">
-          <span class="text-white text-lg">
-            Welcome, {{ request.session.customer_name }}
-          </span>
-
-        <a href="{% url 'login_registration:logout' %}"
-           class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500
-                  bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
-            Logout
-        </a>
-
-        </div>
-      {% else %}
-        <a href="{% url 'login_registration:login' %}"
-          class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500
-             bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
-          Sign in
-        </a>
-      {% endif %}
-
-
-
-
-        </div>
-        
-
-        <!--
-        {% if user.is_authenticated %}
-          <div class="flex items-center space-x-3">
-            <span class="text-white text-lg">Welcome, {{ user.get_full_name }}</span>
-         Logout Button
-          <a href="{% url 'logout' %}"  
-           class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500
-                  bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
-            Logout
-          </a>
-        </div>
-        {% else %}
-          <a href="{% url 'login_registration:login' %}"
-            class="px-5 py-2 rounded-lg text-white font-medium border border-amber-500
-              bg-gradient-to-b from-[#E97820] via-[#EC6030] to-[#EF4444] hover:opacity-90 transition">
-              Sign in
-        </a>
-        {% endif %}
-        -->
-
-    </div>
     </nav>
 
 
-  <!-- Page Content -->
+    <!-- Page Content -->
     <main style="padding-top:var(--nav-h);">
         {% block content %}{% endblock %}
     </main>
 
-{% block footer %}
-<footer
-  class="flex w-auto min-h-[300px] px-20 {% block footer_extra_classes %} {% endblock footer_extra_classes %}"
-  style="background: linear-gradient(176.08deg, #111827 -38%, #762f15 50%, #7f1d1d 138%);"
->
-  <div class="flex justify-between items-start w-full px-20 py-12">
+    {% block footer %}
+    <footer class="flex w-auto min-h-[300px] px-20 {% block footer_extra_classes %} {% endblock footer_extra_classes %}"
+        style="background: linear-gradient(176.08deg, #111827 -38%, #762f15 50%, #7f1d1d 138%);">
+        <div class="flex justify-between items-start w-full px-20 py-12">
 
-    <!-- Brand + Description + Socials -->
-    <div class="flex flex-col w-[35%]">
-      <h2 class="text-lg font-semibold text-amber-400 mb-3">Escale Cuisine and Grill</h2>
-      <p class="text-gray-300 mb-4">
-        Experience authentic cuisine with a tropical fire in a warm,
-        welcoming atmosphere. From traditional recipes passed
-        through generations to modern culinary innovations.
-      </p>
+            <!-- Brand + Description + Socials -->
+            <div class="flex flex-col w-[35%]">
+                <h2 class="text-lg font-semibold text-amber-400 mb-3">Escale Cuisine and Grill</h2>
+                <p class="text-gray-300 mb-4">
+                    Experience authentic cuisine with a tropical fire in a warm,
+                    welcoming atmosphere. From traditional recipes passed
+                    through generations to modern culinary innovations.
+                </p>
 
-      <!-- Social icons -->
-      <div class="flex space-x-4">
+                <!-- Social icons -->
+                <div class="flex space-x-4">
 
-        <div class="flex space-x-4">
-            <a href="https://www.facebook.com/profile.php?id=61576039765411#" aria-label="Facebook">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300 hover:text-amber-400" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M22 12.07C22 6.54 17.52 2 12 2S2 6.54 2 12.07c0 5 3.66 9.13 8.44 9.93v-7.03H8.1v-2.9h2.34V9.41c0-2.3 1.37-3.57 3.46-3.57.99 0 2.03.18 2.03.18v2.24h-1.15c-1.14 0-1.5.71-1.5 1.44v1.73h2.55l-.41 2.9h-2.14v7.03C18.34 21.2 22 17.07 22 12.07z"/>
-                </svg>
-            </a>
+                    <div class="flex space-x-4">
+                        <a href="https://www.facebook.com/profile.php?id=61576039765411#" aria-label="Facebook">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300 hover:text-amber-400"
+                                fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M22 12.07C22 6.54 17.52 2 12 2S2 6.54 2 12.07c0 5 3.66 9.13 8.44 9.93v-7.03H8.1v-2.9h2.34V9.41c0-2.3 1.37-3.57 3.46-3.57.99 0 2.03.18 2.03.18v2.24h-1.15c-1.14 0-1.5.71-1.5 1.44v1.73h2.55l-.41 2.9h-2.14v7.03C18.34 21.2 22 17.07 22 12.07z" />
+                            </svg>
+                        </a>
 
-            <a href="#" aria-label="Instagram">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300 hover:text-amber-400" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7.75 2h8.5C19.1 2 22 4.9 22 8.25v8.5c0 3.35-2.9 6.25-6.25 6.25h-8.5C4.9 23 2 20.1 2 16.75v-8.5C2 4.9 4.9 2 7.75 2zm0 2C5.68 4 4 5.68 4 7.75v8.5C4 18.32 5.68 20 7.75 20h8.5c2.07 0 3.75-1.68 3.75-3.75v-8.5C20 5.68 18.32 4 16.25 4h-8.5zM12 7a5 5 0 110 10 5 5 0 010-10zm0 2.1a2.9 2.9 0 100 5.8 2.9 2.9 0 000-5.8zm4.75-.6a1.15 1.15 0 110 2.3 1.15 1.15 0 010-2.3z"/>
-                </svg>
-            </a>
+                        <a href="#" aria-label="Instagram">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300 hover:text-amber-400"
+                                fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M7.75 2h8.5C19.1 2 22 4.9 22 8.25v8.5c0 3.35-2.9 6.25-6.25 6.25h-8.5C4.9 23 2 20.1 2 16.75v-8.5C2 4.9 4.9 2 7.75 2zm0 2C5.68 4 4 5.68 4 7.75v8.5C4 18.32 5.68 20 7.75 20h8.5c2.07 0 3.75-1.68 3.75-3.75v-8.5C20 5.68 18.32 4 16.25 4h-8.5zM12 7a5 5 0 110 10 5 5 0 010-10zm0 2.1a2.9 2.9 0 100 5.8 2.9 2.9 0 000-5.8zm4.75-.6a1.15 1.15 0 110 2.3 1.15 1.15 0 010-2.3z" />
+                            </svg>
+                        </a>
 
-            <a href="#" aria-label="Twitter">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300 hover:text-amber-400" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M22.46 6c-.77.35-1.6.58-2.46.69a4.3 4.3 0 001.88-2.38 8.59 8.59 0 01-2.72 1.04A4.28 4.28 0 0016 4a4.28 4.28 0 00-4.28 4.28c0 .34.04.66.11.98A12.13 12.13 0 013 5.16a4.28 4.28 0 001.32 5.71 4.2 4.2 0 01-1.94-.54v.06c0 2.1 1.49 3.85 3.47 4.25a4.3 4.3 0 01-1.93.07 4.28 4.28 0 004 2.97A8.6 8.6 0 012 19.54a12.1 12.1 0 006.56 1.92c7.88 0 12.2-6.53 12.2-12.2v-.56A8.8 8.8 0 0022.46 6z"/>
-                </svg>
-            </a>
+                        <a href="#" aria-label="Twitter">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300 hover:text-amber-400"
+                                fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M22.46 6c-.77.35-1.6.58-2.46.69a4.3 4.3 0 001.88-2.38 8.59 8.59 0 01-2.72 1.04A4.28 4.28 0 0016 4a4.28 4.28 0 00-4.28 4.28c0 .34.04.66.11.98A12.13 12.13 0 013 5.16a4.28 4.28 0 001.32 5.71 4.2 4.2 0 01-1.94-.54v.06c0 2.1 1.49 3.85 3.47 4.25a4.3 4.3 0 01-1.93.07 4.28 4.28 0 004 2.97A8.6 8.6 0 012 19.54a12.1 12.1 0 006.56 1.92c7.88 0 12.2-6.53 12.2-12.2v-.56A8.8 8.8 0 0022.46 6z" />
+                            </svg>
+                        </a>
 
-            <a href="#" aria-label="YouTube">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300 hover:text-amber-400" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M21.8 8.001a2.75 2.75 0 00-1.94-1.94C18 5.75 12 5.75 12 5.75s-6 0-7.86.31A2.75 2.75 0 002.2 8.001 29.7 29.7 0 002 12c0 1.33.05 2.66.2 3.99a2.75 2.75 0 001.94 1.94C6 18.25 12 18.25 12 18.25s6 0 7.86-.31a2.75 2.75 0 001.94-1.94A29.7 29.7 0 0022 12c0-1.33-.05-2.66-.2-3.999zM10 14.5v-5l5 2.5-5 2.5z"/>
-                </svg>
-            </a>
+                        <a href="#" aria-label="YouTube">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300 hover:text-amber-400"
+                                fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M21.8 8.001a2.75 2.75 0 00-1.94-1.94C18 5.75 12 5.75 12 5.75s-6 0-7.86.31A2.75 2.75 0 002.2 8.001 29.7 29.7 0 002 12c0 1.33.05 2.66.2 3.99a2.75 2.75 0 001.94 1.94C6 18.25 12 18.25 12 18.25s6 0 7.86-.31a2.75 2.75 0 001.94-1.94A29.7 29.7 0 0022 12c0-1.33-.05-2.66-.2-3.999zM10 14.5v-5l5 2.5-5 2.5z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="flex flex-col w-[15%]">
+                <h3 class="text-lg font-semibold text-amber-300 mb-3">Quick Links</h3>
+                <ul class="space-y-1 text-gray-300">
+                    <li><a href="#" class="hover:text-amber-400">About Us</a></li>
+                    <li><a href="#" class="hover:text-amber-400">Menu</a></li>
+                    <li><a href="{% url 'reservations:reservations' %}" class="hover:text-amber-400">Reservations</a>
+                    </li>
+                    <li><a href="{% url 'review:review' %}" class="hover:text-amber-400">Reviews</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact -->
+            <div class="flex flex-col w-[25%]">
+                <h3 class="text-lg font-semibold text-amber-300 mb-3">Contact</h3>
+                <ul class="space-y-1 text-gray-300">
+                    <li>📍 Flic en Flac, Mauritius</li>
+                    <li>📞 +230 51234567</li>
+                    <li>✉️ info@escalecuisine.com</li>
+                </ul>
+            </div>
         </div>
+    </footer>
+    {% endblock footer %}
 
-        </a>
-      </div>
-    </div>
-
-    <!-- Quick Links -->
-    <div class="flex flex-col w-[15%]">
-      <h3 class="text-lg font-semibold text-amber-300 mb-3">Quick Links</h3>
-      <ul class="space-y-1 text-gray-300">
-        <li><a href="#" class="hover:text-amber-400">About Us</a></li>
-        <li><a href="#" class="hover:text-amber-400">Menu</a></li>
-        <li><a href="{% url 'reservations:reservations' %}" class="hover:text-amber-400">Reservations</a></li>
-        <li><a href="{% url 'review:review' %}" class="hover:text-amber-400">Reviews</a></li>
-      </ul>
-    </div>
-
-    <!-- Contact -->
-    <div class="flex flex-col w-[25%]">
-      <h3 class="text-lg font-semibold text-amber-300 mb-3">Contact</h3>
-      <ul class="space-y-1 text-gray-300">
-        <li>📍 Flic en Flac, Mauritius</li>
-        <li>📞 +230 51234567</li>
-        <li>✉️ info@escalecuisine.com</li>
-      </ul>
-    </div>
-  </div>
-</footer>
-{% endblock footer %}
-
-<!-- Child templates will add their own <script> tags here. -->
-{% block scripts %}
-{% endblock scripts %}
+    <!-- Child templates will add their own <script> tags here. -->
+    {% block scripts %}
+    {% endblock scripts %}
 </body>
 
 <!-- Per-page inline JS block (used by some templates) -->
 {% block extra_js %}{% endblock extra_js %}
 
 </body>
+
 </html>

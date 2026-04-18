@@ -27,28 +27,55 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
                     <!-- First Name -->
                     <div class="space-y-1">
-                        <label for="{{ form.first_name.id_for_label }}" class="text-gray-700 text-sm font-medium">First Name</label>
-                        {{ form.first_name }}
-                        {% if form.first_name.errors %}
-                            <p class="text-red-500 text-xs mt-1">{{ form.first_name.errors.0 }}</p>
+                        <label for="{{ u_form.first_name.id_for_label }}" class="text-gray-700 text-sm font-medium">First Name</label>
+                        {{ u_form.first_name }}
+                        {% if u_form.first_name.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ u_form.first_name.errors.0 }}</p>
                         {% endif %}
                     </div>
 
                     <!-- Last Name -->
                     <div class="space-y-1">
-                        <label for="{{ form.last_name.id_for_label }}" class="text-gray-700 text-sm font-medium">Last Name</label>
-                        {{ form.last_name }}
-                        {% if form.last_name.errors %}
-                            <p class="text-red-500 text-xs mt-1">{{ form.last_name.errors.0 }}</p>
+                        <label for="{{ u_form.last_name.id_for_label }}" class="text-gray-700 text-sm font-medium">Last Name</label>
+                        {{ u_form.last_name }}
+                        {% if u_form.last_name.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ u_form.last_name.errors.0 }}</p>
                         {% endif %}
                     </div>
 
                     <!-- Email -->
                     <div class="space-y-1 md:col-span-2">
-                        <label for="{{ form.email.id_for_label }}" class="text-gray-700 text-sm font-medium">Email Address</label>
-                        {{ form.email }}
-                        {% if form.email.errors %}
-                            <p class="text-red-500 text-xs mt-1">{{ form.email.errors.0 }}</p>
+                        <label for="{{ u_form.email.id_for_label }}" class="text-gray-700 text-sm font-medium">Email Address</label>
+                        {{ u_form.email }}
+                        {% if u_form.email.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ u_form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="space-y-1">
+                        <label for="{{ p_form.phone_number.id_for_label }}" class="text-gray-700 text-sm font-medium">Phone Number</label>
+                        {{ p_form.phone_number }}
+                        {% if p_form.phone_number.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ p_form.phone_number.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Date of Birth -->
+                    <div class="space-y-1">
+                        <label for="{{ p_form.date_of_birth.id_for_label }}" class="text-gray-700 text-sm font-medium">Date of Birth</label>
+                        {{ p_form.date_of_birth }}
+                        {% if p_form.date_of_birth.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ p_form.date_of_birth.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Address -->
+                    <div class="space-y-1 md:col-span-2">
+                        <label for="{{ p_form.address.id_for_label }}" class="text-gray-700 text-sm font-medium">Address</label>
+                        {{ p_form.address }}
+                        {% if p_form.address.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ p_form.address.errors.0 }}</p>
                         {% endif %}
                     </div>
                 </div>

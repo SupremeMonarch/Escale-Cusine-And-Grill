@@ -3,7 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Sum
 from django.contrib import messages
-from .forms import UserUpdateForm
+from .forms import UserUpdateForm, UserProfileUpdateForm
+from apps.login_registration.models import UserProfile
 
 from apps.menu.models import Order
 from apps.reservations.models import Reservation
@@ -64,8 +65,10 @@ def my_reservations(request):
 @login_required
 def profile(request):
     customer = get_current_user(request)
+    profile, created = UserProfile.objects.get_or_create(user=customer)
     context = {
         'user': customer,
+        'profile': profile,
         'active_page': 'profile'
     }
     return render(request, 'customer/profile.html', context)
@@ -73,18 +76,23 @@ def profile(request):
 @login_required
 def edit_profile(request):
     customer = get_current_user(request)
+    profile, created = UserProfile.objects.get_or_create(user=customer)
 
     if request.method == 'POST':
-        form = UserUpdateForm(request.POST, instance=customer)
-        if form.is_valid():
-            form.save()
+        u_form = UserUpdateForm(request.POST, instance=customer)
+        p_form = UserProfileUpdateForm(request.POST, instance=profile)
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            p_form.save()
             messages.success(request, 'Your profile has been updated successfully!')
             return redirect('profile')
     else:
-        form = UserUpdateForm(instance=customer)
+        u_form = UserUpdateForm(instance=customer)
+        p_form = UserProfileUpdateForm(instance=profile)
 
     context = {
-        'form': form,
+        'u_form': u_form,
+        'p_form': p_form,
         'active_page': 'profile'
     }
     return render(request, 'customer/edit_profile.html', context)

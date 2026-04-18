@@ -46,7 +46,18 @@
                     <label class="text-gray-700 text-sm font-medium">Email</label>
                     <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ user.email|default:"..." }}</div>
                 </div>
-
+                <div class="space-y-1">
+                    <label class="text-gray-700 text-sm font-medium">Phone Number</label>
+                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ profile.phone_number|default:"..." }}</div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-gray-700 text-sm font-medium">Date of Birth</label>
+                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ profile.date_of_birth|default:"..." }}</div>
+                </div>
+                <div class="space-y-1 md:col-span-2">
+                    <label class="text-gray-700 text-sm font-medium">Address</label>
+                    <div class="bg-gray-50 border border-gray-100 p-3 rounded-lg text-gray-800 text-base shadow-inner">{{ profile.address|default:"..." }}</div>
+                </div>
             </div>
         </div>
     </div>
