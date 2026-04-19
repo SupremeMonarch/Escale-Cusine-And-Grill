@@ -2,3 +2,5 @@ django
 django-tailwind[reload]
 Pillow
 djangorestframework
+flet[all]==0.84.0
+django-cors-headers

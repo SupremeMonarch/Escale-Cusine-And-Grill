@@ -274,3 +274,98 @@ class OrderSerializer(serializers.ModelSerializer):
         if value not in valid_values:
             raise serializers.ValidationError("Invalid order type.")
         return value
+
+
+class OrderItemCreateSerializer(serializers.Serializer):
+    item_id = serializers.PrimaryKeyRelatedField(queryset=MenuItem.objects.all())
+    quantity = serializers.IntegerField(min_value=1)
+    meat_topping = serializers.CharField(required=False, allow_blank=True, default="")
+    extra_toppings = serializers.CharField(required=False, allow_blank=True, default="")
+    promo_id = serializers.PrimaryKeyRelatedField(
+        queryset=Promotion.objects.all(), required=False, allow_null=True
+    )
+
+class OrderCreateSerializer(serializers.Serializer):
+    order_type = serializers.ChoiceField(choices=Order.Ordertype.choices)
+    items = OrderItemCreateSerializer(many=True)
+
+    address = serializers.CharField(required=False, allow_blank=True)
+
+    payment_method = serializers.ChoiceField(choices=Transaction.Method.choices)
+    card_name = serializers.CharField(required=False, allow_blank=True)
+    card_number = serializers.CharField(required=False, allow_blank=True)
+    exp_date = serializers.DateField(required=False, allow_null=True)
+    cvv = serializers.CharField(required=False, allow_blank=True)
+
+    def validate(self, attrs):
+        order_type = attrs.get("order_type")
+        address = attrs.get("address", "")
+        payment_method = attrs.get("payment_method")
+
+        if order_type == Order.Ordertype.DELIVERY and not address:
+            raise serializers.ValidationError({"address": "Address is required for delivery orders."})
+
+        if payment_method == Transaction.Method.CREDIT_CARD:
+            for field in ["card_name", "card_number", "exp_date", "cvv"]:
+                if not attrs.get(field):
+                    raise serializers.ValidationError({field: "Required for credit card payments."})
+
+        if not attrs.get("items"):
+            raise serializers.ValidationError({"items": "Order must have at least one item."})
+
+        return attrs
+
+    def create(self, validated_data):
+        from decimal import Decimal
+        from django.db import transaction as db_transaction
+
+        request = self.context.get("request")
+        user = request.user if request and request.user.is_authenticated else None
+
+        items_data = validated_data.pop("items")
+        order_type = validated_data["order_type"]
+        address = validated_data.pop("address", "")
+        payment_method = validated_data.pop("payment_method")
+        card_name = validated_data.pop("card_name", "")
+        card_number = validated_data.pop("card_number", "")
+        exp_date = validated_data.pop("exp_date", None)
+        cvv = validated_data.pop("cvv", "")
+
+        with db_transaction.atomic():
+            order = Order.objects.create(
+                user=user,
+                order_type=order_type,
+                status=Order.Status.IN_PROGRESS,
+            )
+
+            for item_data in items_data:
+                OrderItem.objects.create(
+                    order=order,
+                    item=item_data["item_id"],
+                    quantity=item_data["quantity"],
+                    meat_topping=item_data.get("meat_topping", ""),
+                    extra_toppings=item_data.get("extra_toppings", ""),
+                    promo=item_data.get("promo_id"),
+                )
+
+            if order_type == Order.Ordertype.DELIVERY:
+                Delivery.objects.create(order=order, address=address, fee=Decimal("100.00"))
+            elif order_type == Order.Ordertype.CARRY_OUT:
+                Takeout.objects.create(order=order, fee=Decimal("50.00"))
+
+            order.update_total()
+
+            Transaction.objects.create(
+                order=order,
+                payment_method=payment_method,
+                card_name=card_name,
+                card_number=card_number,
+                exp_date=exp_date,
+                cvv=cvv,
+                status=Transaction.Status.IN_PROGRESS,
+            )
+
+        return order
+
+    def to_representation(self, instance):
+        return OrderSerializer(instance, context=self.context).data

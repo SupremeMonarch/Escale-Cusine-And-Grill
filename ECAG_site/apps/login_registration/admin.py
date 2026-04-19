@@ -1,10 +1,24 @@
-# from django.contrib import admin
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
+from .models import UserProfile
 
-# # Register your models here.
-# from .models import Customer
+class ProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
 
-# @admin.register(Customer)
-# class CustomerAdmin(admin.ModelAdmin):
-#     list_display = ('customer_id', 'first_name', 'last_name', 'email', 'phone_number', 'date_of_birth', 'date_joined','address')
-#     search_fields = ('first_Name', 'last_Name', 'email', 'phone_number')
-#     list_filter = ('date_joined','customer_id')
+class CustomUserAdmin(UserAdmin):
+    inlines = [ProfileInline]
+
+admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'phone_number', 'address', 'date_of_birth')
+    def has_add_permission(self, request):
+        return False
+    def has_delete_permission(self, request, obj = ...):
+        return False
+    def has_change_permission(self, request, obj = ...):
+        return False

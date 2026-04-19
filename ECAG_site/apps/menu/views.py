@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db import transaction as db_transaction
 from decimal import Decimal
-from .models import MenuCategory, MenuItem, Order, OrderItem, Transaction, TOPPING_PRICES, eligible_for_toppings
+from .models import MenuCategory, MenuSubCategory, MenuItem, Promotion,Order, OrderItem, Transaction, Delivery, Takeout,TOPPING_PRICES, eligible_for_toppings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -52,7 +52,7 @@ def checkout(request):
         if not order_id:
             # No order found, redirect back to checkout
             return redirect("menu:checkout")
-        
+
         try:
             order = Order.objects.get(pk=order_id, status=Order.Status.IN_PROGRESS)
         except Order.DoesNotExist:
@@ -76,7 +76,7 @@ def checkout(request):
                 except Transaction.DoesNotExist:
                     # Create transaction if it doesn't exist
                     txn = Transaction(order=order, payment_method=pm, status=Transaction.Status.IN_PROGRESS)
-                
+
                 txn.payment_method = pm
                 # Capture card fields only if credit card chosen
                 if pm == Transaction.Method.CREDIT_CARD:
@@ -95,14 +95,14 @@ def checkout(request):
                     txn.card_number = ""
                     txn.exp_date = None
                     txn.cvv = ""
-                
+
                 txn.status = Transaction.Status.COMPLETED
                 txn.save()
-                
+
                 # Mark order as completed
                 order.status = Order.Status.COMPLETED
                 order.save()
-                
+
                 # Clear cart-related session state
                 _reset_cart_session(request.session)
                 request.session["cart_items"] = []
@@ -113,26 +113,26 @@ def checkout(request):
             # Log error but still redirect
             print(f"Error completing order: {e}")
             pass
-        
+
         return redirect("menu:checkout_success")
 
     # GET: Create order from session cart if not already created
     order_id = request.session.get('checkout_order_id')
     order = None
-    
+
     if order_id:
         try:
             order = Order.objects.get(pk=order_id, status=Order.Status.IN_PROGRESS)
         except Order.DoesNotExist:
             order = None
-    
+
     # If no order exists, we'll show preview from session (create on first visit)
     sess_cart = request.session.get("cart_items", [])
-    
+
     if not sess_cart:
         # Empty cart, redirect to menu
         return redirect("menu:menu_starters")
-    
+
     item_ids = [int(x.get('item_id')) for x in sess_cart if x.get('item_id')]
     items_map = {m.item_id: m for m in MenuItem.objects.filter(item_id__in=item_ids)} if item_ids else {}
 
@@ -185,7 +185,7 @@ def checkout(request):
     delivery_fee = DELIVERY_FEE if raw_type == 'delivery' else (TAKEOUT_FEE if raw_type == 'pick_up' else Decimal("0.00"))
     fee_label = 'Delivery' if raw_type == 'delivery' else ('Take Out' if raw_type == 'pick_up' else 'Dine In')
     type_label = 'Delivery' if raw_type == 'delivery' else ('Pick Up' if raw_type == 'pick_up' else 'Dine In')
-    
+
     # If this is the first GET request, create the order now with IN_PROGRESS status
     if not order:
         ORDER_TYPE_MAP = {
@@ -194,7 +194,7 @@ def checkout(request):
             'delivery': Order.Ordertype.DELIVERY,
         }
         mapped_ot = ORDER_TYPE_MAP.get(raw_type) or Order.Ordertype.DELIVERY
-        
+
         try:
             with db_transaction.atomic():
                 # Create order with IN_PROGRESS status
@@ -203,7 +203,7 @@ def checkout(request):
                     order_type=mapped_ot,
                     status=Order.Status.IN_PROGRESS,
                 )
-                
+
                 # Create OrderItems from session cart
                 for x in sess_cart:
                     iid = x.get('item_id')
@@ -223,7 +223,7 @@ def checkout(request):
                         meat_topping=meat,
                         extra_toppings=",".join([e for e in extras if e]),
                     )
-                
+
                 # Create Delivery/Takeout record
                 if mapped_ot == Order.Ordertype.DELIVERY:
                     from .models import Delivery
@@ -231,17 +231,17 @@ def checkout(request):
                 elif mapped_ot == Order.Ordertype.CARRY_OUT:
                     from .models import Takeout
                     Takeout.objects.create(order=order, fee=TAKEOUT_FEE)
-                
+
                 # Update totals
                 order.update_total()
-                
+
                 # Create transaction with IN_PROGRESS status
                 Transaction.objects.create(
                     order=order,
                     payment_method=Transaction.Method.CREDIT_CARD,
                     status=Transaction.Status.IN_PROGRESS,
                 )
-                
+
                 # Store order ID in session
                 request.session['checkout_order_id'] = order.id
                 request.session.modified = True
@@ -249,7 +249,7 @@ def checkout(request):
             print(f"Error creating order: {e}")
             # If order creation fails, show preview from session
             pass
-    
+
     order_ctx = {
         "order_type": raw_type or "delivery",
         "get_order_type_display": None,
@@ -340,3 +340,68 @@ def checkout_success(request):
     # Ensure sidebar/cart cleared post-success even if direct navigation occurred.
     _reset_cart_session(request.session)
     return render(request, 'checkout_success.html', {'order': order, 'transaction': txn})
+
+
+
+from rest_framework import viewsets, permissions
+from .serializers import (
+    MenuCategorySerializer, MenuSubCategorySerializer, MenuItemSerializer,
+    PromotionSerializer, OrderSerializer, OrderItemSerializer,
+    TransactionSerializer, DeliverySerializer, TakeoutSerializer, OrderCreateSerializer
+)
+
+# API ViewSets
+class MenuCategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = MenuCategory.objects.all()
+    serializer_class = MenuCategorySerializer
+
+class MenuSubCategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = MenuSubCategory.objects.all()
+    serializer_class = MenuSubCategorySerializer
+
+class MenuItemViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = MenuItem.objects.filter(is_available=True)
+    serializer_class = MenuItemSerializer
+
+class PromotionViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Promotion.objects.all()
+    serializer_class = PromotionSerializer
+
+class OrderViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user)
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return OrderCreateSerializer  # POST — full order creation
+        return OrderSerializer            # GET — read with nested items/delivery/etc
+
+class OrderItemViewSet(viewsets.ModelViewSet):
+    serializer_class = OrderItemSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return OrderItem.objects.filter(order__user=self.request.user)
+
+class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = TransactionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Transaction.objects.filter(order__user=self.request.user)
+
+class DeliveryViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = DeliverySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Delivery.objects.filter(order__user=self.request.user)
+
+class TakeoutViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = TakeoutSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Takeout.objects.filter(order__user=self.request.user)

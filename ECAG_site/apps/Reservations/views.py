@@ -308,3 +308,21 @@ def confirm_reservation(request):
     }
 
     return JsonResponse({'ok': True, 'next': '/reservations/step2/'})
+
+
+
+from .models import Table, Reservation
+from rest_framework import viewsets, permissions
+from .serializers import ReservationSerializer, TableSerializer
+# API ViewSets
+class TableViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Table.objects.all()
+    serializer_class = TableSerializer
+
+class ReservationViewSet(viewsets.ModelViewSet):
+    serializer_class = ReservationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Only show the user's own reservations
+        return Reservation.objects.filter(user_id=self.request.user)

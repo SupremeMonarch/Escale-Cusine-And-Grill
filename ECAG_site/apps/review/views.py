@@ -180,3 +180,13 @@ def review_verify(request, pk):
         review.save()
 
     return JsonResponse({'is_verified': review.is_verified})
+
+
+from rest_framework import viewsets, permissions
+from .serializers import ReviewSerializer
+
+# API ViewSets
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]

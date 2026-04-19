@@ -30,6 +30,13 @@ urlpatterns = [
     path("user/", include("apps.Customer.urls")),
     path("login/", include('apps.login_registration.urls', namespace="login_registration")),
     path("admin_panel/", include("apps.admin_panel.urls")),
+
+    # API
+    path("api/menu/", include("apps.menu.api_urls")),
+    path("api/reservations/", include("apps.reservations.api_urls")),
+    path("api/review/", include("apps.review.api_urls")),
+    path("api/auth/", include("apps.login_registration.api_urls")),
+
 ]
 
 if settings.DEBUG:

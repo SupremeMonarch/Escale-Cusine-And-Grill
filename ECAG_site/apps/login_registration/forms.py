@@ -38,27 +38,21 @@ class CustomUserProfileForm(forms.ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
-
         user = User.objects.create_user(
-                                            username=self.cleaned_data['username'],
-                                            email=self.cleaned_data['email'],
-                                            password=self.cleaned_data['password1'],
-                                            first_name=self.cleaned_data['first_name'],
-                                            last_name=self.cleaned_data['last_name']
-                                        )
+            username=self.cleaned_data['username'],
+            email=self.cleaned_data['email'],
+            password=self.cleaned_data['password1'],
+            first_name=self.cleaned_data['first_name'],
+            last_name=self.cleaned_data['last_name']
+        )
+        # signal creates the profile automatically
+        # but we still need to update the profile fields
+        user.userprofile.phone_number = self.cleaned_data['phone_number']
+        user.userprofile.address = self.cleaned_data['address']
+        user.userprofile.date_of_birth = self.cleaned_data['date_of_birth']
+        user.userprofile.save()
 
-
-        user_profile = UserProfile(
-                                        user=user,
-                                        phone_number=self.cleaned_data['phone_number'],
-                                        address=self.cleaned_data['address'],
-                                        date_of_birth=self.cleaned_data['date_of_birth']
-                                    )
-
-        if commit:
-            user_profile.save()
-
-        return user_profile
+        return user
 
 
 class LoginForm(forms.Form):
