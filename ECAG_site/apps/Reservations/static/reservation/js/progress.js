@@ -4,18 +4,13 @@ function updateProgress(currentStep) {
     // progress update (no debug logs)
     
     // Reset all steps to inactive first
-    const steps = document.querySelectorAll('[data-step]');
-    steps.forEach(step => {
-        step.classList.remove('bg-amber-600');
-        step.classList.add('bg-gray-400');
-    });
+    $('[data-step]').removeClass('bg-amber-600').addClass('bg-gray-400');
     
     // Activate all steps up to and including current step
     for (let step = 1; step <= currentStep; step++) {
-        const stepElement = document.querySelector(`[data-step="${step}"]`);
-        if (stepElement) {
-            stepElement.classList.remove('bg-gray-400');
-            stepElement.classList.add('bg-amber-600');
+        const $stepElement = $(`[data-step="${step}"]`);
+        if ($stepElement.length) {
+            $stepElement.removeClass('bg-gray-400').addClass('bg-amber-600');
             // step activated
         }
     }
@@ -28,25 +23,22 @@ function updateConnectorLines(currentStep) {
     // update connector lines
     
     // Get all connector lines
-    const connectors = document.querySelectorAll('[data-connector]');
-    
-    connectors.forEach(connector => {
-        const connectorStep = parseInt(connector.getAttribute('data-connector'));
+    $('[data-connector]').each(function () {
+        const $connector = $(this);
+        const connectorStep = parseInt($connector.attr('data-connector'), 10);
         
         // Connector lines should be amber if they come BEFORE the current step
         if (connectorStep < currentStep) {
-            connector.classList.remove('bg-gray-400');
-            connector.classList.add('bg-amber-600');
+            $connector.removeClass('bg-gray-400').addClass('bg-amber-600');
             // connector set to amber
         } else {
-            connector.classList.remove('bg-amber-600');
-            connector.classList.add('bg-gray-400');
+            $connector.removeClass('bg-amber-600').addClass('bg-gray-400');
             // connector set to gray
         }
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+$(function () {
     if (typeof CURRENT_STEP !== 'undefined') {
         updateProgress(parseInt(CURRENT_STEP));
     } else {

@@ -1,0 +1,75 @@
+{% for r in review_items %}
+  <article class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+    <div class="flex gap-4">
+      <div class="flex-shrink-0">
+        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center text-amber-800 font-semibold">{{ r.user_name|slice:":1"|upper }}</div>
+      </div>
+
+      <div class="flex-1">
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="flex items-center gap-2">
+              <p class="text-sm font-semibold text-gray-900">{{ r.user_name }}</p>
+              {% if r.is_verified %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">Verified</span>
+              {% endif %}
+              <span class="text-xs text-gray-400">· {{ r.date|date:"M d, Y" }}</span>
+            </div>
+
+            <h3 class="mt-2 text-base font-semibold text-gray-800">{{ r.title }}</h3>
+          </div>
+
+          <div class="text-right">
+            <div class="flex items-center justify-end gap-1">
+              {% for _ in "12345" %}
+                {% if forloop.counter <= r.rating %}
+                  <svg class="w-4 h-4 text-amber-500" viewBox="0 0 21 20" fill="#FACC15"><path d="M10.4141 15.75L4.53221 19.05L5.84854 12.4334L0.89978 7.86671L7.59811 7.06672L10.4141 0.950048L13.23 7.06672L19.9284 7.86671L14.9796 12.4334L16.2959 19.05L10.4141 15.75Z"></path></svg>
+                {% else %}
+                  <svg class="w-4 h-4 text-gray-300" viewBox="0 0 21 20" fill="#E5E7EB"><path d="M10.4141 15.75L4.53221 19.05L5.84854 12.4334L0.89978 7.86671L7.59811 7.06672L10.4141 0.950048L13.23 7.06672L19.9284 7.86671L14.9796 12.4334L16.2959 19.05L10.4141 15.75Z"></path></svg>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 text-sm text-gray-700 leading-relaxed">{{ r.text }}</div>
+
+        {% if r.dishes %}
+          <div class="mt-4">
+            <p class="text-sm font-medium text-gray-700 mb-2">Ordered:</p>
+            <div class="flex flex-wrap gap-2">
+              {% for dish in r.dishes %}
+                <span class="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-lg">{{ dish }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="mt-4 flex items-center justify-between text-sm text-gray-500">
+          <div class="flex items-center gap-4">
+            <button class="helpful-btn inline-flex items-center gap-2 text-gray-600 hover:text-gray-800" data-review-id="{{ r.id }}" {% if r.voted %}disabled aria-pressed="true" data-voted="1"{% endif %}>
+              <svg class="w-4 h-4" viewBox="0 0 20 20" fill="none"><path d="M7 10l3 3 7-7" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="helpful-count">Helpful (<span>{{ r.helpful }}</span>)</span>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-4">
+            {% if request.user.is_staff %}
+              {% if not r.is_verified %}
+                <button class="verify-btn inline-flex items-center gap-2 text-sm text-white bg-amber-600 hover:opacity-90 px-3 py-1 rounded" data-review-id="{{ r.id }}">Verify</button>
+              {% else %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">Verified</span>
+              {% endif %}
+            {% else %}
+              <a class="text-gray-400 hover:text-gray-600" href="#" aria-label="Share review">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 6l-4-4-4 4" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 2v14" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+{% empty %}
+  <p class="text-sm text-gray-600">No reviews yet — be the first to write one.</p>
+{% endfor %}

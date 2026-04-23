@@ -217,136 +217,20 @@
 
 
   <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
-  <div class="mt-10 flex flex-col justify-start items-start w-full p-4 sm:p-6 rounded-lg bg-white border border-gray-200 shadow-sm mb-12">
-  <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center w-full gap-4 lg:gap-6">
-    <!-- Left Section - Filters -->
-    <div class="flex flex-col sm:flex-row justify-start items-start sm:items-center w-full lg:w-auto gap-4">
-      <!-- Sort Dropdown (GET form preserves rating) -->
-      <div class="flex justify-start items-start w-full sm:w-auto">
-        <form method="get" id="sortForm" class="relative w-full sm:w-40">
-          <input type="hidden" name="rating" value="{{ current_rating }}" />
-          <select name="sort" onchange="this.form.submit()" class="w-full h-9 pl-4 pr-8 py-2 rounded-lg bg-gray-100 border border-gray-300 text-sm text-black appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest First</option>
-            <option value="oldest" {% if current_sort == 'oldest' %}selected{% endif %}>Oldest First</option>
-            <option value="highest" {% if current_sort == 'highest' %}selected{% endif %}>Highest Rated</option>
-            <option value="lowest" {% if current_sort == 'lowest' %}selected{% endif %}>Lowest Rated</option>
-          </select>
-          <svg class="absolute right-3 top-1/2 transform -translate-y-1/2 w-2.5 h-2.5 pointer-events-none" viewBox="0 0 10 10" fill="none">
-            <path d="M1 3.5L5 7.5L9 3.5H1Z" fill="black"></path>
-          </svg>
-        </form>
-      </div>
-
-      <!-- Rating Filters -->
-      <div class="flex flex-wrap justify-start items-center gap-2 w-full sm:w-auto">
-        <!-- All Ratings + individual rating filter buttons -->
-        <a href="?{% if current_sort %}sort={{ current_sort }}&amp;{% endif %}rating=all" class="flex items-center justify-center h-9 px-3 py-1 rounded-full {% if current_rating == 'all' or not current_rating %}bg-amber-100 text-amber-800{% else %}bg-gray-100 text-gray-600{% endif %} text-sm font-medium whitespace-nowrap transition-colors hover:bg-amber-200">All Ratings</a>
-
-        {% for star in "54321" %}
-          {% comment %} build href preserving sort {% endcomment %}
-          <a href="?{% if current_sort %}sort={{ current_sort }}&amp;{% endif %}rating={{ star }}" class="flex items-center justify-center h-9 px-3 py-1 rounded-full {% if current_rating == star %}bg-amber-100 text-amber-800{% else %}bg-gray-100 text-gray-600{% endif %} text-sm whitespace-nowrap transition-colors hover:bg-gray-200">
-            <span>{{ star }}</span>
-            <svg class="w-4 h-4 ml-1" viewBox="0 0 15 14" fill="none">
-              <path d="M7.28905 11.025L3.17219 13.335L4.09352 8.70329L0.629761 5.50663L5.31809 4.94663L7.28905 0.664961L9.26001 4.94663L13.9483 5.50663L10.4846 8.70329L11.4059 13.335L7.28905 11.025Z" fill="#FACC15"></path>
-            </svg>
-          </a>
-        {% endfor %}
-      </div>
-    </div>
-
-    <!-- Right Section - Results Count -->
-    <div class="flex justify-start items-center w-full lg:w-auto">
-      <p class="text-sm text-left text-gray-600 whitespace-nowrap">
-        Showing {{ displayed_count }} of {{ review_count }} reviews
-      </p>
-    </div>
+  <div id="reviews-filters">
+    {% include 'review/partials/review_filters.html' %}
   </div>
 
-  </div>
   <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mt-6">
     <div class="space-y-6" id="reviews-list">
-      {% for r in review_items %}
-        <article class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-          <div class="flex gap-4">
-            <!-- avatar -->
-            <div class="flex-shrink-0">
-              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center text-amber-800 font-semibold">{{ r.user_name|slice:":1"|upper }}</div>
-            </div>
-
-            <div class="flex-1">
-              <div class="flex items-start justify-between">
-                <div>
-                  <div class="flex items-center gap-2">
-                    <p class="text-sm font-semibold text-gray-900">{{ r.user_name }}</p>
-                    {% if r.is_verified %}
-                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">Verified</span>
-                    {% endif %}
-                    <span class="text-xs text-gray-400">· {{ r.date|date:"M d, Y" }}</span>
-                  </div>
-
-                  <h3 class="mt-2 text-base font-semibold text-gray-800">{{ r.title }}</h3>
-                </div>
-
-                <div class="text-right">
-                  <div class="flex items-center justify-end gap-1">
-                    {% for _ in "12345" %}
-                      {% if forloop.counter <= r.rating %}
-                        <svg class="w-4 h-4 text-amber-500" viewBox="0 0 21 20" fill="#FACC15"><path d="M10.4141 15.75L4.53221 19.05L5.84854 12.4334L0.89978 7.86671L7.59811 7.06672L10.4141 0.950048L13.23 7.06672L19.9284 7.86671L14.9796 12.4334L16.2959 19.05L10.4141 15.75Z"></path></svg>
-                      {% else %}
-                        <svg class="w-4 h-4 text-gray-300" viewBox="0 0 21 20" fill="#E5E7EB"><path d="M10.4141 15.75L4.53221 19.05L5.84854 12.4334L0.89978 7.86671L7.59811 7.06672L10.4141 0.950048L13.23 7.06672L19.9284 7.86671L14.9796 12.4334L16.2959 19.05L10.4141 15.75Z"></path></svg>
-                      {% endif %}
-                    {% endfor %}
-                  </div>
-                </div>
-              </div>
-
-              <div class="mt-4 text-sm text-gray-700 leading-relaxed">{{ r.text }}</div>
-
-              {% if r.dishes %}
-                <div class="mt-4">
-                  <p class="text-sm font-medium text-gray-700 mb-2">Ordered:</p>
-                  <div class="flex flex-wrap gap-2">
-                    {% for dish in r.dishes %}
-                      <span class="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-lg">{{ dish }}</span>
-                    {% endfor %}
-                  </div>
-                </div>
-              {% endif %}
-
-              <div class="mt-4 flex items-center justify-between text-sm text-gray-500">
-                <div class="flex items-center gap-4">
-                  <button class="helpful-btn inline-flex items-center gap-2 text-gray-600 hover:text-gray-800" data-review-id="{{ r.id }}" {% if r.voted %}disabled aria-pressed="true" data-voted="1"{% endif %}>
-                    <svg class="w-4 h-4" viewBox="0 0 20 20" fill="none"><path d="M7 10l3 3 7-7" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    <span class="helpful-count">Helpful (<span>{{ r.helpful }}</span>)</span>
-                  </button>
-                </div>
-
-                <div class="flex items-center gap-4">
-                  {% if request.user.is_staff %}
-                    {% if not r.is_verified %}
-                      <button class="verify-btn inline-flex items-center gap-2 text-sm text-white bg-amber-600 hover:opacity-90 px-3 py-1 rounded" data-review-id="{{ r.id }}">Verify</button>
-                    {% else %}
-                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">Verified</span>
-                    {% endif %}
-                  {% else %}
-                    <a class="text-gray-400 hover:text-gray-600" href="#" aria-label="Share review">
-                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 6l-4-4-4 4" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 2v14" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </a>
-                  {% endif %}
-                </div>
-              </div>
-            </div>
-          </div>
-        </article>
-      {% empty %}
-        <p class="text-sm text-gray-600">No reviews yet — be the first to write one.</p>
-      {% endfor %}
+      {% include 'review/partials/reviews_list.html' %}
     </div>
   </div>
 
 {% endblock %}
 
     {% block extra_js %}
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script>
     // Fetch CSRF cookie (Django default)
     function getCookie(name) {
@@ -365,69 +249,98 @@
       return cookieValue;
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
+    $(function () {
+      const reviewBaseUrl = '{% url "review:review" %}';
+
+      function getCurrentRating() {
+        const selected = $('#review-rating-filters .js-rating-filter.bg-amber-100').data('rating');
+        if (selected !== undefined && selected !== null && String(selected).length) return String(selected);
+        const hiddenVal = $('#sortForm input[name="rating"]').val();
+        return hiddenVal || 'all';
+      }
+
+      function updateReviewFilters(sort, rating) {
+        $.ajax({
+          url: reviewBaseUrl,
+          method: 'GET',
+          data: { sort: sort, rating: rating },
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        }).done(function (resp) {
+          if (!resp || typeof resp.reviews_html === 'undefined' || typeof resp.filters_html === 'undefined') return;
+
+          $('#reviews-filters').html(resp.filters_html);
+          $('#reviews-list').html(resp.reviews_html);
+
+          const query = $.param({ sort: resp.current_sort || sort, rating: resp.current_rating || rating });
+          try {
+            window.history.replaceState({}, '', reviewBaseUrl + '?' + query);
+          } catch (e) {
+            // ignore history errors
+          }
+        });
+      }
+
+      $(document).on('change', '#review-sort-select', function (e) {
+        e.preventDefault();
+        const sort = $(this).val() || 'newest';
+        const rating = getCurrentRating();
+        updateReviewFilters(sort, rating);
+      });
+
+      $(document).on('click', '.js-rating-filter', function (e) {
+        e.preventDefault();
+        const rating = String($(this).data('rating') || 'all');
+        const sort = $('#review-sort-select').val() || 'newest';
+        updateReviewFilters(sort, rating);
+      });
+
       const csrftoken = getCookie('csrftoken');
-      // Only attach handlers to non-disabled buttons
-      document.querySelectorAll('.helpful-btn:not([disabled])').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          const id = btn.getAttribute('data-review-id');
+      // Helpful handler uses event delegation so it keeps working after AJAX list updates.
+      $(document).on('click', '.helpful-btn:not([disabled])', function () {
+          const $btn = $(this);
+          const id = $btn.attr('data-review-id');
           if (!id) return;
 
           // Build URL by string replace to avoid using `new URL()` with a relative path
           const helpfulTemplate = '{% url "review:review_helpful" 0 %}';
           const helpfulUrl = helpfulTemplate.replace('0/', id + '/');
 
-          
+          $.ajax({
+            url: helpfulUrl,
+            method: 'POST',
+            contentType: 'application/json',
+            headers: {
+              'X-CSRFToken': csrftoken,
+            },
+            data: JSON.stringify({}),
+          }).done(function (data) {
+            const $span = $btn.find('.helpful-count span');
+            if ($span.length) $span.text(data.helpful);
 
-          try {
-            const resp = await fetch(helpfulUrl, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken,
-              },
-              body: JSON.stringify({}),
-            });
-            
-            if (!resp.ok) throw new Error('Network response was not ok: ' + resp.status);
-            const data = await resp.json();
-            
-            const span = btn.querySelector('.helpful-count span');
-            if (span) span.textContent = data.helpful;
-
-            // If we successfully recorded the vote (or server says already_voted), disable the button
-            if (!data.already_voted) {
-              btn.disabled = true;
-              btn.classList.add('opacity-60', 'cursor-not-allowed');
-            } else {
-              // already voted - still disable to reflect session state
-              btn.disabled = true;
-              btn.classList.add('opacity-60', 'cursor-not-allowed');
-            }
-          } catch (err) {
-            console.error('Error incrementing helpful:', err);
+            $btn.prop('disabled', true).addClass('opacity-60 cursor-not-allowed');
+          }).fail(function () {
             // bubble a small UI hint so user can see something happened
-            btn.classList.add('opacity-60');
-          }
+            $btn.addClass('opacity-60');
+          });
         });
-      });
+
       // Smooth-scroll from Highlights card to the reviews list and focus the first votable button
-      const highlightsLink = document.getElementById('highlights-helpful-link');
-      if (highlightsLink) {
-        highlightsLink.addEventListener('click', function (e) {
+      const $highlightsLink = $('#highlights-helpful-link');
+      if ($highlightsLink.length) {
+        $highlightsLink.on('click', function (e) {
           // default anchor; perform smooth scroll and focus
           e.preventDefault();
-          const target = document.getElementById('reviews-list');
+          const target = $('#reviews-list').get(0);
           if (target) {
             target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             // after a short delay, focus first non-disabled helpful button
             setTimeout(() => {
-              const firstBtn = document.querySelector('.helpful-btn:not([disabled])');
-              if (firstBtn) {
-                firstBtn.focus();
+              const $firstBtn = $('.helpful-btn:not([disabled])').first();
+              if ($firstBtn.length) {
+                $firstBtn.trigger('focus');
                 // add a quick pulse highlight
-                firstBtn.classList.add('ring-2', 'ring-amber-300');
-                setTimeout(() => firstBtn.classList.remove('ring-2', 'ring-amber-300'), 1200);
+                $firstBtn.addClass('ring-2 ring-amber-300');
+                setTimeout(() => $firstBtn.removeClass('ring-2 ring-amber-300'), 1200);
               }
             }, 400);
           }
@@ -437,45 +350,45 @@
     </script>
     <script>
     // Staff verify button handler
-    document.addEventListener('DOMContentLoaded', function () {
+    $(function () {
       const csrftoken = getCookie('csrftoken');
-      document.querySelectorAll('.verify-btn').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          const id = btn.getAttribute('data-review-id');
+      $(document).on('click', '.verify-btn', function () {
+          const $btn = $(this);
+          const id = $btn.attr('data-review-id');
           if (!id) return;
           const verifyTemplate = '{% url "review:review_verify" 0 %}';
           const verifyUrl = verifyTemplate.replace('0/', id + '/');
-          try {
-            const resp = await fetch(verifyUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
-              body: JSON.stringify({}),
-            });
-            if (!resp.ok) throw new Error('Network response was not ok');
-            const data = await resp.json();
+
+          $.ajax({
+            url: verifyUrl,
+            method: 'POST',
+            contentType: 'application/json',
+            headers: { 'X-CSRFToken': csrftoken },
+            data: JSON.stringify({}),
+          }).done(function (data) {
             if (data.is_verified) {
               // replace button with Verified badge
-              const span = document.createElement('span');
-              span.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100';
-              span.textContent = 'Verified';
-              btn.replaceWith(span);
+              const $span = $('<span>', {
+                class: 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100',
+                text: 'Verified'
+              });
+              $btn.replaceWith($span);
               // increment the verified count in the highlights card if present
               try {
-                const vc = document.getElementById('verified-count');
-                if (vc) {
-                  const current = parseInt(vc.textContent.replace(/[^0-9]/g, '') || '0', 10);
-                  vc.textContent = String(current + 1);
+                const $vc = $('#verified-count');
+                if ($vc.length) {
+                  const current = parseInt(($vc.text() || '').replace(/[^0-9]/g, '') || '0', 10);
+                  $vc.text(String(current + 1));
                 }
               } catch (e) {
                 // noop
               }
             }
-          } catch (err) {
-            console.error('Error verifying review:', err);
-            btn.classList.add('opacity-60');
-          }
+          }).fail(function () {
+            $btn.addClass('opacity-60');
+          });
         });
-      });
+
     });
     </script>
     {% endblock %}

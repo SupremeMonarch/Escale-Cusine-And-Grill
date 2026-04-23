@@ -303,6 +303,7 @@
 </div>
 
 <!-- Load the main JavaScript file -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script>const CURRENT_STEP = "{{ step_number }}";</script>
 <script src="{% static 'reservation/js/progress.js' %}"></script>
 
@@ -310,7 +311,7 @@
 
 <script>
 // Runtime CSS override to ensure native date/time picker icons are visible
-(function(){
+(function($){
 	try {
 		const css = `
 			#reservation-date, #reservation-time {
@@ -330,22 +331,22 @@
 				height: 1.25em !important;
 			}
 		`;
-		const s = document.createElement('style');
-		s.setAttribute('data-debug','reservation-datetime-fix');
-		s.appendChild(document.createTextNode(css));
-		document.head.appendChild(s);
+		$('<style>', { 'data-debug': 'reservation-datetime-fix' }).text(css).appendTo('head');
 	} catch (e) { /* failed to inject runtime CSS - ignore in production */ }
-})();
+})(jQuery);
 </script>
 
 <script>
 // Wire the visible calendar/clock buttons to open the native pickers (or fallback to focus)
-(function(){
+(function($){
 	try {
-		const dateInput = document.getElementById('reservation-date');
-		const timeInput = document.getElementById('reservation-time');
-		const dateBtn = document.getElementById('date-picker-btn');
-		const timeBtn = document.getElementById('time-picker-btn');
+		const $dateInput = $('#reservation-date');
+		const $timeInput = $('#reservation-time');
+		const $dateBtn = $('#date-picker-btn');
+		const $timeBtn = $('#time-picker-btn');
+		const dateInput = $dateInput.get(0);
+		const timeInput = $timeInput.get(0);
+		const timeBtn = $timeBtn.get(0);
 
 		function openPicker(input) {
 			if (!input) return;
@@ -356,9 +357,11 @@
 			try { input.click(); } catch (e) { /* ignore */ }
 		}
 
-		if (dateBtn) dateBtn.addEventListener('click', function(e){ e.preventDefault(); openPicker(dateInput); });
-		if (timeBtn) {
-			timeBtn.addEventListener('click', function(e){
+		if ($dateBtn.length) {
+			$dateBtn.on('click', function(e){ e.preventDefault(); openPicker(dateInput); });
+		}
+		if ($timeBtn.length) {
+			$timeBtn.on('click', function(e){
 				e.preventDefault();
 				if (window && typeof window.showCustomTimePicker === 'function') {
 					try { window.showCustomTimePicker(timeInput, timeBtn); return; } catch (err) { /* custom picker failed; fallback to native */ }
@@ -366,12 +369,12 @@
 				openPicker(timeInput);
 			});
 			// keyboard activation for accessibility
-			timeBtn.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); timeBtn.click(); } });
+			$timeBtn.on('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $timeBtn.trigger('click'); } });
 		}
 
 		// pickers wired
 	} catch (e) { /* failed to wire pickers - ignore */ }
-})();
+})(jQuery);
 </script>
 
 

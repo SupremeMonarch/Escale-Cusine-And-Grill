@@ -7,6 +7,7 @@ from django.views.decorators.http import require_POST
 from django.db.models import F, Sum
 from django.middleware.csrf import get_token
 from django.http import HttpResponseForbidden
+from django.template.loader import render_to_string
 
 def _is_staff_user(user):
     try:
@@ -109,6 +110,18 @@ def review(request):
     # number of reviews currently displayed (after filter)
     context['displayed_count'] = len(review_items)
     context['review_items'] = review_items
+
+    # For AJAX-based filtering/sorting, return only the updated fragments.
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        reviews_html = render_to_string('review/partials/reviews_list.html', context=context, request=request)
+        filters_html = render_to_string('review/partials/review_filters.html', context=context, request=request)
+        return JsonResponse({
+            'reviews_html': reviews_html,
+            'filters_html': filters_html,
+            'displayed_count': context['displayed_count'],
+            'current_sort': context['current_sort'],
+            'current_rating': context['current_rating'],
+        })
 
     return render(request, 'review/review.html', context)
 

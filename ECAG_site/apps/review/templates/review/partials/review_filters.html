@@ -1,0 +1,39 @@
+<div class="mt-10 flex flex-col justify-start items-start w-full p-4 sm:p-6 rounded-lg bg-white border border-gray-200 shadow-sm mb-12" id="reviews-filters-inner">
+  <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center w-full gap-4 lg:gap-6">
+    <div class="flex flex-col sm:flex-row justify-start items-start sm:items-center w-full lg:w-auto gap-4">
+      <div class="flex justify-start items-start w-full sm:w-auto">
+        <form method="get" id="sortForm" class="relative w-full sm:w-40">
+          <input type="hidden" name="rating" value="{{ current_rating }}" />
+          <select name="sort" id="review-sort-select" class="w-full h-9 pl-4 pr-8 py-2 rounded-lg bg-gray-100 border border-gray-300 text-sm text-black appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest First</option>
+            <option value="oldest" {% if current_sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+            <option value="highest" {% if current_sort == 'highest' %}selected{% endif %}>Highest Rated</option>
+            <option value="lowest" {% if current_sort == 'lowest' %}selected{% endif %}>Lowest Rated</option>
+          </select>
+          <svg class="absolute right-3 top-1/2 transform -translate-y-1/2 w-2.5 h-2.5 pointer-events-none" viewBox="0 0 10 10" fill="none">
+            <path d="M1 3.5L5 7.5L9 3.5H1Z" fill="black"></path>
+          </svg>
+        </form>
+      </div>
+
+      <div class="flex flex-wrap justify-start items-center gap-2 w-full sm:w-auto" id="review-rating-filters">
+        <a href="?{% if current_sort %}sort={{ current_sort }}&amp;{% endif %}rating=all" data-rating="all" class="js-rating-filter flex items-center justify-center h-9 px-3 py-1 rounded-full {% if current_rating == 'all' or not current_rating %}bg-amber-100 text-amber-800{% else %}bg-gray-100 text-gray-600{% endif %} text-sm font-medium whitespace-nowrap transition-colors hover:bg-amber-200">All Ratings</a>
+
+        {% for star in "54321" %}
+          <a href="?{% if current_sort %}sort={{ current_sort }}&amp;{% endif %}rating={{ star }}" data-rating="{{ star }}" class="js-rating-filter flex items-center justify-center h-9 px-3 py-1 rounded-full {% if current_rating == star %}bg-amber-100 text-amber-800{% else %}bg-gray-100 text-gray-600{% endif %} text-sm whitespace-nowrap transition-colors hover:bg-gray-200">
+            <span>{{ star }}</span>
+            <svg class="w-4 h-4 ml-1" viewBox="0 0 15 14" fill="none">
+              <path d="M7.28905 11.025L3.17219 13.335L4.09352 8.70329L0.629761 5.50663L5.31809 4.94663L7.28905 0.664961L9.26001 4.94663L13.9483 5.50663L10.4846 8.70329L11.4059 13.335L7.28905 11.025Z" fill="#FACC15"></path>
+            </svg>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="flex justify-start items-center w-full lg:w-auto">
+      <p class="text-sm text-left text-gray-600 whitespace-nowrap">
+        Showing <span id="displayed-count">{{ displayed_count }}</span> of {{ review_count }} reviews
+      </p>
+    </div>
+  </div>
+</div>
