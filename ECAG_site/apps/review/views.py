@@ -171,7 +171,28 @@ def review_step2(request):
             form.save()
             return redirect('review:review')
     else:
-        form = forms.ReviewForm()
+        initial = {}
+        user = getattr(request, 'user', None)
+        if user and user.is_authenticated:
+            full_name = ' '.join(part for part in [getattr(user, 'first_name', ''), getattr(user, 'last_name', '')] if part).strip()
+            initial['user_name'] = full_name or getattr(user, 'username', '')
+            initial['email'] = getattr(user, 'email', '')
+        form = forms.ReviewForm(initial=initial)
+        if user and user.is_authenticated:
+            locked_attrs = {
+                'readonly': True,
+                'aria-readonly': 'true',
+                'tabindex': '-1',
+                'class': form.fields['user_name'].widget.attrs.get('class', '') + ' bg-gray-100 text-gray-500 cursor-not-allowed pr-10',
+            }
+            form.fields['user_name'].widget.attrs.update(locked_attrs)
+            form.fields['email'].widget.attrs.update({
+                'readonly': True,
+                'aria-readonly': 'true',
+                'tabindex': '-1',
+                'class': form.fields['email'].widget.attrs.get('class', '') + ' bg-gray-100 text-gray-500 cursor-not-allowed pr-10',
+            })
+        form.fields['date_of_visit'].widget.attrs['class'] = form.fields['date_of_visit'].widget.attrs.get('class', '') + ' pr-12'
 
     return render(request, 'review/review_step2.html', {'form': form})
 
