@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Mobile Menu | Escale{% endblock %}
+
+{% block styles %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/menu_mobile.css' %}">
+{% endblock styles %}
+
+{% block content %}
+<section class="mobile-menu-page">
+  <header class="mobile-hero">
+    <h1>Escale Mobile Menu</h1>
+    <p>Fast ordering layout for phones</p>
+  </header>
+
+  <div class="mobile-order-type" role="group" aria-label="Order type">
+    <button class="order-type-btn" data-type="dine_in">Dine In</button>
+    <button class="order-type-btn" data-type="pick_up">Pick Up</button>
+    <button class="order-type-btn" data-type="delivery">Delivery</button>
+  </div>
+
+  <div id="menu-status" class="menu-status">Loading menu...</div>
+  <div id="menu-tabs" class="menu-tabs" aria-label="Menu categories"></div>
+  <div id="menu-sections" class="menu-sections"></div>
+
+  <section class="mobile-cart-panel" aria-label="Cart details">
+    <div class="mobile-cart-panel-head">
+      <h2>Your Cart</h2>
+      <button id="mobile-clear-cart" class="clear-cart-btn" type="button">Clear</button>
+    </div>
+    <div id="mobile-cart-items" class="mobile-cart-items"></div>
+  </section>
+
+  <div class="mobile-cart-bar">
+    <div>
+      <p class="cart-title">Cart: <span id="cart-count">0</span> items</p>
+      <p class="cart-total">Total Rs <span id="cart-total">0</span></p>
+    </div>
+    <button id="mobile-checkout-btn" class="checkout-btn" type="button">Checkout</button>
+  </div>
+</section>
+{% endblock content %}
+
+{% block scripts %}
+{{ block.super }}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script>
+  window.ECAG_MENU_MOBILE_DATA_URL = "{% url 'menu:menu_mobile_data' %}";
+</script>
+<script src="{% static 'js/menu_mobile.js' %}"></script>
+{% endblock scripts %}

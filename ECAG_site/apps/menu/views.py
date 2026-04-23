@@ -28,6 +28,157 @@ def _build_sections(category_name):
     return sections
 
 
+def menu_mobile_page(request):
+    return render(request, "menu_mobile.html")
+
+
+def menu_mobile_data(request):
+    """Return menu grouped by category/subcategory for mobile clients (jQuery/Flet)."""
+    categories_qs = MenuCategory.objects.prefetch_related(
+        "menusubcategory_set__menuitem_set"
+    ).all()
+
+    categories = []
+    for category in categories_qs:
+        subcategories = []
+        for sub in category.menusubcategory_set.all():
+            items = []
+            for item in sub.menuitem_set.filter(is_available=True):
+                image_url = ""
+                if item.menu_img:
+                    try:
+                        image_url = request.build_absolute_uri(item.menu_img.url)
+                    except Exception:
+                        image_url = ""
+
+                items.append(
+                    {
+                        "item_id": item.item_id,
+                        "name": item.name,
+                        "desc": item.desc,
+                        "price": str(item.price),
+                        "image_url": image_url,
+                    }
+                )
+
+            if items:
+                subcategories.append(
+                    {
+                        "subcategory": sub.subcategory,
+                        "items": items,
+                    }
+                )
+
+        if subcategories:
+            categories.append(
+                {
+                    "category": category.category,
+                    "slug": category.slug,
+                    "subcategories": subcategories,
+                }
+            )
+
+    return JsonResponse({"categories": categories})
+
+
+@csrf_exempt
+def mobile_checkout_start(request):
+    """Create an in-progress order from JSON payload and return checkout URL.
+
+    Payload:
+    {
+      "items": [{"item_id": 1, "quantity": 2, "meat_topping": "Chicken", "extra_toppings": []}],
+      "order_type": "dine_in" | "pick_up" | "delivery"
+    }
+    """
+    if request.method != "POST":
+        return JsonResponse({"ok": False, "error": "POST required"}, status=405)
+
+    try:
+        payload = json.loads(request.body.decode("utf-8") or "{}")
+    except Exception:
+        return JsonResponse({"ok": False, "error": "invalid json"}, status=400)
+
+    raw_items = payload.get("items") or []
+    raw_order_type = payload.get("order_type") or "dine_in"
+
+    normalized = []
+    for it in raw_items:
+        try:
+            iid = int(it.get("item_id")) if it.get("item_id") is not None else None
+        except Exception:
+            iid = None
+        if iid is None:
+            continue
+        qty = int(it.get("quantity", 1) or 1)
+        if qty < 1:
+            continue
+        meat = it.get("meat_topping") or ""
+        extras = it.get("extra_toppings") or []
+        if not isinstance(extras, list):
+            extras = []
+        normalized.append(
+            {
+                "item_id": iid,
+                "quantity": qty,
+                "meat_topping": meat,
+                "extra_toppings": extras,
+            }
+        )
+
+    if not normalized:
+        return JsonResponse({"ok": False, "error": "empty cart"}, status=400)
+
+    ORDER_TYPE_MAP = {
+        "dine_in": Order.Ordertype.DINE_IN,
+        "pick_up": Order.Ordertype.CARRY_OUT,
+        "delivery": Order.Ordertype.DELIVERY,
+    }
+    mapped_ot = ORDER_TYPE_MAP.get(raw_order_type, Order.Ordertype.DINE_IN)
+
+    try:
+        with db_transaction.atomic():
+            order = Order.objects.create(
+                user=request.user if request.user.is_authenticated else None,
+                order_type=mapped_ot,
+                status=Order.Status.IN_PROGRESS,
+            )
+
+            menu_items = {
+                m.item_id: m
+                for m in MenuItem.objects.filter(item_id__in=[x["item_id"] for x in normalized], is_available=True)
+            }
+            for x in normalized:
+                menu_item = menu_items.get(x["item_id"])
+                if not menu_item:
+                    continue
+                OrderItem.objects.create(
+                    order=order,
+                    item=menu_item,
+                    quantity=x["quantity"],
+                    meat_topping=x["meat_topping"],
+                    extra_toppings=",".join([e for e in x["extra_toppings"] if e]),
+                )
+
+            if mapped_ot == Order.Ordertype.DELIVERY:
+                Delivery.objects.create(order=order, address="TBD", fee=DELIVERY_FEE)
+            elif mapped_ot == Order.Ordertype.CARRY_OUT:
+                Takeout.objects.create(order=order, fee=TAKEOUT_FEE)
+
+            order.update_total()
+
+            Transaction.objects.create(
+                order=order,
+                payment_method=Transaction.Method.CREDIT_CARD,
+                status=Transaction.Status.IN_PROGRESS,
+            )
+    except Exception as exc:
+        return JsonResponse({"ok": False, "error": str(exc)}, status=500)
+
+    checkout_url = request.build_absolute_uri(f"/menu/checkout/?order_id={order.id}")
+    return JsonResponse({"ok": True, "order_id": order.id, "checkout_url": checkout_url})
+
+
 def menu_starters(request):
     sections = _build_sections("Starters")
     return render(request, "menu_starters.html", {"sections": sections, "active": "starters"})
@@ -48,7 +199,7 @@ def checkout(request):
        POST: Complete the order and transaction, mark as COMPLETED."""
     if request.method == "POST":
         # Retrieve the in-progress order from session
-        order_id = request.session.get('checkout_order_id')
+        order_id = request.session.get('checkout_order_id') or request.POST.get('order_id')
         if not order_id:
             # No order found, redirect back to checkout
             return redirect("menu:checkout")
@@ -117,74 +268,118 @@ def checkout(request):
         return redirect("menu:checkout_success")
 
     # GET: Create order from session cart if not already created
-    order_id = request.session.get('checkout_order_id')
+    requested_order_id = request.GET.get('order_id')
+    order_id = request.session.get('checkout_order_id') or requested_order_id
     order = None
 
     if order_id:
         try:
             order = Order.objects.get(pk=order_id, status=Order.Status.IN_PROGRESS)
+            request.session['checkout_order_id'] = order.id
+            request.session.modified = True
         except Order.DoesNotExist:
             order = None
 
     # If no order exists, we'll show preview from session (create on first visit)
     sess_cart = request.session.get("cart_items", [])
 
-    if not sess_cart:
+    if not order and not sess_cart:
         # Empty cart, redirect to menu
         return redirect("menu:menu_starters")
-
-    item_ids = [int(x.get('item_id')) for x in sess_cart if x.get('item_id')]
-    items_map = {m.item_id: m for m in MenuItem.objects.filter(item_id__in=item_ids)} if item_ids else {}
 
     rebuilt = []
     subtotal_sum = Decimal("0.00")
     items_count = 0
-    for x in sess_cart:
-        iid = int(x.get('item_id')) if x.get('item_id') else None
-        qty = int(x.get('quantity', 1) or 1)
-        items_count += qty
-        mi = items_map.get(iid)
-        if not mi:
-            continue
-        # per-unit price = base + toppings
-        unit_price = Decimal(mi.price)
-        if eligible_for_toppings(getattr(mi, 'name', '')):
-            meat = x.get('meat_topping') or ''
-            if meat:
-                unit_price += TOPPING_PRICES.get(meat, Decimal('0.00'))
-            extras = x.get('extra_toppings') or []
-            for t in extras:
-                if t:
-                    unit_price += TOPPING_PRICES.get(t, Decimal('0.00'))
-        line_sub = unit_price * qty
-        subtotal_sum += line_sub
-        image_url = None
-        if getattr(mi, "menu_img", None):
-            try:
-                image_url = mi.menu_img.url
-            except Exception:
-                image_url = None
-        toppings_list = []
-        if x.get('meat_topping'):
-            toppings_list.append(x['meat_topping'])
-        if x.get('extra_toppings'):
-            for t in x['extra_toppings']:
-                if t:
-                    toppings_list.append(t)
-        rebuilt.append({
-            "item_id": mi.item_id,
-            "name": mi.name,
-            "price": unit_price,
-            "quantity": qty,
-            "subtotal": line_sub,
-            "image_url": image_url,
-            "toppings": toppings_list,
-        })
 
-    raw_type = request.session.get('order_type_raw')
-    delivery_fee = DELIVERY_FEE if raw_type == 'delivery' else (TAKEOUT_FEE if raw_type == 'pick_up' else Decimal("0.00"))
-    fee_label = 'Delivery' if raw_type == 'delivery' else ('Take Out' if raw_type == 'pick_up' else 'Dine In')
-    type_label = 'Delivery' if raw_type == 'delivery' else ('Pick Up' if raw_type == 'pick_up' else 'Dine In')
+    if order:
+        order_items = order.items.select_related('item').all()
+        for oi in order_items:
+            items_count += oi.quantity
+            subtotal_sum += oi.subtotal
+            image_url = None
+            if getattr(oi.item, "menu_img", None):
+                try:
+                    image_url = oi.item.menu_img.url
+                except Exception:
+                    image_url = None
+            toppings_list = []
+            if oi.meat_topping:
+                toppings_list.append(oi.meat_topping)
+            if oi.extra_toppings:
+                toppings_list.extend([t.strip() for t in oi.extra_toppings.split(',') if t.strip()])
+            rebuilt.append({
+                "item_id": oi.item.item_id,
+                "name": oi.item.name,
+                "price": oi.price,
+                "quantity": oi.quantity,
+                "subtotal": oi.subtotal,
+                "image_url": image_url,
+                "toppings": toppings_list,
+            })
+
+        if order.order_type == Order.Ordertype.DELIVERY:
+            raw_type = 'delivery'
+            delivery_fee = order.delivery_fee
+            fee_label = 'Delivery'
+        elif order.order_type == Order.Ordertype.CARRY_OUT:
+            raw_type = 'pick_up'
+            delivery_fee = order.takeout_fee
+            fee_label = 'Take Out'
+        else:
+            raw_type = 'dine_in'
+            delivery_fee = Decimal("0.00")
+            fee_label = 'Dine In'
+        type_label = order.get_order_type_display()
+    else:
+        item_ids = [int(x.get('item_id')) for x in sess_cart if x.get('item_id')]
+        items_map = {m.item_id: m for m in MenuItem.objects.filter(item_id__in=item_ids)} if item_ids else {}
+
+        for x in sess_cart:
+            iid = int(x.get('item_id')) if x.get('item_id') else None
+            qty = int(x.get('quantity', 1) or 1)
+            items_count += qty
+            mi = items_map.get(iid)
+            if not mi:
+                continue
+            # per-unit price = base + toppings
+            unit_price = Decimal(mi.price)
+            if eligible_for_toppings(getattr(mi, 'name', '')):
+                meat = x.get('meat_topping') or ''
+                if meat:
+                    unit_price += TOPPING_PRICES.get(meat, Decimal('0.00'))
+                extras = x.get('extra_toppings') or []
+                for t in extras:
+                    if t:
+                        unit_price += TOPPING_PRICES.get(t, Decimal('0.00'))
+            line_sub = unit_price * qty
+            subtotal_sum += line_sub
+            image_url = None
+            if getattr(mi, "menu_img", None):
+                try:
+                    image_url = mi.menu_img.url
+                except Exception:
+                    image_url = None
+            toppings_list = []
+            if x.get('meat_topping'):
+                toppings_list.append(x['meat_topping'])
+            if x.get('extra_toppings'):
+                for t in x['extra_toppings']:
+                    if t:
+                        toppings_list.append(t)
+            rebuilt.append({
+                "item_id": mi.item_id,
+                "name": mi.name,
+                "price": unit_price,
+                "quantity": qty,
+                "subtotal": line_sub,
+                "image_url": image_url,
+                "toppings": toppings_list,
+            })
+
+        raw_type = request.session.get('order_type_raw')
+        delivery_fee = DELIVERY_FEE if raw_type == 'delivery' else (TAKEOUT_FEE if raw_type == 'pick_up' else Decimal("0.00"))
+        fee_label = 'Delivery' if raw_type == 'delivery' else ('Take Out' if raw_type == 'pick_up' else 'Dine In')
+        type_label = 'Delivery' if raw_type == 'delivery' else ('Pick Up' if raw_type == 'pick_up' else 'Dine In')
 
     # If this is the first GET request, create the order now with IN_PROGRESS status
     if not order:
@@ -251,6 +446,7 @@ def checkout(request):
             pass
 
     order_ctx = {
+        "order_id": order.id if order else None,
         "order_type": raw_type or "delivery",
         "get_order_type_display": None,
         "order_type_display": type_label,

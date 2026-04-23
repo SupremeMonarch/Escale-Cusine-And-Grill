@@ -7,6 +7,11 @@ urlpatterns = [
     # /menu/           → we can show starters by default
     path("", views.menu_starters, name="menu_home"),
 
+    # /menu/mobile/ -> mobile-first jQuery menu page
+    path("mobile/", views.menu_mobile_page, name="menu_mobile"),
+    path("mobile/data/", views.menu_mobile_data, name="menu_mobile_data"),
+    path("mobile/checkout/start/", views.mobile_checkout_start, name="menu_mobile_checkout_start"),
+
     # /menu/starters/  → Starters page
     path("starters/", views.menu_starters, name="menu_starters"),
 
