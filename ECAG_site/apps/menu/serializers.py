@@ -233,7 +233,7 @@ class TransactionSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    user_id = serializers.ReadOnlyField(source="user_id")
+    user_id = serializers.ReadOnlyField()
     items = OrderItemSerializer(many=True, read_only=True)
     delivery = DeliverySerializer(read_only=True)
     takeout = TakeoutSerializer(read_only=True)

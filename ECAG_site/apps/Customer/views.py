@@ -1,7 +1,5 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from django.db.models import Sum
 from django.contrib import messages
 from .forms import UserUpdateForm, UserProfileUpdateForm
 from apps.login_registration.models import UserProfile
@@ -49,7 +47,7 @@ def overview(request):
 @login_required
 def my_orders(request):
     customer = get_current_user(request)
-    orders = Order.objects.filter(user=customer).select_related('delivery').order_by('-order_date')
+    orders = Order.objects.filter(user=customer).select_related('delivery', 'takeout').order_by('-order_date')
     context = {'orders': orders, 'active_page': 'my_orders'}
     return render(request, 'customer/my_orders.html', context)
 

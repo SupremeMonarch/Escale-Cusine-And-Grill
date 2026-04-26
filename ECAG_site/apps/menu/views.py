@@ -567,7 +567,13 @@ class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user)
+        user = self.request.user
+
+        is_staff_view = self.request.query_params.get('view') == 'staff'
+
+        if (user.is_staff and is_staff_view):
+            return Order.objects.all().order_by('-order_date')
+        return Order.objects.filter(user=user).order_by('-order_date')
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -588,16 +594,22 @@ class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         return Transaction.objects.filter(order__user=self.request.user)
 
-class DeliveryViewSet(viewsets.ReadOnlyModelViewSet):
+class DeliveryViewSet(viewsets.ModelViewSet):
     serializer_class = DeliverySerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Delivery.objects.filter(order__user=self.request.user)
+        user = self.request.user
+        if user.is_staff:
+            return Delivery.objects.all()
+        return Delivery.objects.filter(order__user=user)
 
-class TakeoutViewSet(viewsets.ReadOnlyModelViewSet):
+class TakeoutViewSet(viewsets.ModelViewSet):
     serializer_class = TakeoutSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Takeout.objects.filter(order__user=self.request.user)
+        user = self.request.user
+        if user.is_staff:
+            return Takeout.objects.all()
+        return Takeout.objects.filter(order__user=user)

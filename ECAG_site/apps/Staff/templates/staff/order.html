@@ -16,10 +16,6 @@
         display: none;
     }
 
-    .hidden-card {
-        display: none !important;
-    }
-
     /* Highlight effect when redirected via anchor tag */
     .order-card:target {
         animation: highlight-fade 2s ease-out;
@@ -62,14 +58,6 @@
 
     {% csrf_token %}
 
-    <!-- Hidden fields to store dynamic filter counts -->
-    <div id="filter-counts" class="hidden"
-        data-total="{{ total_orders }}"
-        data-dinein="{{ dine_in_orders }}"
-        data-delivery="{{ delivery_orders }}"
-        data-takeout="{{ take_out_orders }}">
-    </div>
-
     <header class="flex justify-between items-center w-full w-full h-14 mx-auto mb-6 pl-4 pr-4 pt-4">
         <div class="flex flex-col justify-start items-start h-auto w-full sm:w-auto pl-2">
             <h1 class="text-xl font-bold text-gray-900">Today's Orders</h1>
@@ -88,19 +76,19 @@
                 <button
                     id="filter-all"
                     class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-900 text-white hover:bg-gray-700 shadow-sm border"
-                    data-filter-value="all" data-filter-group="type">All ({{total_orders}})</button>
+                    data-filter="all">All ({{total_orders}})</button>
                 <button
                     id="filter-dinein"
                     class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border"
-                    data-filter-value="Dine-in" data-filter-group="type">Dine-in ({{dine_in_orders}})</button>
+                    data-filter="dine in">Dine-in ({{dine_in_orders}})</button>
                 <button
                     id="filter-delivery"
                     class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border"
-                    data-filter-value="Delivery" data-filter-group="type">Delivery ({{delivery_orders}})</button>
+                    data-filter="delivery">Delivery ({{delivery_orders}})</button>
                 <button
                     id="filter-takeout"
                     class="filter-button flex justify-center items-center h-9 px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm border"
-                    data-filter-value="Takeout" data-filter-group="type">Takeout ({{take_out_orders}})</button>
+                    data-filter="pick up">Takeout ({{take_out_orders}})</button>
             </div>
         </div>
     </div>
@@ -183,7 +171,7 @@
                     {% endif %}
                 </div>
             </div>
-            {% if order.order_type == 'Delivery' and order.user.profile.street_address %}
+            {% if order.order_type == 'delivery' and order.user.profile.street_address %}
             <div class="w-full pb-4 px-2green">
                 <div class="p-3 rounded-lg bg-blue-50">
                     <p class="text-sm font-medium text-blue-800 pb-1">Delivery Address:</p>
@@ -196,21 +184,21 @@
             <div class="flex flex-wrap justify-between items-center w-full pt-4 gap-3 border-t border-gray-200 pr-4">
                 <div class="flex gap-3">
                     {% if order.order_type == 'delivery' %}
-                    <button onclick="toggleStatusModal('status-overlay-{{ order.order_id_str }}', '{{ order.delivery.delivery_status }}')"
-                        class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-green-600 text-sm font-medium text-white hover:bg-green-700"
+                    <button class="btn-toggle-status flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-green-600 text-sm font-medium text-white hover:bg-green-700"
+                        data-overlay="status-overlay-{{ order.order_id_str }}"
                         data-current-status="{{ order.delivery.delivery_status }}">
                         Update Delivery Status</button>
                     {% endif %}
 
                     {% if order.order_type == 'pick up' %}
-                    <button onclick="toggleStatusModal('status-overlay-{{ order.order_id_str }}', '{{ order.takeout.pickup_status }}')"
-                        class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-green-600 text-sm font-medium text-white hover:bg-green-700"
+                    <button class="btn-toggle-status flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-green-600 text-sm font-medium text-white hover:bg-green-700"
+                        data-overlay="status-overlay-{{ order.order_id_str }}"
                         data-current-status="{{ order.takeout.pickup_status }}">
                         Update Pickup Status</button>
                     {% endif %}
 
-                    <button onclick="openReceiptModal('receipt-modal-{{ order.order_id_str }}')"
-                        class="flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors">
+                    <button class="btn-open-receipt flex justify-center items-center h-9 px-4 py-2 rounded-lg bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+                        data-modal="receipt-modal-{{ order.order_id_str }}">
                         View Receipt</button>
                 </div>
                 <p class="text-xl font-bold text-right text-gray-900">Rs {{ order.total|floatformat:2 }}</p>
@@ -222,7 +210,8 @@
                  class="hidden absolute bottom-0 left-0 w-full bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-10 p-4 animate-slide-up">
                 <div class="flex justify-between items-center mb-3">
                     <p class="text-sm font-semibold text-gray-700">Update Delivery Status</p>
-                    <button onclick="toggleStatusModal('status-overlay-{{ order.order_id_str }}')" class="text-gray-400 hover:text-gray-600">
+                    <button class="btn-toggle-status text-gray-400 hover:text-gray-600"
+                            data-overlay="status-overlay-{{ order.order_id_str }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -230,18 +219,18 @@
                 </div>
                 <div class="grid grid-cols-3 gap-3">
                     <!-- Preparing Order Button -->
-                    <button onclick="updateOrderStatus('{{ order.id }}', 'preparing_order', '{{ order.order_id_str }}')"
-                            class="flex justify-center items-center py-2 rounded-lg border border-orange-200 text-orange-700 hover:bg-orange-100 hover:border-orange-300 hover:text-orange-900 transition-all duration-200 text-sm font-medium shadow-sm">
+                    <button class="btn-update-status flex justify-center items-center py-2 rounded-lg border border-orange-200 text-orange-700 hover:bg-orange-100 hover:border-orange-300 hover:text-orange-900 transition-all duration-200 text-sm font-medium shadow-sm"
+                            data-db-id="{{ order.id }}" data-new-status="preparing_order" data-dom-id="{{ order.order_id_str }}">
                         Preparing Order
                     </button>
                     <!-- In Progress (Out for Delivery) Button -->
-                    <button onclick="updateOrderStatus('{{ order.id }}', 'in_progress', '{{ order.order_id_str }}')"
-                            class="flex justify-center items-center py-2 rounded-lg border border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-900 transition-all duration-200 text-sm font-medium shadow-sm">
+                    <button class="btn-update-status flex justify-center items-center py-2 rounded-lg border border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-900 transition-all duration-200 text-sm font-medium shadow-sm"
+                            data-db-id="{{ order.id }}" data-new-status="in_progress" data-dom-id="{{ order.order_id_str }}">
                         Out for Delivery
                     </button>
                     <!-- Delivered Button -->
-                    <button onclick="updateOrderStatus('{{ order.id }}', 'delivered', '{{ order.order_id_str }}')"
-                            class="flex justify-center items-center py-2 rounded-lg border border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 hover:text-green-900 transition-all duration-200 text-sm font-medium shadow-sm">
+                    <button class="btn-update-status flex justify-center items-center py-2 rounded-lg border border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 hover:text-green-900 transition-all duration-200 text-sm font-medium shadow-sm"
+                            data-db-id="{{ order.id }}" data-new-status="delivered" data-dom-id="{{ order.order_id_str }}">
                         Delivered
                     </button>
                 </div>
@@ -254,23 +243,24 @@
                     class="hidden absolute bottom-0 left-0 w-full bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-10 p-4 animate-slide-up">
                 <div class="flex justify-between items-center mb-3">
                     <p class="text-sm font-semibold text-gray-700">Update Pickup Status</p>
-                    <button onclick="toggleStatusModal('status-overlay-{{ order.order_id_str }}')" class="text-gray-400 hover:text-gray-600">
+                    <button class="btn-toggle-status text-gray-400 hover:text-gray-600"
+                            data-overlay="status-overlay-{{ order.order_id_str }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
                 <div class="grid grid-cols-3 gap-3">
-                    <button onclick="updateOrderStatus('{{ order.id }}', 'preparing_order', '{{ order.order_id_str }}')"
-                            class="flex justify-center items-center py-2 rounded-lg border border-orange-200 text-orange-700 hover:bg-orange-100 hover:border-orange-300 hover:text-orange-900 transition-all duration-200 text-sm font-medium shadow-sm">
+                    <button class="btn-update-status flex justify-center items-center py-2 rounded-lg border border-orange-200 text-orange-700 hover:bg-orange-100 hover:border-orange-300 hover:text-orange-900 transition-all duration-200 text-sm font-medium shadow-sm"
+                            data-db-id="{{ order.id }}" data-new-status="preparing_order" data-dom-id="{{ order.order_id_str }}">
                         Preparing
                     </button>
-                    <button onclick="updateOrderStatus('{{ order.id }}', 'ready_for_pickup', '{{ order.order_id_str }}')"
-                            class="flex justify-center items-center py-2 rounded-lg border border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-900 transition-all duration-200 text-sm font-medium shadow-sm">
+                    <button class="btn-update-status flex justify-center items-center py-2 rounded-lg border border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 hover:text-blue-900 transition-all duration-200 text-sm font-medium shadow-sm"
+                            data-db-id="{{ order.id }}" data-new-status="ready_for_pickup" data-dom-id="{{ order.order_id_str }}">
                         Ready
                     </button>
-                    <button onclick="updateOrderStatus('{{ order.id }}', 'picked_up', '{{ order.order_id_str }}')"
-                            class="flex justify-center items-center py-2 rounded-lg border border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 hover:text-green-900 transition-all duration-200 text-sm font-medium shadow-sm">
+                    <button class="btn-update-status flex justify-center items-center py-2 rounded-lg border border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300 hover:text-green-900 transition-all duration-200 text-sm font-medium shadow-sm"
+                            data-db-id="{{ order.id }}" data-new-status="picked_up" data-dom-id="{{ order.order_id_str }}">
                         Picked Up
                     </button>
                 </div>
@@ -280,10 +270,9 @@
 
         <!-- RECEIPT MODAL -->
         <div id="receipt-modal-{{ order.order_id_str }}"
-             class="fixed inset-0 w-screen h-screen hidden z-50 flex items-center justify-center p-4 modal-backdrop"
-             onclick="closeReceiptModal('receipt-modal-{{ order.order_id_str }}')">
+            class="receipt-backdrop fixed inset-0 w-screen h-screen hidden z-50 flex items-center justify-center p-4 modal-backdrop">
 
-            <div class="bg-white w-full max-w-[380px] shadow-2xl rounded-sm overflow-hidden transform transition-all border border-gray-200" onclick="event.stopPropagation()">
+            <div class="btn-receipt-inner bg-white w-full max-w-[380px] shadow-2xl rounded-sm overflow-hidden transform transition-all border border-gray-200">
                 <div class="bg-gray-50 border-b border-gray-200 p-4 text-center">
                     <h2 class="text-lg font-bold text-gray-800 uppercase tracking-wider">Receipt</h2>
                     <p class="text-sm text-gray-500">Order #{{ order.order_id_str }}</p>
@@ -321,7 +310,7 @@
                         <p class="text-sm text-gray-700">Takeout Fee: </p>
                         <p class="text-sm font-medium text-gray-900">Rs {{ order.takeout_fee|floatformat:2 }}</p>
                     </div>
-                    {% elif order.order_type == 'delivery' %}
+                    {% elif order.order_type == 'delivery' or order.order_type == 'Delivery' %}
                     <div  class="flex justify-between items-start px-6">
                         <p class="text-sm text-gray-700">Delivery Fee: </p>
                         <p class="text-sm font-medium text-gray-900">Rs {{ order.delivery_fee|floatformat:2 }}</p>
@@ -336,13 +325,14 @@
                     </div>
                 </div>
                 <div class="bg-gray-50 px-6 py-4 flex justify-between items-center gap-3">
-                    <button onclick="window.print()" class="text-gray-600 hover:text-gray-800 text-sm font-medium flex items-center gap-1">
+                    <button class="btn-print text-gray-600 hover:text-gray-800 text-sm font-medium flex items-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                         </svg>
                         Print
                     </button>
-                    <button onclick="closeReceiptModal('receipt-modal-{{ order.order_id_str }}')" class="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors">
+                    <button class="btn-close-receipt px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors"
+                        data-modal="receipt-modal-{{ order.order_id_str }}">
                         Close
                     </button>
                 </div>
@@ -357,226 +347,111 @@
 {% endblock dashboard_content %}
 
 {% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
-    // Global object to manage counts dynamically
-    const typeCounts = {};
+    const styles = {
+        inactive:  ["bg-gray-100",   "text-gray-700",   "hover:bg-gray-200"],
+        all:       ["bg-gray-900",   "text-white",      "hover:bg-gray-700"],
+        'dine in': ["bg-yellow-100", "text-yellow-800", "hover:bg-yellow-200"],
+        'delivery':  ["bg-blue-100",   "text-blue-800",   "hover:bg-blue-200"],
+        'pick up': ["bg-green-100",  "text-green-800",  "hover:bg-green-200"],
+    };
+    const allStyleClasses = [...new Set(Object.values(styles).flat())].join(" ");
 
-    // --- INITIALIZATION ---
-    document.addEventListener('DOMContentLoaded', () => {
-        const countsData = document.getElementById('filter-counts');
-        if (countsData) {
-            typeCounts.all = parseInt(countsData.getAttribute('data-total')) || 0;
-            typeCounts['Dine-in'] = parseInt(countsData.getAttribute('data-dinein')) || 0;
-            typeCounts['Delivery'] = parseInt(countsData.getAttribute('data-delivery')) || 0;
-            typeCounts['Takeout'] = parseInt(countsData.getAttribute('data-takeout')) || 0;
-        }
-
-        // Initialize filters on load
-        filterOrders();
-    });
-
-    // --- AJAX Status Update Function ---
-    async function updateOrderStatus(dbOrderId, newStatus, domOrderId) {
-        const card = document.getElementById(`order-${domOrderId}`);
-        // For delivery orders, we are tracking delivery_status, not card data-status attribute anymore
-
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-        try {
-            const response = await fetch(`/staff/orders/update-status/${dbOrderId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({ status: newStatus })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                // 1. Close the modal
-                toggleStatusModal(`status-overlay-${domOrderId}`);
-
-                // 2. Update the DOM (badge)
-                updateOrderCardUI(domOrderId, newStatus);
-
-                // We don't need to refresh filters anymore as we only filter by Type, not Status.
-
-                // 3. Update the Update Status button's data attribute
-                const updateButton = card.querySelector('button[data-current-status]');
-                if (updateButton) {
-                     updateButton.setAttribute('data-current-status', newStatus);
-                }
-
-            } else {
-                alert('Failed to update status: ' + (data.error || 'Unknown error'));
-            }
-        } catch (error) {
-            console.error('Error updating status:', error);
-            alert('An error occurred while updating status.');
-        }
-    }
-
-
-    function updateOrderCardUI(domOrderId, status) {
-        const card = document.getElementById(`order-${domOrderId}`);
-        if (!card) return;
-
-        // Update badge (For Delivery AND Takeout)
-        const badgeContainer = card.querySelector('.status-badge-container');
-        if (badgeContainer) {
-            let badgeHtml = '';
-
-            // Common / Delivery Statuses
-            if (status === 'preparing_order') {
-                badgeHtml = '<div class="px-3 py-1 rounded-lg bg-orange-100 text-sm font-medium text-orange-800">Preparing Order</div>';
-            } else if (status === 'in_progress') { // Delivery: Out for Delivery
-                badgeHtml = '<div class="px-3 py-1 rounded-lg bg-blue-100 text-sm font-medium text-blue-800">Out for Delivery</div>';
-            } else if (status === 'delivered') {   // Delivery: Delivered
-                badgeHtml = '<div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Delivered</div>';
-
-            // Takeout Specific Statuses
-            } else if (status === 'ready_for_pickup') { // Takeout: Ready
-                badgeHtml = '<div class="px-3 py-1 rounded-lg bg-blue-100 text-sm font-medium text-blue-800">Ready for Pickup</div>';
-            } else if (status === 'picked_up') {        // Takeout: Completed
-                badgeHtml = '<div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Picked Up</div>';
-
-            // Fallback
-            } else {
-                badgeHtml = `<div class="px-3 py-1 rounded-lg bg-gray-100 text-sm font-medium text-gray-800">${status}</div>`;
-            }
-            badgeContainer.innerHTML = badgeHtml;
-        }
-    }
-
-    // --- Status Overlay Function ---
-    function toggleStatusModal(overlayId, currentStatus) {
-        const overlay = document.getElementById(overlayId);
-        if (overlay) {
-            overlay.classList.toggle('hidden');
-        }
-    }
-
-    // --- Modal Functions (Receipt) ---
-    function getScrollbarWidth() {
-        return window.innerWidth - document.documentElement.clientWidth;
-    }
-
-    function openReceiptModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            const scrollbarWidth = getScrollbarWidth();
-            if (scrollbarWidth > 0) {
-                document.body.style.paddingRight = `${scrollbarWidth}px`;
-            }
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-    }
-
-    function closeReceiptModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.add('hidden');
-            document.body.style.overflow = '';
-            document.body.style.paddingRight = '';
-        }
-    }
-
-    // Close on Escape key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === "Escape") {
-            const openReceipts = document.querySelectorAll('[id^="receipt-modal-"]:not(.hidden)');
-            openReceipts.forEach(modal => {
-                modal.classList.add('hidden');
-            });
-            document.body.style.overflow = '';
-            document.body.style.paddingRight = '';
-
-            const openOverlays = document.querySelectorAll('[id^="status-overlay-"]:not(.hidden)');
-            openOverlays.forEach(overlay => {
-                overlay.classList.add('hidden');
-            });
-        }
-    });
-
-    // --- Filter functions ---
-    let activeType = 'all';
-
-    const activeStyles = {
-        all: ["bg-gray-900", "text-white", "hover:bg-gray-700"],
-        'Dine-in': ["bg-yellow-100", "text-yellow-800", "hover:bg-yellow-200"],
-        Delivery: ["bg-blue-100", "text-blue-800", "hover:bg-blue-200"],
-        Takeout: ["bg-green-100", "text-green-800", "hover:bg-green-200"],
+    const badgeMap = {
+        preparing_order:  '<div class="px-3 py-1 rounded-lg bg-orange-100 text-sm font-medium text-orange-800">Preparing Order</div>',
+        in_progress:      '<div class="px-3 py-1 rounded-lg bg-blue-100 text-sm font-medium text-blue-800">Out for Delivery</div>',
+        delivered:        '<div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Delivered</div>',
+        ready_for_pickup: '<div class="px-3 py-1 rounded-lg bg-blue-100 text-sm font-medium text-blue-800">Ready for Pickup</div>',
+        picked_up:        '<div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">Picked Up</div>',
     };
 
-    const inactiveStyles = ["bg-gray-100", "text-gray-700", "hover:bg-gray-200"];
-    const allActiveStyleClasses = [...new Set(Object.values(activeStyles).flat())];
+    $(document).ready(function () {
 
+        // --- Filter buttons ---
+        $(document).on("click", ".filter-button", function () {
+            const filterType = $(this).data("filter");
+            let visibleCount = 0;
 
-    const orderCards = document.querySelectorAll('.order-card');
-    const filterButtons = document.querySelectorAll('.filter-button');
-    const totalCountElement = document.getElementById('total-order-count');
+            $(".filter-button").each(function () {
+                const f = $(this).data("filter");
+                $(this).removeClass(allStyleClasses);
 
-    function filterOrders() {
-        let visibleCount = 0;
-        orderCards.forEach(card => {
-            const cardType = card.getAttribute('data-type');
+                if (f === filterType) {
+                    $(this).addClass((styles[f] || styles.all).join(" "));
+                } else {
+                    $(this).addClass(styles.inactive.join(" "));
+                }
+            });
 
-            // Loose matching for types (e.g., 'pick up' from DB vs 'Takeout' from filter)
-            let typeMatch = false;
-
-            if (activeType === 'all') {
-                typeMatch = true;
-            } else if (activeType === 'Takeout') {
-                // Handle various potential DB values for Takeout
-                typeMatch = cardType === 'Takeout' || cardType === 'pick up' || cardType === 'Pick Up';
-            } else if (activeType === 'Delivery') {
-                typeMatch = cardType === 'Delivery' || cardType === 'delivery';
-            } else if (activeType === 'Dine-in') {
-                typeMatch = cardType === 'Dine-in' || cardType === 'dine in';
-            }
-
-            if (typeMatch) {
-                card.classList.remove('hidden-card');
-                visibleCount++;
-            } else {
-                card.classList.add('hidden-card');
-            }
+            $(".order-card").each(function () {
+                const match = filterType === "all" || $(this).data("type") === filterType;
+                if (match) {
+                    $(this).css("display", "flex");
+                    visibleCount++;
+                } else {
+                    $(this).hide();
+                }
+            });
+            $("#total-order-count").text(visibleCount);
         });
 
-        totalCountElement.textContent = visibleCount;
-    }
-
-    function handleFilterClick(event) {
-        const button = event.currentTarget;
-        const group = button.getAttribute('data-filter-group');
-        const value = button.getAttribute('data-filter-value');
-
-        if (group === 'type') {
-            activeType = value;
-        }
-
-        const groupButtons = document.querySelectorAll(`.filter-button[data-filter-group="${group}"]`);
-        groupButtons.forEach(btn => {
-            const btnValue = btn.getAttribute('data-filter-value');
-            // Reset styles
-            btn.classList.remove(...allActiveStyleClasses);
-            btn.classList.add(...inactiveStyles);
-
-            // Apply active styles
-            if (btnValue === value) {
-                btn.classList.remove(...inactiveStyles);
-                btn.classList.add(...(activeStyles[btnValue] || activeStyles.all));
-            }
+        // --- Toggle status overlay ---
+        $(document).on("click", ".btn-toggle-status", function () {
+            $("#" + $(this).data("overlay")).toggleClass("hidden");
         });
-        filterOrders();
-    }
 
-    filterButtons.forEach(button => {
-        button.addEventListener('click', handleFilterClick);
+        // --- Update order status (AJAX) ---
+        $(document).on("click", ".btn-update-status", function () {
+            const dbId    = $(this).data("db-id");
+            const newStatus = $(this).data("new-status");
+            const domId   = $(this).data("dom-id");
+            const $card   = $("#order-" + domId);
+
+            $.ajax({
+                url: "/staff/orders/update-status/" + dbId + "/",
+                method: "POST",
+                contentType: "application/json",
+                headers: { "X-CSRFToken": $("[name=csrfmiddlewaretoken]").val() },
+                data: JSON.stringify({ status: newStatus }),
+                success: function (data) {
+                    if (data.success) {
+                        $("#status-overlay-" + domId).addClass("hidden");
+                        const badge = badgeMap[newStatus]
+                            || '<div class="px-3 py-1 rounded-lg bg-gray-100 text-sm font-medium text-gray-800">' + newStatus + '</div>';
+                        $card.find(".status-badge-container").html(badge);
+                        $card.find("button[data-current-status]").attr("data-current-status", newStatus);
+                    } else {
+                        alert("Failed to update status: " + (data.error || "Unknown error"));
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error updating status:", error);
+                    alert("An error occurred while updating status.");
+                }
+            });
+        });
+
+        // --- Open receipt modal ---
+        $(document).on("click", ".btn-open-receipt", function () {
+            const $modal = $("#" + $(this).data("modal"));
+            $modal.removeClass("hidden");
+            $("body").css("overflow", "hidden");
+        });
+
+        // --- Close receipt modal (close button) ---
+        $(document).on("click", ".btn-close-receipt", function () {
+            $(this).closest('[id^="receipt-modal-"]').addClass("hidden");
+            $("body").css("overflow", "");
+        });
+
+        // --- Print button ---
+        $(document).on("click", ".btn-print", function () {
+            window.print();
+        });
+
+        // --- Initialize filters on load ---
+        $(".filter-button[data-filter='All']").trigger("click");
     });
-
 </script>
 {% endblock scripts %}

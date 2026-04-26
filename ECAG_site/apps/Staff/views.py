@@ -1,8 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
-from django.db.models import Sum, Count, Q
-from django.contrib.auth.models import User
+from django.db.models import Sum
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 import json
@@ -54,7 +53,7 @@ def staff_overview(request):
 @user_passes_test(is_staff_user)
 def staff_orders(request):
     today = timezone.now().date()
-    orders = Order.objects.filter(order_date__date=today).select_related('delivery').order_by('-order_date')
+    orders = Order.objects.filter(order_date__date=today).select_related('delivery', 'takeout').order_by('-order_date')
 
     total_orders = orders.count()
 
@@ -140,6 +139,8 @@ def staff_reservations(request):
     return render(request, 'staff/reservation.html', context)
 
 @require_POST
+@login_required
+@user_passes_test(is_staff_user)
 def update_order_status(request, order_id):
     """
     Updates status for Delivery OR Takeout orders.
@@ -190,6 +191,8 @@ def update_order_status(request, order_id):
 
 
 @require_POST
+@login_required
+@user_passes_test(is_staff_user)
 def update_reservation_status(request, reservation_id):
     try:
         data = json.loads(request.body)
