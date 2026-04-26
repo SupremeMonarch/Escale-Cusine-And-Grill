@@ -11,6 +11,7 @@ urlpatterns = [
     path("mobile/", views.menu_mobile_page, name="menu_mobile"),
     path("mobile/data/", views.menu_mobile_data, name="menu_mobile_data"),
     path("mobile/checkout/start/", views.mobile_checkout_start, name="menu_mobile_checkout_start"),
+    path("mobile/checkout/complete/", views.mobile_checkout_complete, name="menu_mobile_checkout_complete"),
 
     # /menu/starters/  → Starters page
     path("starters/", views.menu_starters, name="menu_starters"),

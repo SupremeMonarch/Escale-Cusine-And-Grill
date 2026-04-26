@@ -1,5 +1,6 @@
 import argparse
 import json
+from pathlib import Path
 import urllib.parse
 import urllib.request
 
@@ -25,7 +26,7 @@ def fetch_menu_data(url: str) -> list[dict]:
     return payload.get("categories", [])
 
 
-def start_checkout(base_url: str, items: list[dict], order_type: str) -> str:
+def start_checkout(base_url: str, items: list[dict], order_type: str) -> dict:
     endpoint = urllib.parse.urljoin(base_url, "/menu/mobile/checkout/start/")
     payload = {"items": items, "order_type": order_type}
     req = urllib.request.Request(
@@ -38,7 +39,38 @@ def start_checkout(base_url: str, items: list[dict], order_type: str) -> str:
         parsed = json.loads(response.read().decode("utf-8"))
     if not parsed.get("ok"):
         raise RuntimeError(parsed.get("error", "Checkout start failed"))
-    return parsed["checkout_url"]
+    return parsed
+
+
+def complete_checkout(
+    base_url: str,
+    order_id: int,
+    payment_method: str,
+    card_name: str = "",
+    card_number: str = "",
+    exp_date: str = "",
+    cvv: str = "",
+) -> dict:
+    endpoint = urllib.parse.urljoin(base_url, "/menu/mobile/checkout/complete/")
+    payload = {
+        "order_id": order_id,
+        "payment_method": payment_method,
+        "card_name": card_name,
+        "card_number": card_number,
+        "exp_date": exp_date,
+        "cvv": cvv,
+    }
+    req = urllib.request.Request(
+        endpoint,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json", "User-Agent": "ECAG-Flet-Client"},
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=20) as response:
+        parsed = json.loads(response.read().decode("utf-8"))
+    if not parsed.get("ok"):
+        raise RuntimeError(parsed.get("error", "Checkout completion failed"))
+    return parsed
 
 
 def is_topping_eligible(name: str) -> bool:
@@ -86,25 +118,53 @@ def write_storage_json(page: ft.Page, key: str, value) -> None:
         pass
 
 
-def build_menu_card(item: dict, on_add) -> ft.Control:
-    image_url = item.get("image_url")
+def resolve_image_payload(raw_url: str, base_url: str = "http://127.0.0.1:8000") -> dict:
+    if not raw_url:
+        return {}
+
+    try:
+        parsed = urllib.parse.urlparse(raw_url)
+        image_url = raw_url
+        if not parsed.scheme:
+            image_url = urllib.parse.urljoin(base_url, raw_url)
+            parsed = urllib.parse.urlparse(image_url)
+
+        # Prefer local bytes for localhost media for reliable desktop rendering.
+        if parsed.hostname in {"127.0.0.1", "localhost"} and parsed.path.startswith("/media/"):
+            project_root = Path(__file__).resolve().parents[2]
+            local_path = project_root / parsed.path.lstrip("/")
+            if local_path.exists():
+                try:
+                    return {"src": local_path.read_bytes()}
+                except Exception:
+                    return {"src": local_path.as_uri()}
+
+        return {"src": image_url}
+    except Exception:
+        return {"src": raw_url}
+
+
+def build_menu_card(item: dict, on_add, base_url: str = "http://127.0.0.1:8000") -> ft.Control:
+    image_payload = resolve_image_payload(item.get("image_url", ""), base_url)
+    fit_cover = ft.BoxFit.COVER if hasattr(ft, "BoxFit") else ft.ImageFit.COVER
     image_control = (
-        ft.Image(src=image_url, width=84, height=84, fit=ft.ImageFit.COVER, border_radius=10)
-        if image_url
+        ft.Image(width=84, height=84, fit=fit_cover, border_radius=10, **image_payload)
+        if image_payload
         else ft.Container(width=84, height=84, bgcolor=ft.Colors.GREY_200, border_radius=10)
     )
 
     return ft.Container(
-        margin=ft.margin.only(bottom=10),
+        margin=ft.Margin.only(bottom=10),
         padding=10,
         border_radius=14,
         bgcolor=ft.Colors.WHITE,
-        border=ft.border.all(1, ft.Colors.with_opacity(0.12, ft.Colors.BLACK)),
+        border=ft.Border.all(1, ft.Colors.with_opacity(0.12, ft.Colors.BLACK)),
         content=ft.Row(
             spacing=10,
             controls=[
                 image_control,
-                ft.Expanded(
+                ft.Container(
+                    expand=True,
                     content=ft.Column(
                         spacing=4,
                         controls=[
@@ -112,8 +172,9 @@ def build_menu_card(item: dict, on_add) -> ft.Control:
                                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                 vertical_alignment=ft.CrossAxisAlignment.START,
                                 controls=[
-                                    ft.Expanded(
-                                        ft.Text(
+                                    ft.Container(
+                                        expand=True,
+                                        content=ft.Text(
                                             item.get("name", "Item"),
                                             size=14,
                                             weight=ft.FontWeight.W_700,
@@ -139,7 +200,7 @@ def build_menu_card(item: dict, on_add) -> ft.Control:
                                 alignment=ft.MainAxisAlignment.END,
                                 controls=[
                                     ft.Container(
-                                        padding=ft.padding.symmetric(horizontal=10, vertical=6),
+                                        padding=ft.Padding.symmetric(horizontal=10, vertical=6),
                                         border_radius=8,
                                         bgcolor=ft.Colors.ORANGE_600,
                                         on_click=lambda e, item=item: on_add(item),
@@ -180,24 +241,15 @@ def main(page: ft.Page):
     stored_order_type = read_storage_json(page, "ecag_mobile_order_type", "dine_in")
     order_type_value = stored_order_type if stored_order_type in ["dine_in", "pick_up", "delivery"] else "dine_in"
 
-    order_type_dd = ft.Dropdown(
-        label="Order type",
-        width=190,
-        dense=True,
-        value=order_type_value,
-        options=[
-            ft.dropdown.Option("dine_in", "Dine In"),
-            ft.dropdown.Option("pick_up", "Pick Up"),
-            ft.dropdown.Option("delivery", "Delivery"),
-        ],
-    )
+    order_type_state = {"value": order_type_value}
+    order_type_btns: list[tuple[ft.Button, str]] = []
 
     cart_count = ft.Text("0 items", color=ft.Colors.GREY_800)
     cart_total = ft.Text("Rs 0.00", size=18, weight=ft.FontWeight.W_700, color=ft.Colors.GREY_900)
 
     def save_cart_state():
         write_storage_json(page, "ecag_mobile_cart", cart_items)
-        write_storage_json(page, "ecag_mobile_order_type", order_type_dd.value or "dine_in")
+        write_storage_json(page, "ecag_mobile_order_type", order_type_state["value"])
 
     def cart_item_unit_price(item: dict) -> float:
         toppings_total = 0.0
@@ -215,10 +267,30 @@ def main(page: ft.Page):
             qty = int(item.get("quantity", 1))
             count += qty
             subtotal += qty * cart_item_unit_price(item)
-        fee = 100.0 if order_type_dd.value == "delivery" else (50.0 if order_type_dd.value == "pick_up" else 0.0)
+        order_type = order_type_state["value"]
+        fee = 100.0 if order_type == "delivery" else (50.0 if order_type == "pick_up" else 0.0)
         total = subtotal + fee
         cart_count.value = f"{count} items"
         cart_total.value = f"Rs {total:.2f}"
+
+    def refresh_order_type_buttons():
+        for btn, value in order_type_btns:
+            selected = value == order_type_state["value"]
+            btn.bgcolor = "#EA580C" if selected else "#F8FAFC"
+            btn.color = ft.Colors.WHITE if selected else "#9A3412"
+            btn.elevation = 0
+            btn.style = ft.ButtonStyle(
+                shape=ft.RoundedRectangleBorder(radius=999),
+                side=ft.BorderSide(1, "#FDBA74" if selected else "#E5E7EB"),
+                padding=ft.Padding.symmetric(horizontal=16, vertical=10),
+            )
+
+    def on_select_order_type(value: str):
+        order_type_state["value"] = value
+        save_cart_state()
+        recalc_totals()
+        refresh_order_type_buttons()
+        page.update()
 
     def set_meat(index: int, meat: str):
         if not (0 <= index < len(cart_items)):
@@ -281,7 +353,10 @@ def main(page: ft.Page):
                         alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                         vertical_alignment=ft.CrossAxisAlignment.CENTER,
                         controls=[
-                            ft.Expanded(ft.Text(item.get("name", "Item"), weight=ft.FontWeight.W_700, size=13)),
+                            ft.Container(
+                                expand=True,
+                                content=ft.Text(item.get("name", "Item"), weight=ft.FontWeight.W_700, size=13),
+                            ),
                             ft.Text(f"Rs {unit:.2f}", color=ft.Colors.AMBER_800, weight=ft.FontWeight.W_700, size=12),
                         ],
                     ),
@@ -324,7 +399,7 @@ def main(page: ft.Page):
                         padding=10,
                         border_radius=12,
                         bgcolor=ft.Colors.WHITE,
-                        border=ft.border.all(1, ft.Colors.with_opacity(0.1, ft.Colors.BLACK)),
+                        border=ft.Border.all(1, ft.Colors.with_opacity(0.1, ft.Colors.BLACK)),
                         content=ft.Column(spacing=6, controls=item_controls),
                     )
                 )
@@ -336,6 +411,7 @@ def main(page: ft.Page):
         item_id = menu_item.get("item_id")
         name = menu_item.get("name", "Item")
         price = float(menu_item.get("price", 0.0))
+        image_url = menu_item.get("image_url", "")
         default_meat = "Chicken" if is_topping_eligible(name) else ""
 
         existing = next(
@@ -358,6 +434,7 @@ def main(page: ft.Page):
                     "item_id": item_id,
                     "name": name,
                     "price": price,
+                    "image_url": image_url,
                     "quantity": 1,
                     "meat_topping": default_meat,
                     "extra_toppings": [],
@@ -369,45 +446,213 @@ def main(page: ft.Page):
         recalc_totals()
         render_cart()
 
-    def on_checkout(_):
+    def order_type_label() -> str:
+        return {
+            "dine_in": "Dine In",
+            "pick_up": "Pick Up",
+            "delivery": "Delivery",
+        }.get(order_type_state["value"], "Dine In")
+
+    def build_checkout_payload() -> list[dict]:
+        return [
+            {
+                "item_id": it.get("item_id"),
+                "quantity": it.get("quantity", 1),
+                "meat_topping": it.get("meat_topping", ""),
+                "extra_toppings": it.get("extra_toppings", []),
+            }
+            for it in cart_items
+        ]
+
+    checkout_status = ft.Text("", color=ft.Colors.GREY_700)
+    checkout_items_column = ft.Column(spacing=8, height=280, scroll=ft.ScrollMode.ADAPTIVE)
+    checkout_type_text = ft.Text("Dine In", size=12, color=ft.Colors.GREY_700)
+    checkout_items_count_text = ft.Text("0", size=12, color=ft.Colors.GREY_700)
+    checkout_fee_text = ft.Text("Rs 0.00", size=12, color=ft.Colors.GREY_700)
+    checkout_subtotal_text = ft.Text("Rs 0.00", size=12, color=ft.Colors.GREY_700)
+    checkout_total_text = ft.Text("Rs 0.00", size=22, weight=ft.FontWeight.W_700, color=ft.Colors.WHITE)
+
+    payment_method_group = ft.RadioGroup(content=ft.Column(), value="card")
+    card_name_input = ft.TextField(label="Name on Card", dense=True, border_radius=10)
+    card_number_input = ft.TextField(label="Card Number", dense=True, border_radius=10)
+    exp_date_input = ft.TextField(label="Expiration Date (YYYY-MM-DD)", dense=True, border_radius=10)
+    cvv_input = ft.TextField(label="CVV", dense=True, border_radius=10, password=True, can_reveal_password=True)
+
+    success_order_text = ft.Text("Order Confirmed", size=24, weight=ft.FontWeight.W_700, color=ft.Colors.WHITE)
+    success_total_text = ft.Text("Rs 0.00", size=16, color="#FDBA74", weight=ft.FontWeight.W_600)
+
+    menu_view = ft.Column(spacing=8)
+    checkout_view = ft.Column(spacing=10, visible=False)
+    success_view = ft.Column(spacing=10, visible=False)
+
+    def refresh_card_fields():
+        is_card = payment_method_group.value == "card"
+        for field in [card_name_input, card_number_input, exp_date_input, cvv_input]:
+            field.disabled = not is_card
+            if not is_card:
+                field.value = ""
+
+    def render_checkout_items():
+        controls = []
+        items_count = 0
+        subtotal = 0.0
+        for item in cart_items:
+            qty = int(item.get("quantity", 1))
+            items_count += qty
+            line_subtotal = qty * cart_item_unit_price(item)
+            subtotal += line_subtotal
+
+            image_payload = resolve_image_payload(item.get("image_url", ""), args.base_url)
+            img = (
+                ft.Image(width=48, height=48, border_radius=8, fit=ft.BoxFit.COVER, **image_payload)
+                if image_payload
+                else ft.Container(width=48, height=48, bgcolor=ft.Colors.GREY_300, border_radius=8)
+            )
+
+            toppings = []
+            if item.get("meat_topping"):
+                toppings.append(item.get("meat_topping"))
+            toppings.extend(item.get("extra_toppings", []))
+
+            controls.append(
+                ft.Container(
+                    padding=8,
+                    border_radius=10,
+                    bgcolor=ft.Colors.with_opacity(0.04, ft.Colors.WHITE),
+                    border=ft.Border.all(1, ft.Colors.with_opacity(0.08, ft.Colors.WHITE)),
+                    content=ft.Row(
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                        vertical_alignment=ft.CrossAxisAlignment.START,
+                        controls=[
+                            ft.Row(
+                                spacing=8,
+                                controls=[
+                                    img,
+                                    ft.Column(
+                                        spacing=2,
+                                        controls=[
+                                            ft.Text(item.get("name", "Item"), color=ft.Colors.WHITE, size=13, weight=ft.FontWeight.W_600),
+                                            ft.Text(f"Qty: {qty}", color="#D1D5DB", size=11),
+                                            ft.Text(
+                                                ", ".join(toppings) if toppings else "No toppings",
+                                                color="#9CA3AF",
+                                                size=10,
+                                            ),
+                                        ],
+                                    ),
+                                ],
+                            ),
+                            ft.Text(f"Rs {line_subtotal:.2f}", color="#FDBA74", size=12, weight=ft.FontWeight.W_700),
+                        ],
+                    ),
+                )
+            )
+
+        if not controls:
+            controls = [ft.Text("Your cart is empty.", color="#9CA3AF", size=12)]
+
+        fee = 100.0 if order_type_state["value"] == "delivery" else (50.0 if order_type_state["value"] == "pick_up" else 0.0)
+        total = subtotal + fee
+
+        checkout_items_column.controls = controls
+        checkout_type_text.value = order_type_label()
+        checkout_items_count_text.value = str(items_count)
+        checkout_fee_text.value = f"Rs {fee:.2f}"
+        checkout_subtotal_text.value = f"Rs {subtotal:.2f}"
+        checkout_total_text.value = f"Rs {total:.2f}"
+
+    def show_menu_view():
+        menu_view.visible = True
+        checkout_view.visible = False
+        success_view.visible = False
+        page.update()
+
+    def show_checkout_view():
+        render_checkout_items()
+        checkout_status.value = ""
+        menu_view.visible = False
+        checkout_view.visible = True
+        success_view.visible = False
+        page.update()
+
+    def show_success_view(order_code: str, total: str):
+        success_order_text.value = f"Order {order_code or 'Confirmed'}"
+        success_total_text.value = f"Total Paid: Rs {total}"
+        menu_view.visible = False
+        checkout_view.visible = False
+        success_view.visible = True
+        page.update()
+
+    async def on_checkout(_):
         if not cart_items:
             status.value = "Cart is empty."
             page.update()
             return
-        status.value = "Starting checkout..."
+        show_checkout_view()
+
+    async def on_confirm_payment(_):
+        if not cart_items:
+            checkout_status.value = "Cart is empty."
+            page.update()
+            return
+
+        if payment_method_group.value == "card":
+            if not card_name_input.value or not card_number_input.value or not cvv_input.value:
+                checkout_status.value = "Please fill card details."
+                page.update()
+                return
+
+        checkout_status.value = "Processing payment..."
         page.update()
+
         try:
-            payload = [
-                {
-                    "item_id": it.get("item_id"),
-                    "quantity": it.get("quantity", 1),
-                    "meat_topping": it.get("meat_topping", ""),
-                    "extra_toppings": it.get("extra_toppings", []),
-                }
-                for it in cart_items
-            ]
-            checkout_link = start_checkout(args.base_url, payload, order_type_dd.value or "dine_in")
-            page.launch_url(checkout_link)
-            status.value = "Checkout opened in browser."
+            payload = build_checkout_payload()
+            started = start_checkout(args.base_url, payload, order_type_state["value"])
+            order_id = started.get("order_id")
+            if not order_id:
+                raise RuntimeError("Unable to start checkout")
+
+            completed = complete_checkout(
+                args.base_url,
+                order_id=order_id,
+                payment_method=payment_method_group.value or "card",
+                card_name=card_name_input.value or "",
+                card_number=card_number_input.value or "",
+                exp_date=exp_date_input.value or "",
+                cvv=cvv_input.value or "",
+            )
+
+            cart_items.clear()
+            save_cart_state()
+            recalc_totals()
+            render_cart()
+            show_success_view(completed.get("order_code", ""), completed.get("total", "0.00"))
         except Exception as exc:
-            status.value = f"Checkout failed: {exc}"
-        page.update()
+            checkout_status.value = f"Checkout failed: {exc}"
+            page.update()
 
-    def on_order_type_change(_):
-        save_cart_state()
-        recalc_totals()
-        page.update()
+    order_type_row = ft.Row(spacing=8, wrap=True)
+    for value, label in [("dine_in", "Dine In"), ("pick_up", "Pick Up"), ("delivery", "Delivery")]:
+        btn = ft.Button(
+            content=label,
+            on_click=lambda e, v=value: on_select_order_type(v),
+            height=36,
+            bgcolor="#F8FAFC",
+            color="#9A3412",
+        )
+        order_type_btns.append((btn, value))
+        order_type_row.controls.append(btn)
 
-    order_type_dd.on_change = on_order_type_change
+    refresh_order_type_buttons()
 
-    checkout_btn = ft.ElevatedButton(
+    checkout_btn = ft.Button(
         "Checkout",
         bgcolor=ft.Colors.AMBER_400,
         color=ft.Colors.GREY_900,
         on_click=on_checkout,
     )
 
-    page.add(
+    menu_view.controls = [
         ft.Container(
             border_radius=18,
             padding=14,
@@ -416,19 +661,19 @@ def main(page: ft.Page):
                 spacing=2,
                 controls=[
                     ft.Text("Escale Mobile Menu", size=22, weight=ft.FontWeight.W_700, color=ft.Colors.WHITE),
-                    ft.Text("Phone-first ordering view", color=ft.Colors.WHITE, size=13),
+                    ft.Text("Fast ordering layout for phones", color=ft.Colors.WHITE, size=13),
                 ],
             ),
         ),
         status,
-        ft.Row(controls=[order_type_dd]),
+        order_type_row,
         menu_content,
         ft.Container(
-            margin=ft.margin.only(top=8),
+            margin=ft.Margin.only(top=8),
             padding=12,
             border_radius=14,
             bgcolor=ft.Colors.WHITE,
-            border=ft.border.all(1, ft.Colors.with_opacity(0.1, ft.Colors.BLACK)),
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.1, ft.Colors.BLACK)),
             content=ft.Column(
                 spacing=8,
                 controls=[
@@ -445,7 +690,103 @@ def main(page: ft.Page):
                 ],
             ),
         ),
+    ]
+
+    payment_method_group.content = ft.Column(
+        spacing=6,
+        controls=[
+            ft.Radio(value="card", label="Credit Card"),
+            ft.Radio(value="paypal", label="PayPal"),
+            ft.Radio(value="juice", label="Juice"),
+            ft.Radio(value="myt", label="My.T Mobile"),
+        ],
     )
+    payment_method_group.on_change = lambda e: (refresh_card_fields(), page.update())
+    refresh_card_fields()
+
+    checkout_view.controls = [
+        ft.Container(
+            border_radius=18,
+            padding=14,
+            gradient=ft.LinearGradient(colors=["#FFB17A", "#EA580C", "#DC2626"]),
+            content=ft.Column(
+                spacing=2,
+                controls=[
+                    ft.Text("Checkout", size=24, weight=ft.FontWeight.W_700, color=ft.Colors.WHITE),
+                    ft.Text("Review your order and pay", color=ft.Colors.WHITE, size=13),
+                ],
+            ),
+        ),
+        checkout_status,
+        ft.Container(
+            padding=12,
+            border_radius=14,
+            bgcolor=ft.Colors.WHITE,
+            border=ft.Border.all(1, ft.Colors.with_opacity(0.1, ft.Colors.BLACK)),
+            content=ft.Column(
+                spacing=10,
+                controls=[
+                    ft.Text("Payment Info", size=16, weight=ft.FontWeight.W_700),
+                    payment_method_group,
+                    card_name_input,
+                    card_number_input,
+                    exp_date_input,
+                    cvv_input,
+                ],
+            ),
+        ),
+        ft.Container(
+            padding=12,
+            border_radius=14,
+            bgcolor="#111827",
+            content=ft.Column(
+                spacing=8,
+                controls=[
+                    ft.Text("Your Order", size=16, weight=ft.FontWeight.W_700, color=ft.Colors.WHITE),
+                    ft.Row(alignment=ft.MainAxisAlignment.SPACE_BETWEEN, controls=[ft.Text("Order Type", color="#D1D5DB"), checkout_type_text]),
+                    ft.Row(alignment=ft.MainAxisAlignment.SPACE_BETWEEN, controls=[ft.Text("No of Items", color="#D1D5DB"), checkout_items_count_text]),
+                    ft.Row(alignment=ft.MainAxisAlignment.SPACE_BETWEEN, controls=[ft.Text("Fee", color="#D1D5DB"), checkout_fee_text]),
+                    ft.Row(alignment=ft.MainAxisAlignment.SPACE_BETWEEN, controls=[ft.Text("Subtotal", color="#D1D5DB"), checkout_subtotal_text]),
+                    ft.Divider(height=10, color=ft.Colors.with_opacity(0.15, ft.Colors.WHITE)),
+                    ft.Row(alignment=ft.MainAxisAlignment.SPACE_BETWEEN, controls=[ft.Text("Total", color=ft.Colors.WHITE, weight=ft.FontWeight.W_700), checkout_total_text]),
+                    checkout_items_column,
+                ],
+            ),
+        ),
+        ft.Row(
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            controls=[
+                ft.OutlinedButton("Back", on_click=lambda e: show_menu_view()),
+                ft.Button("Proceed to Payment", on_click=on_confirm_payment, bgcolor="#EA580C", color=ft.Colors.WHITE),
+            ],
+        ),
+    ]
+
+    success_view.controls = [
+        ft.Container(
+            border_radius=18,
+            padding=18,
+            gradient=ft.LinearGradient(colors=["#FFB17A", "#EA580C", "#DC2626"]),
+            content=ft.Column(
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=12,
+                controls=[
+                    ft.Text("Payment Complete", size=28, weight=ft.FontWeight.W_700, color=ft.Colors.WHITE),
+                    success_order_text,
+                    success_total_text,
+                    ft.Text("Thank You!", size=36, color=ft.Colors.WHITE, weight=ft.FontWeight.W_700),
+                    ft.Row(
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        controls=[
+                            ft.Button("Order More", on_click=lambda e: show_menu_view(), bgcolor=ft.Colors.WHITE, color="#EA580C"),
+                        ],
+                    ),
+                ],
+            ),
+        )
+    ]
+
+    page.add(menu_view, checkout_view, success_view)
 
     try:
         categories = fetch_menu_data(args.data_url)
@@ -463,46 +804,67 @@ def main(page: ft.Page):
         page.update()
         return
 
-    status.value = "Pick a category"
+    status.value = "Choose a category"
 
-    tabs = ft.Tabs(
-        selected_index=0,
-        animation_duration=220,
-        label_color=ft.Colors.WHITE,
-        unselected_label_color=ft.Colors.GREY_700,
-        indicator_color=ft.Colors.TRANSPARENT,
-        divider_color=ft.Colors.TRANSPARENT,
-        tabs=[],
-    )
+    selected_category = {"index": 0}
+    category_btns: list[tuple[ft.Button, int]] = []
+    category_tabs_row = ft.Row(spacing=8, wrap=False, scroll=ft.ScrollMode.ALWAYS)
+    sections_column = ft.Column(spacing=8)
 
-    for category in categories:
-        category_controls = []
-        for sub in category.get("subcategories", []):
-            category_controls.append(
+    def refresh_category_buttons():
+        for btn, idx in category_btns:
+            selected = idx == selected_category["index"]
+            btn.bgcolor = "#EA580C" if selected else "#F3F4F6"
+            btn.color = ft.Colors.WHITE if selected else "#1F2937"
+            btn.elevation = 0
+            btn.style = ft.ButtonStyle(
+                shape=ft.RoundedRectangleBorder(radius=999),
+                side=ft.BorderSide(1, "#FDBA74" if selected else "#E5E7EB"),
+                padding=ft.Padding.symmetric(horizontal=16, vertical=10),
+            )
+
+    def render_selected_category():
+        cat = categories[selected_category["index"]]
+        controls = []
+        for sub in cat.get("subcategories", []):
+            controls.append(
                 ft.Text(
                     sub.get("subcategory", "Section").upper(),
                     size=12,
                     weight=ft.FontWeight.W_700,
-                    color=ft.Colors.ORANGE_800,
+                    color="#EA580C",
                 )
             )
-            category_controls.extend(build_menu_card(item, add_to_cart) for item in sub.get("items", []))
+            controls.extend(build_menu_card(item, add_to_cart, args.base_url) for item in sub.get("items", []))
+        sections_column.controls = controls
 
-        tabs.tabs.append(
-            ft.Tab(
-                text=category.get("category", "Category"),
-                content=ft.Container(
-                    padding=ft.padding.only(top=8),
-                    content=ft.Column(controls=category_controls, spacing=8, scroll=ft.ScrollMode.ADAPTIVE),
-                ),
-            )
+    def select_category(idx: int):
+        selected_category["index"] = idx
+        refresh_category_buttons()
+        render_selected_category()
+        page.update()
+
+    for idx, category in enumerate(categories):
+        btn = ft.Button(
+            content=category.get("category", "Category"),
+            on_click=lambda e, i=idx: select_category(i),
+            height=38,
+            bgcolor="#F3F4F6",
+            color="#1F2937",
         )
+        category_btns.append((btn, idx))
+        category_tabs_row.controls.append(btn)
 
-    menu_content.controls = [tabs]
+    refresh_category_buttons()
+    render_selected_category()
+    menu_content.controls = [category_tabs_row, sections_column]
     recalc_totals()
     render_cart()
     page.update()
 
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    if hasattr(ft, "run"):
+        ft.run(main)
+    else:
+        ft.app(target=main)

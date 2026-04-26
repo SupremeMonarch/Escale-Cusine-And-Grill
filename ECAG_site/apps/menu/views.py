@@ -179,6 +179,97 @@ def mobile_checkout_start(request):
     return JsonResponse({"ok": True, "order_id": order.id, "checkout_url": checkout_url})
 
 
+@csrf_exempt
+def mobile_checkout_complete(request):
+    """Finalize an in-progress order for mobile clients (Flet/jQuery).
+
+    Payload:
+    {
+      "order_id": 123,
+      "payment_method": "card" | "paypal" | "juice" | "myt",
+      "card_name": "",
+      "card_number": "",
+      "exp_date": "YYYY-MM-DD",
+      "cvv": ""
+    }
+    """
+    if request.method != "POST":
+        return JsonResponse({"ok": False, "error": "POST required"}, status=405)
+
+    try:
+        payload = json.loads(request.body.decode("utf-8") or "{}")
+    except Exception:
+        return JsonResponse({"ok": False, "error": "invalid json"}, status=400)
+
+    try:
+        order_id = int(payload.get("order_id"))
+    except Exception:
+        return JsonResponse({"ok": False, "error": "invalid order_id"}, status=400)
+
+    raw_method = payload.get("payment_method") or "card"
+    if raw_method == "card":
+        pm = Transaction.Method.CREDIT_CARD
+    elif raw_method == "paypal":
+        pm = Transaction.Method.PAYPAL
+    elif raw_method == "juice":
+        pm = Transaction.Method.JUICE
+    else:
+        pm = Transaction.Method.MYT_MOB
+
+    try:
+        order = Order.objects.get(pk=order_id, status=Order.Status.IN_PROGRESS)
+    except Order.DoesNotExist:
+        return JsonResponse({"ok": False, "error": "order not found"}, status=404)
+
+    try:
+        with db_transaction.atomic():
+            txn = order.transactions.filter(status=Transaction.Status.IN_PROGRESS).order_by("-id").first()
+            if not txn:
+                txn = Transaction(order=order, payment_method=pm, status=Transaction.Status.IN_PROGRESS)
+
+            txn.payment_method = pm
+            if pm == Transaction.Method.CREDIT_CARD:
+                txn.card_name = payload.get("card_name", "")
+                txn.card_number = payload.get("card_number", "")
+                raw_exp = payload.get("exp_date")
+                txn.exp_date = None
+                if raw_exp:
+                    from datetime import datetime
+
+                    try:
+                        txn.exp_date = datetime.strptime(raw_exp, "%Y-%m-%d").date()
+                    except Exception:
+                        txn.exp_date = None
+                txn.cvv = payload.get("cvv", "")
+            else:
+                txn.card_name = ""
+                txn.card_number = ""
+                txn.exp_date = None
+                txn.cvv = ""
+
+            txn.status = Transaction.Status.COMPLETED
+            txn.save()
+
+            order.status = Order.Status.COMPLETED
+            order.save(update_fields=["status"])
+
+            request.session["last_order_id"] = order.id
+            _reset_cart_session(request.session)
+
+    except Exception as exc:
+        return JsonResponse({"ok": False, "error": str(exc)}, status=500)
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "order_id": order.id,
+            "order_code": order.order_id_str,
+            "total": str(order.total),
+            "message": "Payment complete",
+        }
+    )
+
+
 def menu_starters(request):
     sections = _build_sections("Starters")
     return render(request, "menu_starters.html", {"sections": sections, "active": "starters"})
