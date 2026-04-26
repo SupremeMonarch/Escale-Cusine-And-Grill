@@ -1,4 +1,5 @@
 import flet as ft
+from menu import MenuFeature
 
 from reservation import ReservationFeature
 from review import ReviewFeature
@@ -12,6 +13,8 @@ def main(page: ft.Page):
 
     counter = ft.Text("0", size=50, data=0)
     content_host = ft.Container(expand=True)
+    menu_feature: MenuFeature | None = None
+    menu_view_cache: ft.Control | None = None
     route_history: list[str] = []
     current_route = "/"
 
@@ -48,13 +51,18 @@ def main(page: ft.Page):
                             on_click=lambda e: navigate("/reservation"),
                             style=ft.ButtonStyle(bgcolor="#b24700", color="white"),
                         ),
+                        ft.ElevatedButton(
+                            "Open Menu",
+                            on_click=lambda e: navigate("/menu"),
+                            style=ft.ButtonStyle(bgcolor="#b24700", color="white"),
+                        ),
                     ],
                 ),
             ),
         )
 
     def navigate(route: str, add_history: bool = True) -> None:
-        nonlocal current_route
+        nonlocal current_route, menu_view_cache
         if add_history and route != current_route:
             route_history.append(current_route)
 
@@ -76,6 +84,14 @@ def main(page: ft.Page):
         elif route == "/reservation/confirmed":
             page.floating_action_button = None
             content_host.content = reservation_feature.build_confirmation_view()
+        elif route == "/menu":
+            nonlocal menu_feature
+            page.floating_action_button = None
+            if menu_feature is None:
+                menu_feature = MenuFeature(page, on_back=go_back)
+            if menu_view_cache is None:
+                menu_view_cache = menu_feature.build_view()
+            content_host.content = menu_view_cache
         else:
             content_host.content = home_view()
 
