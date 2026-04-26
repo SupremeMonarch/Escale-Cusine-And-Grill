@@ -217,6 +217,8 @@ def review_verify(request, pk):
 
 
 from rest_framework import viewsets, permissions
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from .serializers import ReviewSerializer
 
 # API ViewSets
@@ -224,3 +226,16 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_permissions(self):
+        # Allow public create/list/retrieve like the website review form.
+        if self.action in ['create', 'list', 'retrieve', 'helpful']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticatedOrReadOnly()]
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.AllowAny])
+    def helpful(self, request, pk=None):
+        review = self.get_object()
+        Review.objects.filter(pk=review.pk).update(helpful_count=F('helpful_count') + 1)
+        review.refresh_from_db()
+        return Response({'helpful': review.helpful_count, 'already_voted': False})

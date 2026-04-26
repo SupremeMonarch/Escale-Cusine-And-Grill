@@ -324,5 +324,10 @@ class ReservationViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Only show the user's own reservations
-        return Reservation.objects.filter(user_id=self.request.user)
+        user = self.request.user
+
+        is_staff_view = self.request.query_params.get('view') == 'staff'
+
+        if (user.is_staff and is_staff_view):
+            return Reservation.objects.all()
+        return Reservation.objects.filter(user_id=user)

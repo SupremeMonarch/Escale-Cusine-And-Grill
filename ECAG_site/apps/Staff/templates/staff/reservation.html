@@ -109,8 +109,7 @@
             </div>
 
             <div class="relative">
-                <button type="button"
-                        onclick="toggleSortMenu()"
+                <button type="button" id="btn-sort-toggle"
                         class="flex justify-center items-center h-9 px-3 rounded-lg border bg-gray-100 border text-gray-700 hover:bg-gray-200 shadow-sm transition-colors"
                         title="Sort Reservations">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -124,36 +123,36 @@
 
                     <div class="border-t border-gray-300 my-1"></div>
 
-                    <button type="button" onclick="applySort('time_asc')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
+                    <button type="button" data-sort="time_asc" class="btn-apply-sort w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
                         <span class="{% if current_sort == 'time_asc' %}text-orange-600 font-medium{% else %}text-gray-700{% endif %}">Time: Earliest First</span>
                         {% if current_sort == 'time_asc' %}<svg class="h-4 w-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{% endif %}
                     </button>
 
-                    <button type="button" onclick="applySort('time_desc')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
+                    <button type="button" data-sort="time_desc" class="btn-apply-sort w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
                         <span class="{% if current_sort == 'time_desc' %}text-orange-600 font-medium{% else %}text-gray-700{% endif %}">Time: Latest First</span>
                         {% if current_sort == 'time_desc' %}<svg class="h-4 w-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{% endif %}
                     </button>
 
                     <div class="border-t border-gray-300 my-1"></div>
 
-                    <button type="button" onclick="applySort('guests_desc')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
+                    <button type="button" data-sort="guests_desc" class="btn-apply-sort w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
                         <span class="{% if current_sort == 'guests_desc' %}text-orange-600 font-medium{% else %}text-gray-700{% endif %}">Guests: High to Low</span>
                         {% if current_sort == 'guests_desc' %}<svg class="h-4 w-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{% endif %}
                     </button>
 
-                    <button type="button" onclick="applySort('guests_asc')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
+                    <button type="button" data-sort="guests_asc" class="btn-apply-sort w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
                         <span class="{% if current_sort == 'guests_asc' %}text-orange-600 font-medium{% else %}text-gray-700{% endif %}">Guests: Low to High</span>
                         {% if current_sort == 'guests_asc' %}<svg class="h-4 w-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{% endif %}
                     </button>
 
                     <div class="border-t border-gray-300 my-1"></div>
 
-                    <button type="button" onclick="applySort('table_desc')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
+                    <button type="button" data-sort="table_desc" class="btn-apply-sort w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
                         <span class="{% if current_sort == 'guests_desc' %}text-orange-600 font-medium{% else %}text-gray-700{% endif %}">Table id: High to Low</span>
                         {% if current_sort == 'table_desc' %}<svg class="h-4 w-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{% endif %}
                     </button>
 
-                    <button type="button" onclick="applySort('table_asc')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
+                    <button type="button" data-sort="table_asc" class="btn-apply-sort w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between group">
                         <span class="{% if current_sort == 'guests_desc' %}text-orange-600 font-medium{% else %}text-gray-700{% endif %}">Table id: Low to High</span>
                         {% if current_sort == 'table_asc' %}<svg class="h-4 w-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>{% endif %}
                     </button>
@@ -221,8 +220,8 @@
             <div class="flex flex-wrap items-center gap-3">
                 {% if res.status %}
                 <!-- Trigger Overlay Button -->
-                <button onclick="toggleStatusModal('status-overlay-{{ res.reservation_id }}')"
-                        class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-sm font-medium text-white">
+                <button class="btn-toggle-status px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-sm font-medium text-white"
+                        data-overlay="status-overlay-{{ res.reservation_id }}">
                     Update status
                 </button>
                 {% endif %}
@@ -234,7 +233,7 @@
              class="hidden absolute bottom-0 left-0 w-full bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-10 p-4 animate-slide-up">
             <div class="flex justify-between items-center mb-3">
                 <p class="text-sm font-semibold text-gray-700">Update Reservation Status</p>
-                <button onclick="toggleStatusModal('status-overlay-{{ res.reservation_id }}')" class="text-gray-400 hover:text-gray-600">
+                <button class="btn-toggle-status text-gray-400 hover:text-gray-600" data-overlay="status-overlay-{{ res.reservation_id }}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -242,23 +241,23 @@
             </div>
             <div class="grid grid-cols-4 gap-2">
                 <!-- Confirmed -->
-                <button onclick="updateReservationStatus('{{ res.reservation_id }}', 'confirmed')"
-                        class="flex justify-center items-center py-2 rounded-lg border border-green-200 text-green-700 hover:bg-green-100 transition-all duration-200 text-xs font-medium shadow-sm">
+                <button class="btn-update-res-status flex justify-center items-center py-2 rounded-lg border border-green-200 text-green-700 hover:bg-green-100 transition-all duration-200 text-xs font-medium shadow-sm"
+                        data-res-id="{{ res.reservation_id }}" data-new-status="confirmed">
                     Confirmed
                 </button>
                 <!-- Seated -->
-                <button onclick="updateReservationStatus('{{ res.reservation_id }}', 'seated')"
-                        class="flex justify-center items-center py-2 rounded-lg border border-purple-200 text-purple-700 hover:bg-purple-100 transition-all duration-200 text-xs font-medium shadow-sm">
+                <button class="btn-update-res-status flex justify-center items-center py-2 rounded-lg border border-purple-200 text-purple-700 hover:bg-purple-100 transition-all duration-200 text-xs font-medium shadow-sm"
+                        data-res-id="{{ res.reservation_id }}" data-new-status="seated">
                     Seated
                 </button>
                 <!-- Completed -->
-                <button onclick="updateReservationStatus('{{ res.reservation_id }}', 'completed')"
-                        class="flex justify-center items-center py-2 rounded-lg border border-blue-200 text-blue-700 hover:bg-blue-100 transition-all duration-200 text-xs font-medium shadow-sm">
+                <button class="btn-update-res-status flex justify-center items-center py-2 rounded-lg border border-blue-200 text-blue-700 hover:bg-blue-100 transition-all duration-200 text-xs font-medium shadow-sm"
+                        data-res-id="{{ res.reservation_id }}" data-new-status="completed">
                     Completed
                 </button>
                 <!-- Cancelled -->
-                <button onclick="updateReservationStatus('{{ res.reservation_id }}', 'cancelled')"
-                        class="flex justify-center items-center py-2 rounded-lg border border-red-200 text-red-700 hover:bg-red-100 transition-all duration-200 text-xs font-medium shadow-sm">
+                <button class="btn-update-res-status flex justify-center items-center py-2 rounded-lg border border-red-200 text-red-700 hover:bg-red-100 transition-all duration-200 text-xs font-medium shadow-sm"
+                        data-res-id="{{ res.reservation_id }}" data-new-status="cancelled">
                     Cancelled
                 </button>
             </div>
@@ -278,232 +277,149 @@
 {% endblock dashboard_content %}
 
 {% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
     const statusCounts = {};
 
-    document.addEventListener('DOMContentLoaded', function () {
-        // 1. Initialize Counts
-        const countsData = document.getElementById('filter-counts');
-        if (countsData) {
-            statusCounts.All = parseInt(countsData.getAttribute('data-total')) || 0;
-            statusCounts.pending = parseInt(countsData.getAttribute('data-pending')) || 0;
-            statusCounts.confirmed = parseInt(countsData.getAttribute('data-confirmed')) || 0;
-            statusCounts.seated = parseInt(countsData.getAttribute('data-seated')) || 0;
-            statusCounts.completed = parseInt(countsData.getAttribute('data-completed')) || 0;
-            statusCounts.cancelled = parseInt(countsData.getAttribute('data-cancelled')) || 0;
-        }
-
-        // 2. Setup Status Filters
-        const buttons = document.querySelectorAll(".filter-button");
-        buttons.forEach(button => {
-            button.addEventListener("click", () => {
-                const status = button.getAttribute("data-status");
-                applyFilters(status);
-            });
-        });
-
-        // Initial load
-        applyFilters('All');
-    });
-
-    // --- Filter Functions ---
     const styles = {
-        inactive: ["bg-gray-100", "text-gray-700", "hover:bg-gray-200"],
-        All: ["bg-gray-900", "text-white", "hover:bg-gray-700"],
-        pending: ["bg-yellow-100", "text-yellow-800", "hover:bg-yellow-200"],
-        confirmed: ["bg-green-100", "text-green-800", "hover:bg-green-200"],
-        seated:["bg-purple-100", "text-purple-800", "hover:bg-purple-200"],
-        completed: ["bg-blue-100", "text-blue-800", "hover:bg-blue-200"],
-        cancelled: ["bg-red-100", "text-red-800", "hover:bg-red-200"],
+        inactive:  ["bg-gray-100",   "text-gray-700",   "hover:bg-gray-200"],
+        All:       ["bg-gray-900",   "text-white",       "hover:bg-gray-700"],
+        pending:   ["bg-yellow-100", "text-yellow-800",  "hover:bg-yellow-200"],
+        confirmed: ["bg-green-100",  "text-green-800",   "hover:bg-green-200"],
+        seated:    ["bg-purple-100", "text-purple-800",  "hover:bg-purple-200"],
+        completed: ["bg-blue-100",   "text-blue-800",    "hover:bg-blue-200"],
+        cancelled: ["bg-red-100",    "text-red-800",     "hover:bg-red-200"],
+    };
+    const statusColour = Object.values(styles).flat().join(" ");
+
+    const badgeColors = {
+        confirmed: "bg-green-100 text-green-800",
+        pending:   "bg-yellow-100 text-yellow-800",
+        seated:    "bg-purple-100 text-purple-800",
+        completed: "bg-blue-200 text-blue-800",
+        cancelled: "bg-red-100 text-red-800",
     };
 
-    let currentActiveFilter = 'All';
 
-    function applyFilters(status) {
-        currentActiveFilter = status;
-        const cards = document.querySelectorAll(".reservation-card");
-        const buttons = document.querySelectorAll(".filter-button");
-        const totalCountEl = document.getElementById('total-count-display');
-        const noResultsMsg = document.getElementById('filter-no-results'); // Get the message element
-        let visibleCount = 0;
+    $(document).ready(function () {
 
-        // Update buttons style
-        buttons.forEach(button => {
-            const btnStatus = button.getAttribute("data-status");
-            Object.values(styles).flat().forEach(cls => button.classList.remove(cls));
-
-            if (btnStatus === status) {
-                button.classList.add(...(styles[btnStatus] || styles.All));
-            } else {
-                button.classList.add(...styles.inactive);
-            }
-        });
-
-        // Show/Hide cards
-        cards.forEach(card => {
-            const cardStatus = card.getAttribute("data-status");
-            if (status === "All" || cardStatus === status) {
-                card.style.display = "flex";
-                visibleCount++;
-            } else {
-                card.style.display = "none";
-            }
-        });
-
-        // Toggle "No Results" message
-        if (noResultsMsg) {
-            // Only show message if we have cards loaded (length > 0) but none matched the filter (visibleCount === 0)
-            if (visibleCount === 0 && cards.length > 0) {
-                noResultsMsg.classList.remove('hidden');
-            } else {
-                noResultsMsg.classList.add('hidden');
-            }
+        // --- Initialize counts ---
+        const $c = $("#filter-counts");
+        if ($c.length) {
+            statusCounts.All       = parseInt($c.data("total"))     || 0;
+            statusCounts.pending   = parseInt($c.data("pending"))   || 0;
+            statusCounts.confirmed = parseInt($c.data("confirmed")) || 0;
+            statusCounts.seated    = parseInt($c.data("seated"))    || 0;
+            statusCounts.completed = parseInt($c.data("completed")) || 0;
+            statusCounts.cancelled = parseInt($c.data("cancelled")) || 0;
         }
 
-        // Update display count
-        if (totalCountEl) {
-            totalCountEl.textContent = visibleCount;
-        }
-    }
+        // --- Filter buttons ---
+        $(document).on("click", ".filter-button", function () {
+            const status = $(this).data("status");
+            let visibleCount = 0;
 
-    // --- AJAX Status Update ---
-    async function updateReservationStatus(reservationId, newStatus) {
-        const card = document.getElementById(`reservation-${reservationId}`);
-        const oldStatus = card ? card.getAttribute('data-status') : null;
+            $(".filter-button").each(function () {
+                const s = $(this).data("status");
+                $(this).removeClass(statusColour);
 
-        if (!oldStatus || oldStatus === newStatus) {
-            toggleStatusModal(`status-overlay-${reservationId}`);
-            return;
-        }
-
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-        try {
-            const response = await fetch(`/staff/reservations/update-status/${reservationId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({ status: newStatus })
+                if (s === status) {
+                    $(this).addClass((styles[s] || styles.All).join(" "));
+                } else {
+                    $(this).addClass(styles.inactive.join(" "));
+                }
             });
 
-            const data = await response.json();
 
-            if (data.success) {
-                // 1. Close overlay
-                toggleStatusModal(`status-overlay-${reservationId}`);
 
-                // 2. Update DOM (badge + data attr)
-                updateCardUI(reservationId, newStatus);
+            $(".reservation-card").each(function () {
+                if (status === "All" || $(this).data("status") === status) {
+                    $(this).css("display", "flex"); visibleCount++;
+                } else {
+                    $(this).hide();
+                }
+            });
 
-                // 3. Update Counts & Filter Button Text
-                refreshFilterCounts(oldStatus, newStatus);
+            const cardCount = $(".reservation-card").length;
+            $("#filter-no-results").toggleClass("hidden", !(visibleCount === 0 && cardCount > 0));
+            $("#total-count-display").text(visibleCount);
+        });
 
-                // 4. Re-apply current filter (so if we moved it out of the current filter, it disappears)
-                applyFilters(currentActiveFilter);
+        // --- Toggle status overlay ---
+        $(document).on("click", ".btn-toggle-status", function () {
+            $("#" + $(this).data("overlay")).toggleClass("hidden");
+        });
 
-            } else {
-                alert('Failed to update status: ' + (data.error || 'Unknown error'));
-            }
-        } catch (error) {
-            console.error('Error updating status:', error);
-            alert('An error occurred while updating status.');
-        }
-    }
+        // --- Update reservation status (AJAX) ---
+        $(document).on("click", ".btn-update-res-status", function () {
+            const resId     = $(this).data("res-id");
+            const newStatus = $(this).data("new-status");
+            const $card     = $("#reservation-" + resId);
+            const oldStatus = $card.data("status");
 
-    function updateCardUI(id, status) {
-        const card = document.getElementById(`reservation-${id}`);
-        if (!card) return;
-
-        // Update data attribute
-        card.setAttribute('data-status', status);
-
-        // Update Badge
-        const badgeContainer = card.querySelector('.status-badge-container');
-        if (badgeContainer) {
-            let badgeHtml = '';
-            // Capitalize for display
-            const displayStatus = status.charAt(0).toUpperCase() + status.slice(1);
-
-            if (status === 'confirmed') {
-                badgeHtml = `<div class="px-3 py-1 rounded-lg bg-green-100 text-sm font-medium text-green-800">${displayStatus}</div>`;
-            } else if (status === 'pending') {
-                badgeHtml = `<div class="px-3 py-1 rounded-lg bg-yellow-100 text-sm font-medium text-yellow-800">${displayStatus}</div>`;
-            } else if (status === 'seated') {
-                badgeHtml = `<div class="px-3 py-1 rounded-lg bg-purple-100 text-sm font-medium text-purple-800">${displayStatus}</div>`;
-            } else if (status === 'completed') {
-                badgeHtml = `<div class="px-3 py-1 rounded-lg bg-blue-200 text-sm font-medium text-blue-800">${displayStatus}</div>`;
-            } else if (status === 'cancelled') {
-                badgeHtml = `<div class="px-3 py-1 rounded-lg bg-red-100 text-sm font-medium text-red-800">${displayStatus}</div>`;
-            } else {
-                badgeHtml = `<div class="px-3 py-1 rounded-lg bg-gray-100 text-sm font-medium text-gray-800">${displayStatus}</div>`;
+            if (!oldStatus || oldStatus === newStatus) {
+                $("#status-overlay-" + resId).toggleClass("hidden");
+                return;
             }
 
-            badgeContainer.innerHTML = badgeHtml;
-        }
-    }
+            $.ajax({
+                url: "/api/reservations/bookings/" + resId + "/",
+                method: "PATCH",
+                contentType: "application/json",
+                headers: { "X-CSRFToken": $("[name=csrfmiddlewaretoken]").val() },
+                data: JSON.stringify({ status: newStatus }),
+                success: function (data) {
 
-    function refreshFilterCounts(oldStatus, newStatus) {
-        // Update global counts object
-        if (statusCounts[oldStatus] > 0) statusCounts[oldStatus]--;
-        statusCounts[newStatus]++;
+                    $("#status-overlay-" + resId).addClass("hidden");
 
-        // Helper to update specific button text
-        const updateButtonText = (statusKey) => {
-            const btn = document.querySelector(`.filter-button[data-status="${statusKey}"]`);
-            if (btn) {
-                // Capitalize for display text
-                const displayLabel = statusKey.charAt(0).toUpperCase() + statusKey.slice(1);
-                btn.textContent = `${displayLabel} (${statusCounts[statusKey]})`;
+                    $card.data("status", newStatus).attr("data-status", newStatus);
+                    const label  = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+                    const colors = badgeColors[newStatus] || "bg-gray-100 text-gray-800";
+                    $card.find(".status-badge-container").html(
+                        '<div class="px-3 py-1 rounded-lg ' + colors + ' text-sm font-medium">' + label + '</div>'
+                    );
+
+                    if (statusCounts[oldStatus] > 0) statusCounts[oldStatus]--;
+                    statusCounts[newStatus]++;
+                    [oldStatus, newStatus].forEach(function (key) {
+                        const $btn = $(".filter-button[data-status='" + key + "']");
+                        if ($btn.length) {
+                            $btn.text(key.charAt(0).toUpperCase() + key.slice(1) + " (" + statusCounts[key] + ")");
+                        }
+                    });
+
+                    $(".filter-button[data-status='" + status + "']").trigger("click");
+
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error updating status:", error);
+                    alert("An error occurred while updating status.");
+                }
+            });
+        });
+
+        // --- Sort menu toggle ---
+        $("#btn-sort-toggle").on("click", function (e) {
+            e.stopPropagation();
+            $("#sort-menu").toggleClass("hidden");
+        });
+
+        // --- Sort menu item click ---
+        $(document).on("click", ".btn-apply-sort", function () {
+            $("#sort-input").val($(this).data("sort"));
+            $("#filter-form").submit();
+        });
+
+        // --- Close sort menu on outside click ---
+        $(document).on("click", function (e) {
+            const $menu = $("#sort-menu");
+            if (!$menu.hasClass("hidden") && !$menu.is(e.target) && !$menu.has(e.target).length) {
+                $menu.addClass("hidden");
             }
-        };
+        });
 
-        updateButtonText(oldStatus);
-        updateButtonText(newStatus);
-    }
-
-    // --- Overlay Toggle ---
-    function toggleStatusModal(overlayId) {
-        const overlay = document.getElementById(overlayId);
-        if (overlay) {
-            overlay.classList.toggle('hidden');
-        }
-    }
-
-    // Close overlays on Escape
-    document.addEventListener('keydown', function(event) {
-        if (event.key === "Escape") {
-            const openOverlays = document.querySelectorAll('[id^="status-overlay-"]:not(.hidden)');
-            openOverlays.forEach(overlay => overlay.classList.add('hidden'));
-        }
-    });
-    // --- Sort Menu Toggle Logic ---
-    function toggleSortMenu() {
-        const menu = document.getElementById('sort-menu');
-        if (menu.classList.contains('hidden')) {
-            menu.classList.remove('hidden');
-        } else {
-            menu.classList.add('hidden');
-        }
-    }
-
-    function applySort(sortValue) {
-        // Set the hidden input value
-        document.getElementById('sort-input').value = sortValue;
-        // Submit the form
-        document.getElementById('filter-form').submit();
-    }
-
-    // Close sort menu if clicking outside
-    window.addEventListener('click', function(e) {
-        const menu = document.getElementById('sort-menu');
-        const button = e.target.closest('button[onclick="toggleSortMenu()"]');
-
-        // If the click is NOT on the menu and NOT on the button, hide the menu
-        if (!menu.contains(e.target) && !button && !menu.classList.contains('hidden')) {
-            menu.classList.add('hidden');
-        }
+        // --- Initialize filters ---
+        $(".filter-button[data-status='All']").trigger("click");
     });
 </script>
 {% endblock scripts %}

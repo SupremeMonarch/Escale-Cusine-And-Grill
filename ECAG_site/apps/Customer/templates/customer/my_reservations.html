@@ -41,7 +41,7 @@
 {% endblock styles %}
 
 {% block dashboard_content %}
-    <div class="p-4 sm:p-6 lg:p-8 w-full max-w-[900px] mx-auto space-y-6">
+    <div class="p-4 sm:p-6 lg:p-8 w-full max-w-[850px] mx-auto">
         <!-- Hidden CSRF Token for JS -->
         {% csrf_token %}
 
@@ -99,12 +99,11 @@
                     <div class="action-buttons flex gap-3 w-full sm:w-auto mt-4 sm:mt-0">
                         {% if res.status == 'confirmed' or res.status == 'pending' %}
                             <!-- Cancel Button -->
-                            <button onclick="openCancelModal('{{ res.reservation_id }}')"
-                                    class="flex justify-center items-center h-10 px-4 py-2 rounded-lg bg-red-600 text-base text-white hover:bg-red-700 transition w-full sm:w-auto font-medium">
+                            <button class="btn-open-cancel-modal flex justify-center items-center h-10 px-4 py-2 rounded-lg bg-red-600 text-base text-white hover:bg-red-700 transition w-full sm:w-auto font-medium"
+                                    data-res-id="{{ res.reservation_id }}">
                                 Cancel
                             </button>
                         {% endif %}
-                        <!-- Removed Modify Button -->
                     </div>
                 </div>
             </div>
@@ -135,11 +134,11 @@
                 </div>
             </div>
             <div class="mt-5 sm:mt-6 flex gap-3">
-                <button type="button" onclick="closeCancelModal()"
+                <button type="button" id="btn-keep-reservation"
                     class="flex-1 justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:text-sm">
                     No, Keep It
                 </button>
-                <button type="button" onclick="confirmCancelReservation()"
+                <button type="button" id="btn-confirm-cancel"
                     class="flex-1 justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:text-sm">
                     Yes, Cancel
                 </button>
@@ -149,160 +148,103 @@
 {% endblock dashboard_content %}
 
 {% block scripts %}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
-    // Variables to track the reservation being cancelled
+    const styles = {
+        inactive:  ["bg-gray-100", "text-gray-600", "hover:bg-gray-200"],
+        All:       ["bg-gray-900", "text-white",     "hover:bg-gray-700"],
+        pending:   ["bg-yellow-100", "text-yellow-800", "hover:bg-yellow-200"],
+        confirmed: ["bg-green-100",  "text-green-800",  "hover:bg-green-200"],
+        seated:    ["bg-purple-100", "text-purple-800",  "hover:bg-purple-200"],
+        completed: ["bg-blue-100",   "text-blue-800",   "hover:bg-blue-200"],
+        cancelled: ["bg-red-100",    "text-red-800",    "hover:bg-red-200"],
+    };
+    const statusColour = Object.values(styles).flat().join(" ");
+
     let resToCancelId = null;
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const buttons = document.querySelectorAll(".filter-button");
-        const cards = document.querySelectorAll(".reservation-card");
-        const noReservationsMessage = document.getElementById("no-reservations-message");
+    $(document).ready(function () {
 
-        const styles = {
-            inactive: ["bg-gray-100", "text-gray-600", "hover:bg-gray-200"],
-            All: ["bg-gray-900", "text-white", "hover:bg-gray-700"],
-            pending: ["bg-yellow-100", "text-yellow-800", "hover:bg-yellow-200"],
-            confirmed: ["bg-green-100", "text-green-800", "hover:bg-green-200"],
-            completed: ["bg-blue-100", "text-blue-800", "hover:bg-blue-200"],
-            cancelled: ["bg-red-100", "text-red-800", "hover:bg-red-200"],
-        };
-
-        function filterReservations(status) {
+        // --- Filter buttons ---
+        $(document).on("click", ".filter-button", function () {
+            const status = $(this).data("status");
             let visibleCount = 0;
 
-            // Update button styles
-            buttons.forEach(button => {
-                const buttonStatus = button.getAttribute("data-status");
-                // Reset all styles first
-                Object.values(styles).flat().forEach(styleClass => button.classList.remove(styleClass));
+            $(".filter-button").each(function () {
+                const s = $(this).data("status");
+                $(this).removeClass(statusColour);
 
-                if (buttonStatus === status) {
-                    button.classList.add(...styles[buttonStatus]);
+                if (s === status) {
+                    $(this).addClass((styles[s] || styles.All).join(" "));
                 } else {
-                    button.classList.add(...styles.inactive);
+                    $(this).addClass(styles.inactive.join(" "));
                 }
             });
 
-            // Filter cards
-            cards.forEach(card => {
-                const cardStatus = card.getAttribute("data-status");
-                if (status === "All" || cardStatus === status) {
-                    card.style.display = "flex";
+            $(".reservation-card").each(function () {
+                if (status === "All" || $(this).data("status") === status) {
+                    $(this).css("display", "flex");
                     visibleCount++;
                 } else {
-                    card.style.display = "none";
+                    $(this).hide();
                 }
             });
 
-            // Show or hide the "no reservations" message
-            if (visibleCount === 0) {
-                noReservationsMessage.style.display = "block";
-            } else {
-                noReservationsMessage.style.display = "none";
-            }
-        }
+            $("#no-reservations-message").toggle(visibleCount === 0);
+        });
 
-        // Attach click event listeners
-        buttons.forEach(button => {
-            button.addEventListener("click", () => {
-                const status = button.getAttribute("data-status");
-                filterReservations(status);
+        // --- Open cancel modal ---
+        $(document).on("click", ".btn-open-cancel-modal", function () {
+            resToCancelId = $(this).data("res-id");
+            $("#modal-res-id").text(resToCancelId);
+            $("#cancel-modal").removeClass("hidden");
+            $("body").css("overflow", "hidden");
+        });
+
+        // --- Close cancel modal ---
+        $("#btn-keep-reservation").on("click", function () {
+            resToCancelId = null;
+            $("#cancel-modal").addClass("hidden");
+            $("body").css({ overflow: "", paddingRight: "" });
+        });
+
+        // --- Confirm cancel - AJAX ---
+        $("#btn-confirm-cancel").on("click", function () {
+            if (!resToCancelId) return;
+            const resId = resToCancelId;
+
+            $.ajax({
+                url: "/api/reservations/bookings/" + resId + "/",
+                method: "PATCH",
+                contentType: "application/json",
+                headers: { "X-CSRFToken": $("[name=csrfmiddlewaretoken]").val() },
+                data: JSON.stringify({ status: "cancelled" }),
+                success: function (data) {
+
+                    const $card = $("#reservation-" + resId);
+                    $card.data("status", "cancelled").attr("data-status", "cancelled");
+                    $card.find(".status-badge-container").html(
+                        '<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-red-100 text-red-800"><p class="text-sm font-medium">Cancelled</p></div>'
+                    );
+                    $card.find(".action-buttons").empty();
+
+                    resToCancelId = null;
+                    $("#cancel-modal").addClass("hidden");
+                    $("body").css({ overflow: "", paddingRight: "" });
+
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error cancelling reservation:", error);
+                    alert("An error occurred. Please try again.");
+                    resToCancelId = null;
+                    $("#cancel-modal").addClass("hidden");
+                    $("body").css({ overflow: "", paddingRight: "" });
+                }
             });
         });
 
-        // Initialize filter on load
-        filterReservations('All');
+        // --- Initialize filters ---
+        $(".filter-button[data-status='All']").trigger("click");
     });
-
-    // --- Modal Functions ---
-
-    // Helper to determine scrollbar width
-    function getScrollbarWidth() {
-        return window.innerWidth - document.documentElement.clientWidth;
-    }
-
-    function openCancelModal(resId) {
-        resToCancelId = resId;
-        document.getElementById('modal-res-id').textContent = resId;
-        const modal = document.getElementById('cancel-modal');
-
-        // Add padding to body to replace scrollbar width
-        const scrollbarWidth = getScrollbarWidth();
-        if (scrollbarWidth > 0) {
-            document.body.style.paddingRight = `${scrollbarWidth}px`;
-        }
-
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; // Prevent scrolling
-    }
-
-    function closeCancelModal() {
-        resToCancelId = null;
-
-        const modal = document.getElementById('cancel-modal');
-        modal.classList.add('hidden');
-        document.body.style.overflow = ''; // Restore scrolling
-        document.body.style.paddingRight = ''; // Remove padding
-    }
-
-    async function confirmCancelReservation() {
-        if (!resToCancelId) return;
-
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-        try {
-            const response = await fetch(`/staff/reservations/update-status/${resToCancelId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({ status: 'cancelled' })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                // 1. Update UI
-                updateReservationCardCancelled(resToCancelId);
-                // 2. Close Modal
-                closeCancelModal();
-            } else {
-                alert('Failed to cancel reservation: ' + (data.error || 'Unknown error'));
-                closeCancelModal();
-            }
-        } catch (error) {
-            console.error('Error cancelling reservation:', error);
-            alert('An error occurred. Please try again.');
-            closeCancelModal();
-        }
-    }
-
-    function updateReservationCardCancelled(resId) {
-        const card = document.getElementById(`reservation-${resId}`);
-        if (!card) return;
-
-        // Update data status for filtering
-        card.setAttribute('data-status', 'cancelled');
-
-        // Update Badge
-        const badgeContainer = card.querySelector('.status-badge-container');
-        if (badgeContainer) {
-            badgeContainer.innerHTML = `<div class="flex justify-start items-center h-7 px-3 py-1 rounded-lg bg-red-100 text-red-800"><p class="text-sm font-medium">Cancelled</p></div>`;
-        }
-
-        // Remove action buttons (Cancel/Modify)
-        const actionButtons = card.querySelector('.action-buttons');
-        if (actionButtons) {
-            actionButtons.innerHTML = '';
-        }
-    }
-
-    // Close modal on Escape key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === "Escape") {
-            closeCancelModal();
-        }
-    });
-</script>
+    </script>
 {% endblock scripts %}
