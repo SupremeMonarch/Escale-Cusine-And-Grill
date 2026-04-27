@@ -61,7 +61,7 @@ class DeliveryAdmin(admin.ModelAdmin):
 
 @admin.register(Takeout)
 class TakeoutAdmin(admin.ModelAdmin):
-    list_display = ("order", "fee")
+    list_display = ("order", "fee", "pickup_status")
     search_fields = ("order__order_id_str",)
 
 

@@ -115,6 +115,7 @@ from django.contrib.auth.models import User
 from .serializers import UserSerializer, UserRegistrationSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework import status
 
@@ -126,6 +127,17 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return UserRegistrationSerializer
         return UserSerializer
+
+
+    @action(detail=False, methods=['get', 'patch'], permission_classes=[permissions.IsAuthenticated])
+    def me(self, request):
+        if request.method == 'PATCH':
+            serializer = UserSerializer(request.user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        return Response(UserSerializer(request.user).data)
+
 
 class RegisterAPIView(APIView):
     def post(self, request):

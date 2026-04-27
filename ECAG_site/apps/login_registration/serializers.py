@@ -11,12 +11,29 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    profile = UserProfileSerializer(source="userprofile", read_only=True)
+    profile = UserProfileSerializer(source="userprofile", required=False)
 
     class Meta:
         model = User
         fields = ["id", "username", "first_name", "last_name", "email", "profile"]
         read_only_fields = ["id", "username"]
+
+    def update(self, instance, validated_data):
+        profile_data = validated_data.pop("userprofile", {})
+
+        # Update User fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # Update UserProfile fields
+        if profile_data:
+            profile = instance.userprofile
+            for attr, value in profile_data.items():
+                setattr(profile, attr, value)
+            profile.save()
+
+        return instance
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(required=False)
