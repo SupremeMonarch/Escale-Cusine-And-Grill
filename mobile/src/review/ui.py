@@ -103,7 +103,6 @@ class ReviewFeature:
 					scroll=ft.ScrollMode.AUTO,
 					spacing=18,
 					controls=[
-						self._build_header(),
 						ft.Container(
 							bgcolor="#efe2c9",
 							border_radius=30,
@@ -166,7 +165,6 @@ class ReviewFeature:
 					scroll=ft.ScrollMode.AUTO,
 					spacing=16,
 					controls=[
-						self._build_header(),
 						ft.Text("Review", size=40 if compact else 58, weight=ft.FontWeight.BOLD, color="#be4f0b"),
 						ft.Text("Share Your Experience", size=15 if compact else 17, color="#6c6559"),
 						ft.Container(height=8),
@@ -211,31 +209,6 @@ class ReviewFeature:
 					],
 				),
 			),
-		)
-
-	def _build_header(self) -> ft.Control:
-		compact = self._is_compact()
-		return ft.Row(
-			alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-			vertical_alignment=ft.CrossAxisAlignment.CENTER,
-			controls=[
-				ft.IconButton(icon=ft.Icons.MENU, icon_color="#9c4317"),
-				ft.Container(
-					expand=True,
-					content=ft.Container(
-						alignment=ft.Alignment.CENTER,
-						content=ft.Text("Escale", size=28 if compact else 40, weight=ft.FontWeight.BOLD, italic=True, color="#a24014"),
-					),
-				),
-				ft.Container(
-					width=40,
-					height=40,
-					border_radius=20,
-					bgcolor="#efe7da",
-					alignment=ft.Alignment.CENTER,
-					content=ft.Icon(ft.Icons.PERSON, size=24, color="#8a7765"),
-				),
-			],
 		)
 
 	def _build_distribution_rows(self, stats) -> list[ft.Control]:

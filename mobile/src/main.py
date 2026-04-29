@@ -4,6 +4,7 @@ from menu import MenuFeature
 
 from reservation import ReservationFeature
 from review import ReviewFeature
+from settings import SettingsFeature
 
 
 def main(page: ft.Page):
@@ -13,38 +14,165 @@ def main(page: ft.Page):
     page.padding = 0
     page.scroll = ft.ScrollMode.HIDDEN
 
+    top_bar_host = ft.Container(height=56)
     content_host = ft.Container(expand=True, clip_behavior=ft.ClipBehavior.HARD_EDGE)
+    sidebar_scrim = ft.Container(expand=True, visible=False, bgcolor=ft.Colors.with_opacity(0.18, ft.Colors.BLACK))
+    sidebar_panel_host = ft.Container(visible=False)
     menu_feature: MenuFeature | None = None
     menu_view_cache: ft.Control | None = None
     home_feature: HomeFeature | None = None
     home_view_cache: ft.Control | None = None
+    settings_feature: SettingsFeature | None = None
+    sidebar_about_expanded = False
+    sidebar_contact_expanded = False
+    sidebar_faq_expanded = False
+    sidebar_open = False
     route_history: list[str] = []
     current_route = "/"
 
-    def build_top_bar() -> ft.AppBar:
-        return ft.AppBar(
-            toolbar_height=56,
-            bgcolor="#f8f8f8",
-            elevation=0,
-            leading=ft.IconButton(icon=ft.Icons.MENU, icon_color="#FF5C00"),
-            center_title=True,
-            title=ft.Text(
-                "ESCALE CUISINE",
-                size=16,
-                weight=ft.FontWeight.BOLD,
-                color="#FF5C00",
+    def close_sidebar(e=None) -> None:
+        nonlocal sidebar_open
+        sidebar_open = False
+        sidebar_scrim.visible = False
+        sidebar_panel_host.visible = False
+        page.update()
+
+    def open_sidebar(e=None) -> None:
+        nonlocal sidebar_open
+        sidebar_open = True
+        sidebar_scrim.visible = True
+        sidebar_panel_host.visible = True
+        refresh_sidebar_panel()
+        page.update()
+
+    sidebar_scrim.on_click = close_sidebar
+
+    def toggle_about(e=None) -> None:
+        nonlocal sidebar_about_expanded
+        sidebar_about_expanded = not sidebar_about_expanded
+        refresh_sidebar_panel()
+        page.update()
+
+    def toggle_contact(e=None) -> None:
+        nonlocal sidebar_contact_expanded
+        sidebar_contact_expanded = not sidebar_contact_expanded
+        refresh_sidebar_panel()
+        page.update()
+
+    def toggle_faq(e=None) -> None:
+        nonlocal sidebar_faq_expanded
+        sidebar_faq_expanded = not sidebar_faq_expanded
+        refresh_sidebar_panel()
+        page.update()
+
+    def sidebar_expandable_row(title: str, expanded: bool, on_click) -> ft.Control:
+        return ft.Container(
+            padding=ft.padding.symmetric(vertical=10),
+            on_click=on_click,
+            content=ft.Row(
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                controls=[
+                    ft.Text(title, size=17, color="#3a342c"),
+                    ft.Icon(
+                        ft.Icons.KEYBOARD_ARROW_DOWN if not expanded else ft.Icons.KEYBOARD_ARROW_UP,
+                        color="#FF5C00",
+                        size=20,
+                    ),
+                ],
             ),
-            actions=[
-                ft.Container(
-                    width=32,
-                    height=32,
-                    border_radius=16,
-                    bgcolor="#e8dcc8",
-                    alignment=ft.Alignment.CENTER,
-                    margin=ft.margin.only(right=10),
-                    content=ft.Icon(ft.Icons.PERSON, size=18, color="#8a7765"),
-                )
-            ],
+        )
+
+    def sidebar_child_text(value: str) -> ft.Control:
+        return ft.Container(
+            padding=ft.padding.only(left=10, right=8, top=2, bottom=8),
+            content=ft.Text(value, size=13, color="#6f665b"),
+        )
+
+    def sidebar_nav_row(title: str, route: str) -> ft.Control:
+        return ft.Container(
+            padding=ft.padding.symmetric(vertical=10),
+            on_click=lambda e: (close_sidebar(), navigate(route)),
+            content=ft.Row(
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                controls=[
+                    ft.Text(title, size=17, color="#3a342c"),
+                    ft.Icon(ft.Icons.ARROW_FORWARD, color="#FF5C00", size=16),
+                ],
+            ),
+        )
+
+    def refresh_sidebar_panel() -> None:
+        about_details = [
+            sidebar_child_text("Escale Cuisine & Grill serves authentic Mauritian flavors in a warm coastal setting."),
+        ]
+        contact_details = [
+            sidebar_child_text("Phone: +230 5830 7677"),
+            sidebar_child_text("Email: info@escale.com"),
+            sidebar_child_text("Address: Coastal Rd, Flic en Flac, Mauritius"),
+        ]
+        faq_details = [
+            sidebar_child_text("Do I need a reservation? Walk-ins are welcome, but reservations are recommended."),
+            sidebar_child_text("Do you offer delivery? Yes, via our mobile ordering flow."),
+            sidebar_child_text("Any vegetarian options? Yes, we have dedicated vegetarian dishes."),
+        ]
+
+        controls: list[ft.Control] = [
+            ft.Container(
+                padding=ft.padding.only(bottom=14),
+                content=ft.IconButton(icon=ft.Icons.CLOSE, icon_color="#FF5C00", on_click=close_sidebar),
+            ),
+            sidebar_expandable_row("About Us", sidebar_about_expanded, toggle_about),
+        ]
+
+        if sidebar_about_expanded:
+            controls.extend(about_details)
+
+        controls.append(sidebar_expandable_row("Contact Us", sidebar_contact_expanded, toggle_contact))
+        if sidebar_contact_expanded:
+            controls.extend(contact_details)
+
+        controls.append(sidebar_expandable_row("Frequently Asked Questions", sidebar_faq_expanded, toggle_faq))
+        if sidebar_faq_expanded:
+            controls.extend(faq_details)
+
+        controls.append(sidebar_nav_row("Reviews", "/review"))
+        controls.append(sidebar_nav_row("Settings", "/settings"))
+
+        sidebar_panel_host.content = ft.Container(
+            width=min(int(page.width * 0.82), 330) if page.width else 300,
+            expand=True,
+            bgcolor="#ececec",
+            padding=ft.padding.only(left=12, right=12, top=8, bottom=20),
+            content=ft.Column(scroll=ft.ScrollMode.AUTO, spacing=0, controls=controls),
+        )
+
+    def build_top_bar() -> ft.Control:
+        return ft.Container(
+            height=56,
+            bgcolor="#f8f8f8",
+            border=ft.border.only(bottom=ft.BorderSide(1, "#e3e3e3")),
+            content=ft.Row(
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                controls=[
+                    ft.IconButton(icon=ft.Icons.MENU, icon_color="#FF5C00", on_click=open_sidebar),
+                    ft.Text(
+                        "ESCALE CUISINE",
+                        size=16,
+                        weight=ft.FontWeight.BOLD,
+                        color="#FF5C00",
+                    ),
+                    ft.Container(
+                        width=32,
+                        height=32,
+                        border_radius=16,
+                        bgcolor="#e8dcc8",
+                        alignment=ft.Alignment.CENTER,
+                        margin=ft.margin.only(right=10),
+                        content=ft.Icon(ft.Icons.PERSON, size=18, color="#8a7765"),
+                    ),
+                ],
+            ),
         )
 
     def nav_item(label: str, icon: str, active: bool, route: str) -> ft.Control:
@@ -96,7 +224,7 @@ def main(page: ft.Page):
         return home_view_cache
 
     def navigate(route: str, add_history: bool = True) -> None:
-        nonlocal current_route, menu_view_cache
+        nonlocal current_route, menu_view_cache, settings_feature
         if add_history and route != current_route:
             route_history.append(current_route)
 
@@ -126,11 +254,18 @@ def main(page: ft.Page):
             if menu_view_cache is None:
                 menu_view_cache = menu_feature.build_view()
             content_host.content = ft.Container(expand=True, content=menu_view_cache)
+        elif route == "/settings":
+            page.floating_action_button = None
+            if settings_feature is None:
+                settings_feature = SettingsFeature(page)
+            content_host.content = ft.Container(expand=True, content=settings_feature.build_view())
         else:
             content_host.content = ft.Container(expand=True, content=home_view())
 
         current_route = route
+        top_bar_host.content = build_top_bar()
         page.bottom_appbar = build_bottom_nav(current_route)
+        close_sidebar()
         page.route = route
         page.update()
 
@@ -140,14 +275,26 @@ def main(page: ft.Page):
 
     review_feature = ReviewFeature(page, on_navigate=navigate)
     reservation_feature = ReservationFeature(page, on_navigate=navigate, on_back=go_back)
-    page.appbar = build_top_bar()
     page.bottom_appbar = build_bottom_nav(current_route)
 
     page.add(
         ft.Container(
             expand=True,
             bgcolor="#f5efe1",
-            content=content_host,
+            content=ft.Stack(
+                expand=True,
+                controls=[
+                    ft.Container(expand=True, padding=ft.padding.only(top=56), content=content_host),
+                    ft.Container(top=0, left=0, right=0, content=top_bar_host),
+                    sidebar_scrim,
+                    ft.Container(
+                        left=0,
+                        top=0,
+                        bottom=0,
+                        content=sidebar_panel_host,
+                    ),
+                ],
+            ),
         )
     )
     navigate("/")
