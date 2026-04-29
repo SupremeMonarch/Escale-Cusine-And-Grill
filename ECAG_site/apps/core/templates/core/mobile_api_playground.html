@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Mobile API Playground | Escale{% endblock %}
+
+{% block content %}
+<section class="max-w-4xl mx-auto px-6 py-10">
+  <h1 class="text-3xl font-bold mb-2">Mobile API Playground</h1>
+  <p class="text-gray-600 mb-8">This page uses <strong>jQuery + AJAX</strong> to consume your Django REST API endpoints.</p>
+
+  <div class="bg-white rounded-lg shadow p-6 mb-8">
+    <h2 class="text-xl font-semibold mb-4">1) Login and Fetch Profile</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <input id="username" class="border rounded px-3 py-2" placeholder="Username" />
+      <input id="password" type="password" class="border rounded px-3 py-2" placeholder="Password" />
+    </div>
+
+    <div class="flex gap-3">
+      <button id="login-btn" class="px-4 py-2 bg-orange-600 text-white rounded">Login</button>
+      <button id="me-btn" class="px-4 py-2 bg-slate-700 text-white rounded">Get Profile</button>
+      <button id="logout-btn" class="px-4 py-2 bg-red-600 text-white rounded">Logout</button>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-6 mb-8">
+    <h2 class="text-xl font-semibold mb-4">2) Load Menu Items</h2>
+    <div class="flex gap-3 mb-4">
+      <input id="menu-search" class="border rounded px-3 py-2 flex-1" placeholder="Search menu items (e.g. grilled)" />
+      <button id="menu-btn" class="px-4 py-2 bg-green-700 text-white rounded">Search</button>
+    </div>
+    <ul id="menu-list" class="space-y-2 text-sm text-gray-700"></ul>
+  </div>
+
+  <div class="bg-slate-900 text-slate-100 rounded-lg p-4">
+    <h2 class="text-lg font-semibold mb-2">API Output</h2>
+    <pre id="output" class="text-xs overflow-x-auto whitespace-pre-wrap"></pre>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+  let token = localStorage.getItem("ecag_token") || "";
+
+  function show(data) {
+    $("#output").text(typeof data === "string" ? data : JSON.stringify(data, null, 2));
+  }
+
+  function authHeaders() {
+    if (!token) return {};
+    return { Authorization: `Token ${token}` };
+  }
+
+  $("#login-btn").on("click", function () {
+    $.ajax({
+      url: "/api/auth/login/",
+      method: "POST",
+      data: {
+        username: $("#username").val(),
+        password: $("#password").val(),
+      },
+      success: function (res) {
+        token = res.token;
+        localStorage.setItem("ecag_token", token);
+        show({ message: "Logged in", token: token });
+      },
+      error: function (xhr) {
+        show(xhr.responseJSON || xhr.responseText || "Login failed");
+      },
+    });
+  });
+
+  $("#me-btn").on("click", function () {
+    $.ajax({
+      url: "/api/auth/me/",
+      method: "GET",
+      headers: authHeaders(),
+      success: function (res) {
+        show(res);
+      },
+      error: function (xhr) {
+        show(xhr.responseJSON || xhr.responseText || "Profile request failed");
+      },
+    });
+  });
+
+  $("#logout-btn").on("click", function () {
+    $.ajax({
+      url: "/api/auth/logout/",
+      method: "POST",
+      headers: authHeaders(),
+      success: function (res) {
+        token = "";
+        localStorage.removeItem("ecag_token");
+        show(res);
+      },
+      error: function (xhr) {
+        show(xhr.responseJSON || xhr.responseText || "Logout failed");
+      },
+    });
+  });
+
+  $("#menu-btn").on("click", function () {
+    const query = $("#menu-search").val() || "";
+    $.ajax({
+      url: "/api/menu/items/",
+      method: "GET",
+      data: { search: query, ordering: "name" },
+      success: function (res) {
+        const list = res.results || [];
+        $("#menu-list").empty();
+        list.forEach(function (item) {
+          $("#menu-list").append(
+            `<li class=\"border-b pb-2\"><strong>${item.name}</strong> - Rs ${item.price}</li>`
+          );
+        });
+        show(res);
+      },
+      error: function (xhr) {
+        show(xhr.responseJSON || xhr.responseText || "Menu request failed");
+      },
+    });
+  });
+</script>
+{% endblock %}

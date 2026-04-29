@@ -4,3 +4,4 @@ Pillow
 djangorestframework
 flet[all]==0.84.0
 django-cors-headers
+requests

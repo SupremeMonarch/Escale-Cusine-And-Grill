@@ -9,4 +9,6 @@ router.register(r'users', views.UserViewSet, basename='user')
 urlpatterns = router.urls + [
     path('login/', obtain_auth_token),
     path('register/', views.RegisterAPIView.as_view()),
+    path('me/', views.MeAPIView.as_view()),
+    path('logout/', views.LogoutAPIView.as_view()),
 ]
