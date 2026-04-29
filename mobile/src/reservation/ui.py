@@ -26,6 +26,8 @@ class ReservationFeature:
         self.on_navigate = on_navigate
         self.on_back = on_back
         self.client = ReservationApiClient()
+        self.url_launcher = ft.UrlLauncher()
+        self.page.services.append(self.url_launcher)
 
         self.selected_date = date.today() + timedelta(days=1)
         self.selected_time = "19:30"
@@ -973,11 +975,11 @@ class ReservationFeature:
         }
         return f"https://calendar.google.com/calendar/render?{urlencode(params)}"
 
-    def _add_to_calendar(self, e: ft.ControlEvent | None = None) -> None:
+    async def _add_to_calendar(self, e: ft.ControlEvent | None = None) -> None:
         url = self._calendar_url(self._confirmed_draft())
         print(f"CALENDAR_URL {url}", flush=True)
         try:
-            self.page.launch_url(url, web_popup_window=True, web_popup_window_name="_blank")
+            await self.url_launcher.launch_url(url, mode=ft.LaunchMode.EXTERNAL_APPLICATION)
             self._show_message("Opening calendar event.")
         except Exception as exc:
             print(f"CALENDAR_ERROR {exc}", flush=True)

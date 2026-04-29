@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from urllib.parse import quote_plus
 
 import flet as ft
 
@@ -9,6 +10,9 @@ from menu.service import resolve_image_payload
 
 
 class HomeFeature:
+    DESTINATION_LABEL = "Escale Cuisine and Grill"
+    DESTINATION_QUERY = "Escale Cuisine and Grill, Port Louis, Mauritius"
+
     def __init__(
         self,
         page: ft.Page,
@@ -16,6 +20,8 @@ class HomeFeature:
     ):
         self.page = page
         self.on_navigate = on_navigate
+        self.url_launcher = ft.UrlLauncher()
+        self.page.services.append(self.url_launcher)
         self.featured_dishes = self._load_featured_dishes()
 
     # ------------------------------------------------------------------ #
@@ -41,6 +47,7 @@ class HomeFeature:
                         self._build_description_section(),
                         self._build_featured_dishes(),
                         self._build_experience_section(),
+                        self._build_find_us_section(),
                         ft.Container(height=18),
                     ],
                 ),
@@ -271,6 +278,71 @@ class HomeFeature:
             ),
         )
 
+    def _build_find_us_section(self) -> ft.Control:
+        return ft.Container(
+            padding=ft.padding.symmetric(horizontal=20, vertical=8),
+            content=ft.Column(
+                spacing=14,
+                controls=[
+                    ft.Text(
+                        "Find Us",
+                        size=22,
+                        weight=ft.FontWeight.BOLD,
+                        color="#1a1a1a",
+                    ),
+                    ft.Container(
+                        border_radius=16,
+                        bgcolor="#fff7ed",
+                        border=ft.Border.all(1, "#f0dac4"),
+                        padding=ft.padding.all(18),
+                        content=ft.Column(
+                            spacing=12,
+                            controls=[
+                                ft.Row(
+                                    spacing=10,
+                                    controls=[
+                                        ft.Icon(ft.Icons.NEAR_ME, size=28, color="#E97820"),
+                                        ft.Text(
+                                            "Get the best route from your current location",
+                                            size=14,
+                                            weight=ft.FontWeight.W_600,
+                                            color="#4b433a",
+                                            expand=True,
+                                        ),
+                                    ],
+                                ),
+                                ft.Text(
+                                    f"Destination: {self.DESTINATION_LABEL}",
+                                    size=13,
+                                    color="#6a6156",
+                                ),
+                                ft.Container(
+                                    height=44,
+                                    border_radius=10,
+                                    bgcolor="#FF5C00",
+                                    alignment=ft.Alignment.CENTER,
+                                    on_click=self._open_best_route,
+                                    content=ft.Row(
+                                        alignment=ft.MainAxisAlignment.CENTER,
+                                        spacing=8,
+                                        controls=[
+                                            ft.Icon(ft.Icons.DIRECTIONS, size=18, color="white"),
+                                            ft.Text(
+                                                "Best Route",
+                                                size=13,
+                                                weight=ft.FontWeight.BOLD,
+                                                color="white",
+                                            ),
+                                        ],
+                                    ),
+                                ),
+                            ],
+                        ),
+                    ),
+                ],
+            ),
+        )
+
     def _experience_card(self, icon: str, title: str, desc: str, cta: str, route: str) -> ft.Control:
         return ft.Container(
             border_radius=16,
@@ -308,6 +380,17 @@ class HomeFeature:
                 ],
             ),
         )
+
+    async def _open_best_route(self, e: ft.ControlEvent | None = None) -> None:
+        destination = quote_plus(self.DESTINATION_QUERY)
+        params = f"api=1&origin=Current+Location&destination={destination}&travelmode=driving"
+        maps_url = f"https://www.google.com/maps/dir/?{params}"
+        try:
+            await self.url_launcher.launch_url(maps_url, mode=ft.LaunchMode.EXTERNAL_APPLICATION)
+        except Exception:
+            self.page.snack_bar = ft.SnackBar(content=ft.Text("Unable to open maps on this device."), bgcolor="#7a2315")
+            self.page.snack_bar.open = True
+            self.page.update()
 
     # ------------------------------------------------------------------ #
     #  Helpers
