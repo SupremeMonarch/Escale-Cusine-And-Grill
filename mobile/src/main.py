@@ -1,6 +1,9 @@
 import flet as ft
+import asyncio
+import os
 from home import HomeFeature
 from menu import MenuFeature
+from notifications import fetch_notification_events
 
 from reservation import ReservationFeature
 from review import ReviewFeature
@@ -23,12 +26,80 @@ def main(page: ft.Page):
     home_feature: HomeFeature | None = None
     home_view_cache: ft.Control | None = None
     settings_feature: SettingsFeature | None = None
+    notifications_enabled = True
+    last_notification_cursor: str | None = None
+    notifications_task_started = False
+    notification_seen_ids: set[str] = set()
     sidebar_about_expanded = False
     sidebar_contact_expanded = False
     sidebar_faq_expanded = False
     sidebar_open = False
     route_history: list[str] = []
     current_route = "/"
+
+    api_base_url = os.getenv("ECAG_API_BASE_URL", "http://127.0.0.1:8000")
+
+    def read_bool_setting(key: str, default: bool) -> bool:
+        try:
+            raw = page.client_storage.get(key)
+            if isinstance(raw, bool):
+                return raw
+            if isinstance(raw, str):
+                return raw.lower() in {"1", "true", "yes", "on"}
+        except Exception:
+            pass
+        return default
+
+    def set_bool_setting(key: str, value: bool) -> None:
+        try:
+            page.client_storage.set(key, bool(value))
+        except Exception:
+            pass
+
+    def set_notifications_enabled(value: bool) -> None:
+        nonlocal notifications_enabled
+        notifications_enabled = bool(value)
+        set_bool_setting("settings.notifications_enabled", notifications_enabled)
+
+    async def notification_poller():
+        nonlocal last_notification_cursor
+        while True:
+            await asyncio.sleep(10)
+            if not notifications_enabled:
+                continue
+
+            try:
+                payload = fetch_notification_events(api_base_url, last_notification_cursor)
+            except Exception:
+                continue
+
+            events = payload.get("events", [])
+            server_time = payload.get("server_time")
+
+            if last_notification_cursor is None:
+                last_notification_cursor = server_time
+                continue
+
+            fresh_events = []
+            for event in events:
+                eid = event.get("event_id", "")
+                timestamp = event.get("timestamp", "")
+                unique_key = f"{eid}:{timestamp}"
+                if unique_key in notification_seen_ids:
+                    continue
+                notification_seen_ids.add(unique_key)
+                fresh_events.append(event)
+
+            if fresh_events:
+                latest = fresh_events[-1]
+                page.snack_bar = ft.SnackBar(
+                    content=ft.Text(latest.get("message", "New update available")),
+                    open=True,
+                    bgcolor="#2f2a24",
+                )
+                page.update()
+
+            last_notification_cursor = server_time or (events[-1].get("timestamp") if events else last_notification_cursor)
 
     def close_sidebar(e=None) -> None:
         nonlocal sidebar_open
@@ -257,7 +328,11 @@ def main(page: ft.Page):
         elif route == "/settings":
             page.floating_action_button = None
             if settings_feature is None:
-                settings_feature = SettingsFeature(page)
+                settings_feature = SettingsFeature(
+                    page,
+                    notifications_enabled=notifications_enabled,
+                    on_notifications_change=set_notifications_enabled,
+                )
             content_host.content = ft.Container(expand=True, content=settings_feature.build_view())
         else:
             content_host.content = ft.Container(expand=True, content=home_view())
@@ -275,6 +350,12 @@ def main(page: ft.Page):
 
     review_feature = ReviewFeature(page, on_navigate=navigate)
     reservation_feature = ReservationFeature(page, on_navigate=navigate, on_back=go_back)
+    notifications_enabled = read_bool_setting("settings.notifications_enabled", True)
+
+    if not notifications_task_started:
+        notifications_task_started = True
+        page.run_task(notification_poller)
+
     page.bottom_appbar = build_bottom_nav(current_route)
 
     page.add(

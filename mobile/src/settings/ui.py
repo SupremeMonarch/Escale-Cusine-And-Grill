@@ -4,10 +4,20 @@ import flet as ft
 
 
 class SettingsFeature:
-    def __init__(self, page: ft.Page):
+    def __init__(
+        self,
+        page: ft.Page,
+        notifications_enabled: bool = True,
+        on_notifications_change=None,
+    ):
         self.page = page
+        self.on_notifications_change = on_notifications_change
 
-        self.notifications_switch = ft.Switch(value=True, active_color="#FF5C00")
+        self.notifications_switch = ft.Switch(
+            value=notifications_enabled,
+            active_color="#FF5C00",
+            on_change=self._handle_notifications_toggle,
+        )
         self.location_switch = ft.Switch(value=True, active_color="#FF5C00")
         self.marketing_switch = ft.Switch(value=False, active_color="#FF5C00")
 
@@ -38,11 +48,6 @@ class SettingsFeature:
                         subtitle="Enable location for faster delivery address suggestions.",
                         trailing=self.location_switch,
                     ),
-                    self._settings_card(
-                        title="Marketing Emails",
-                        subtitle="Receive special offers and event announcements.",
-                        trailing=self.marketing_switch,
-                    ),
                     self._settings_row("Language", "English"),
                     self._settings_row("Theme", "Light"),
                     self._settings_row("Privacy Policy", "View"),
@@ -51,6 +56,10 @@ class SettingsFeature:
                 ],
             ),
         )
+
+    def _handle_notifications_toggle(self, e: ft.ControlEvent) -> None:
+        if callable(self.on_notifications_change):
+            self.on_notifications_change(bool(self.notifications_switch.value))
 
     def _settings_card(self, title: str, subtitle: str, trailing: ft.Control) -> ft.Control:
         return ft.Container(
