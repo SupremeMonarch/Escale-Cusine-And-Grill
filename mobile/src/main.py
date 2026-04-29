@@ -26,13 +26,13 @@ def main(page: ft.Page):
             toolbar_height=56,
             bgcolor="#f8f8f8",
             elevation=0,
-            leading=ft.IconButton(icon=ft.Icons.MENU, icon_color="#e57722"),
+            leading=ft.IconButton(icon=ft.Icons.MENU, icon_color="#FF5C00"),
             center_title=True,
             title=ft.Text(
                 "ESCALE CUISINE",
                 size=16,
                 weight=ft.FontWeight.BOLD,
-                color="#e57722",
+                color="#FF5C00",
             ),
             actions=[
                 ft.Container(

@@ -154,7 +154,7 @@ class HomeFeature:
                         weight=ft.FontWeight.BOLD,
                         color="#1a1a1a",
                     ),
-                    ft.Row(spacing=12, scroll=ft.ScrollMode.AUTO, controls=dish_cards)
+                    ft.Row(spacing=30, scroll=ft.ScrollMode.AUTO, controls=dish_cards)
                     if dish_cards
                     else ft.Text("No featured dishes available right now.", size=13, color="#7a7a7a"),
                 ],
@@ -223,7 +223,7 @@ class HomeFeature:
                                 ),
                                 ft.Container(height=8),
                                 ft.Container(
-                                    bgcolor="#e57722",
+                                    gradient=ft.LinearGradient(colors=["#E97820", "#EF4444"]),
                                     border_radius=6,
                                     padding=ft.padding.symmetric(vertical=8),
                                     alignment=ft.Alignment.CENTER,
@@ -283,7 +283,7 @@ class HomeFeature:
                 controls=[
                     ft.Row(
                         controls=[
-                            ft.Icon(icon, size=32, color="#e57722"),
+                            ft.Icon(icon, size=32, color="#E97820"),
                         ],
                     ),
                     ft.Text(
@@ -303,7 +303,7 @@ class HomeFeature:
                         cta,
                         size=12,
                         weight=ft.FontWeight.BOLD,
-                        color="#e57722",
+                        color="#E97820",
                     ),
                 ],
             ),
