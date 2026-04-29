@@ -72,7 +72,6 @@ class ReservationFeature:
         self._refresh_date_cards()
         return self._screen(
             step=1,
-            show_brand_bar=True,
             controls=[
                 ft.Container(height=18),
                 ft.Text("Reserve Your Table", size=34, weight=ft.FontWeight.BOLD, color="#a63b06"),
@@ -143,7 +142,6 @@ class ReservationFeature:
     def build_details_view(self) -> ft.Control:
         return self._screen(
             step=2,
-            show_app_header=True,
             controls=[
                 ft.Container(height=48),
                 ft.Text("Guest Details", size=42, weight=ft.FontWeight.BOLD, color="#a63b06"),
@@ -174,8 +172,6 @@ class ReservationFeature:
         draft = self._confirmed_draft()
         return self._screen(
             step=3,
-            show_app_header=True,
-            header_back_enabled=False,
             controls=[
                 ft.Container(height=70),
                 ft.Container(
@@ -213,20 +209,12 @@ class ReservationFeature:
         self,
         step: int,
         controls: list[ft.Control],
-        show_brand_bar: bool = False,
-        show_app_header: bool = False,
-        header_back_enabled: bool = False,
         top_padding: int = 16,
         horizontal: ft.CrossAxisAlignment = ft.CrossAxisAlignment.STRETCH,
     ) -> ft.Control:
         content: list[ft.Control] = []
-        if show_brand_bar:
-            content.append(self._brand_bar())
-        if show_app_header:
-            content.append(self._app_header(back_enabled=header_back_enabled))
         content.extend(controls)
-        content.append(ft.Container(height=82))
-        content.append(self._bottom_nav(step))
+        content.append(ft.Container(height=12))
 
         return ft.Container(
             expand=True,
