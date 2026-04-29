@@ -126,6 +126,7 @@ class HomeFeature:
                                 border=ft.Border.all(1, "#c9bfb0"),
                                 padding=ft.padding.symmetric(vertical=12),
                                 alignment=ft.Alignment.CENTER,
+                                on_click=lambda e: self._navigate("/menu"),
                                 content=ft.Text(
                                     "View Menu",
                                     color="#5a5249",
@@ -164,13 +165,13 @@ class HomeFeature:
         fit_cover = ft.BoxFit.COVER if hasattr(ft, "BoxFit") else "cover"
         image_payload = resolve_image_payload(dish.get("image_url", ""))
         image_control = (
-            ft.Image(width=160, height=120, fit=fit_cover, **image_payload)
+            ft.Image(width=220, height=130, fit=fit_cover, **image_payload)
             if image_payload
             else ft.Icon(ft.Icons.RESTAURANT, size=48, color="#d4a574")
         )
 
         return ft.Container(
-            width=160,
+            width=220,
             border_radius=12,
             bgcolor="white",
             shadow=ft.BoxShadow(blur_radius=8, color=ft.Colors.with_opacity(0.1, ft.Colors.BLACK)),
@@ -179,8 +180,8 @@ class HomeFeature:
                 spacing=0,
                 controls=[
                     ft.Container(
-                        width=160,
-                        height=120,
+                        width=220,
+                        height=130,
                         border_radius=ft.border_radius.only(top_left=12, top_right=12),
                         bgcolor="#f0f0f0",
                         alignment=ft.Alignment.CENTER,
