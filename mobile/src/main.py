@@ -7,6 +7,8 @@ from notifications import fetch_notification_events
 
 from reservation import ReservationFeature
 from review import ReviewFeature
+from Registration import RegistrationFeature
+from Login import LoginFeature
 from settings import SettingsFeature
 
 
@@ -15,7 +17,6 @@ def main(page: ft.Page):
     page.bgcolor = "#f5efe1"
     page.theme_mode = ft.ThemeMode.LIGHT
     page.padding = 0
-    page.scroll = ft.ScrollMode.HIDDEN
 
     top_bar_host = ft.Container(height=56)
     content_host = ft.Container(expand=True, clip_behavior=ft.ClipBehavior.HARD_EDGE)
@@ -301,22 +302,36 @@ def main(page: ft.Page):
 
         if route == "/review":
             page.floating_action_button = None
-            content_host.content = ft.Container(expand=True, content=review_feature.build_list_view())
+            content_host.content = review_feature.build_list_view()
+        
         elif route == "/review/write":
             page.floating_action_button = None
-            content_host.content = ft.Container(expand=True, content=review_feature.build_write_view())
+            content_host.content = review_feature.build_write_view()
+        
         elif route == "/reservation":
             page.floating_action_button = None
-            content_host.content = ft.Container(expand=True, content=reservation_feature.build_start_view())
+            content_host.content = reservation_feature.build_start_view()
+        
         elif route == "/reservation/tables":
             page.floating_action_button = None
-            content_host.content = ft.Container(expand=True, content=reservation_feature.build_table_view())
+            content_host.content = reservation_feature.build_table_view()
+        
         elif route == "/reservation/details":
             page.floating_action_button = None
-            content_host.content = ft.Container(expand=True, content=reservation_feature.build_details_view())
+            content_host.content = reservation_feature.build_details_view()
+        
         elif route == "/reservation/confirmed":
             page.floating_action_button = None
-            content_host.content = ft.Container(expand=True, content=reservation_feature.build_confirmation_view())
+            content_host.content = reservation_feature.build_confirmation_view()
+        
+        elif route == "/signup":
+            page.floating_action_button = None
+            content_host.content = registration_feature.build_signup_view()
+
+        elif route == "/login":
+            page.floating_action_button = None
+            content_host.content = login_feature.build_login_view()
+
         elif route == "/menu":
             nonlocal menu_feature
             page.floating_action_button = None
@@ -350,6 +365,9 @@ def main(page: ft.Page):
 
     review_feature = ReviewFeature(page, on_navigate=navigate)
     reservation_feature = ReservationFeature(page, on_navigate=navigate, on_back=go_back)
+    registration_feature = RegistrationFeature(page, on_navigate=navigate)
+    registration_feature.setup()
+    login_feature = LoginFeature(page, on_navigate=navigate)
     notifications_enabled = read_bool_setting("settings.notifications_enabled", True)
 
     if not notifications_task_started:
