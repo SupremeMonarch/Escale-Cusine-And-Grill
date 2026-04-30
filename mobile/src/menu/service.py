@@ -15,9 +15,11 @@ def fetch_menu_data(url: str) -> list[dict]:
     return payload.get("categories", [])
 
 
-def start_checkout(base_url: str, items: list[dict], order_type: str) -> dict:
+def start_checkout(base_url: str, items: list[dict], order_type: str, address: str = "") -> dict:
     endpoint = urllib.parse.urljoin(base_url, "/menu/mobile/checkout/start/")
     payload = {"items": items, "order_type": order_type}
+    if order_type == "delivery":
+        payload["address"] = address
     req = urllib.request.Request(
         endpoint,
         data=json.dumps(payload).encode("utf-8"),

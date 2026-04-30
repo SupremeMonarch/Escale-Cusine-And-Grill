@@ -14,7 +14,24 @@ EXTRA_TOPPINGS = ["Eggs", "Shrimps", "Mushrooms"]
 
 def is_topping_eligible(name: str) -> bool:
     lowered = str(name or "").lower()
-    return "fried rice" in lowered or "fried noodles" in lowered or "magic bowl" in lowered
+    keywords = [
+        "fried rice",
+        "fried noodles",
+        "magic bowl",
+        "chicken",
+        "lamb",
+        "curry",
+        "grill",
+        "rice",
+        "noodle",
+        "bowl",
+        "seafood",
+        "veg",
+        "burger",
+        "wrap",
+        "pasta",
+    ]
+    return any(keyword in lowered for keyword in keywords)
 
 
 def normalize_cart(items: list[dict]) -> list[dict]:
