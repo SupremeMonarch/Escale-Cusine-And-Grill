@@ -82,6 +82,7 @@
     --container-sm: 24rem;
     --container-md: 28rem;
     --container-lg: 32rem;
+    --container-xl: 36rem;
     --container-2xl: 42rem;
     --container-3xl: 48rem;
     --container-4xl: 56rem;
@@ -1344,6 +1345,94 @@
     white-space: nowrap;
     border-width: 0;
   }
+  .checkbox {
+    border: var(--border) solid var(--input-color, var(--color-base-content));
+  }
+  @supports (color: color-mix(in lab, red, red)) {
+    .checkbox {
+      border: var(--border) solid var(--input-color, color-mix(in oklab, var(--color-base-content) 20%, #0000));
+    }
+  }
+  .checkbox {
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+    cursor: pointer;
+    appearance: none;
+    border-radius: var(--radius-selector);
+    padding: calc(0.25rem * 1);
+    vertical-align: middle;
+    color: var(--color-base-content);
+    box-shadow: 0 1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset, 0 0 #0000 inset, 0 0 #0000;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    --size: calc(var(--size-selector, 0.25rem) * 6);
+    width: var(--size);
+    height: var(--size);
+    background-size: auto, calc(var(--noise) * 100%);
+    background-image: none, var(--fx-noise);
+  }
+  .checkbox:before {
+    --tw-content: "";
+    content: var(--tw-content);
+    display: block;
+    width: 100%;
+    height: 100%;
+    rotate: 45deg;
+    background-color: currentcolor;
+    opacity: 0%;
+    transition: clip-path 0.3s, opacity 0.1s, rotate 0.3s, translate 0.3s;
+    transition-delay: 0.1s;
+    clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 80%, 70% 80%, 70% 100%);
+    box-shadow: 0px 3px 0 0px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset;
+    font-size: 1rem;
+    line-height: 0.75;
+  }
+  .checkbox:focus-visible {
+    outline: 2px solid var(--input-color, currentColor);
+    outline-offset: 2px;
+  }
+  .checkbox:checked, .checkbox[aria-checked="true"] {
+    background-color: var(--input-color, #0000);
+    box-shadow: 0 0 #0000 inset, 0 8px 0 -4px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset, 0 1px oklch(0% 0 0 / calc(var(--depth) * 0.1));
+  }
+  .checkbox:checked:before, .checkbox[aria-checked="true"]:before {
+    clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 0%, 70% 0%, 70% 100%);
+    opacity: 100%;
+  }
+  @media (forced-colors: active) {
+    .checkbox:checked:before, .checkbox[aria-checked="true"]:before {
+      rotate: 0deg;
+      background-color: transparent;
+      --tw-content: "✔︎";
+      clip-path: none;
+    }
+  }
+  @media print {
+    .checkbox:checked:before, .checkbox[aria-checked="true"]:before {
+      rotate: 0deg;
+      background-color: transparent;
+      --tw-content: "✔︎";
+      clip-path: none;
+    }
+  }
+  .checkbox:indeterminate {
+    background-color: var(--input-color, var(--color-base-content));
+  }
+  @supports (color: color-mix(in lab, red, red)) {
+    .checkbox:indeterminate {
+      background-color: var(--input-color, color-mix(in oklab, var(--color-base-content) 20%, #0000));
+    }
+  }
+  .checkbox:indeterminate:before {
+    rotate: 0deg;
+    opacity: 100%;
+    translate: 0 -35%;
+    clip-path: polygon(20% 100%, 20% 80%, 50% 80%, 50% 80%, 80% 80%, 80% 100%);
+  }
+  .checkbox:disabled {
+    cursor: not-allowed;
+    opacity: 20%;
+  }
   .radio {
     position: relative;
     display: inline-block;
@@ -2150,6 +2239,9 @@
   .max-h-\[32rem\] {
     max-height: 32rem;
   }
+  .max-h-\[70vh\] {
+    max-height: 70vh;
+  }
   .max-h-\[525px\] {
     max-height: 525px;
   }
@@ -2305,6 +2397,9 @@
   }
   .max-w-sm {
     max-width: var(--container-sm);
+  }
+  .max-w-xl {
+    max-width: var(--container-xl);
   }
   .min-w-0 {
     min-width: calc(var(--spacing) * 0);
@@ -2475,6 +2570,13 @@
   }
   .gap-y-6 {
     row-gap: calc(var(--spacing) * 6);
+  }
+  :where(.divide-y > :not(:last-child)) {
+    --tw-divide-y-reverse: 0;
+    border-bottom-style: var(--tw-border-style);
+    border-top-style: var(--tw-border-style);
+    border-top-width: calc(1px * var(--tw-divide-y-reverse));
+    border-bottom-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
   }
   .self-stretch {
     align-self: stretch;
@@ -2651,6 +2753,14 @@
   }
   .bg-black {
     background-color: var(--color-black);
+  }
+  .bg-black\/50 {
+    background-color: color-mix(in srgb, #000 50%, transparent);
+  }
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-black\/50 {
+      background-color: color-mix(in oklab, var(--color-black) 50%, transparent);
+    }
   }
   .bg-blue-50 {
     background-color: var(--color-blue-50);
@@ -3420,6 +3530,36 @@
       color: var(--color-orange-700);
     }
   }
+  .file\:mr-4::file-selector-button {
+    margin-right: calc(var(--spacing) * 4);
+  }
+  .file\:rounded-md::file-selector-button {
+    border-radius: var(--radius-md);
+  }
+  .file\:border-0::file-selector-button {
+    border-style: var(--tw-border-style);
+    border-width: 0px;
+  }
+  .file\:bg-amber-100::file-selector-button {
+    background-color: var(--color-amber-100);
+  }
+  .file\:px-3::file-selector-button {
+    padding-inline: calc(var(--spacing) * 3);
+  }
+  .file\:py-2::file-selector-button {
+    padding-block: calc(var(--spacing) * 2);
+  }
+  .file\:text-sm::file-selector-button {
+    font-size: var(--text-sm);
+    line-height: var(--tw-leading, var(--text-sm--line-height));
+  }
+  .file\:font-medium::file-selector-button {
+    --tw-font-weight: var(--font-weight-medium);
+    font-weight: var(--font-weight-medium);
+  }
+  .file\:text-amber-800::file-selector-button {
+    color: var(--color-amber-800);
+  }
   @media (hover: hover) {
     .hover\:scale-105:hover {
       --tw-scale-x: 105%;
@@ -3711,6 +3851,11 @@
       box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
     }
   }
+  @media (hover: hover) {
+    .hover\:file\:bg-amber-200:hover::file-selector-button {
+      background-color: var(--color-amber-200);
+    }
+  }
   .focus\:border-amber-500:focus {
     border-color: var(--color-amber-500);
   }
@@ -3720,6 +3865,9 @@
   .focus\:ring-2:focus {
     --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+  .focus\:ring-amber-100:focus {
+    --tw-ring-color: var(--color-amber-100);
   }
   .focus\:ring-amber-300:focus {
     --tw-ring-color: var(--color-amber-300);
@@ -4566,6 +4714,11 @@
   inherits: false;
   initial-value: 0;
 }
+@property --tw-divide-y-reverse {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
 @property --tw-border-style {
   syntax: "*";
   inherits: false;
@@ -4820,6 +4973,7 @@
       --tw-skew-y: initial;
       --tw-space-y-reverse: 0;
       --tw-space-x-reverse: 0;
+      --tw-divide-y-reverse: 0;
       --tw-border-style: solid;
       --tw-gradient-position: initial;
       --tw-gradient-from: #0000;
