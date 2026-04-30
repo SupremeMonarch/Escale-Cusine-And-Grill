@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import os
 from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from urllib.parse import urlencode
@@ -25,7 +26,23 @@ class ReservationFeature:
         self.page = page
         self.on_navigate = on_navigate
         self.on_back = on_back
-        self.client = ReservationApiClient()
+
+        def _token_provider() -> str | None:
+            try:
+                token = self.page.client_storage.get("auth.token")
+                if token:
+                    return str(token)
+            except Exception:
+                pass
+            try:
+                token = self.page.session.store.get("token")
+                if token:
+                    return str(token)
+            except Exception:
+                pass
+            return os.getenv("ECAG_API_TOKEN")
+
+        self.client = ReservationApiClient(token_provider=_token_provider)
         self.url_launcher = ft.UrlLauncher()
         self.page.services.append(self.url_launcher)
 
@@ -851,7 +868,7 @@ class ReservationFeature:
         except ApiError as exc:
             if exc.status_code in (401, 403):
                 self._set_feedback(
-                    "Database save failed: authentication was rejected. Restart Flet after setting ECAG_API_TOKEN.",
+                    "Database save failed: authentication was rejected. Please login again and retry.",
                     is_error=True,
                 )
             else:

@@ -8,7 +8,9 @@ authors = [
     { name = "Flet developer", email = "you@example.com" }
 ]
 dependencies = [
-    "flet>=0.84.0"
+    "flet>=0.84.0",
+    "flet-geolocator>=0.84.0",
+    "flet-permission-handler>=0.84.0"
 ]
 
 [dependency-groups]
@@ -23,6 +25,11 @@ org = "com.mycompany"
 product = "mobile"
 company = "Flet"
 copyright = "Copyright (C) 2023-2026 by Flet"
+permissions = ["location"]
 
 [tool.flet.app]
 path = "src"
+
+[tool.flet.android.permission]
+"android.permission.ACCESS_COARSE_LOCATION" = true
+"android.permission.ACCESS_FINE_LOCATION" = true

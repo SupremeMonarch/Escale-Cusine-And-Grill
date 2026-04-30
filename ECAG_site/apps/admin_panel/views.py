@@ -24,6 +24,39 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
+def _generate_temp_password() -> str:
+    return secrets.token_urlsafe(12)
+
+
+def _send_staff_credentials_email(*, email: str, role: str, temp_password: str, reason: str) -> None:
+    reason_text = "invited to join" if reason == "invite" else "issued a password reset for"
+    subject = "Escale Cuisine and Grill Staff Credentials"
+    message = f"""Hello,
+
+You have been {reason_text} Escale staff as {role.capitalize()}.
+
+Email: {email}
+Temporary Password: {temp_password}
+
+Please log in and change your password immediately.
+"""
+    send_mail(subject, message, 'noreply@escalecuisine.com', [email], fail_silently=False)
+
+
+def _set_staff_credentials_flash(request, *, email: str, role: str, temp_password: str, warning: str = "", reason: str = "invite") -> None:
+    request.session['staff_temp_credentials'] = {
+        'email': email,
+        'role': role,
+        'temp_password': temp_password,
+        'warning': warning,
+        'reason': reason,
+    }
+
+
+def _pop_staff_credentials_flash(request) -> dict | None:
+    return request.session.pop('staff_temp_credentials', None)
+
+
 def _save_menu_item_from_payload(item, *, name, desc, price, subcategory_id, is_available, image_file=None):
     name = (name or "").strip()
     desc = (desc or "").strip()
@@ -503,6 +536,34 @@ def staffs(request):
                 staff.is_superuser = False
                 staff.save()
                 messages.success(request, f"{staff.first_name}'s access has been removed.")
+
+            elif action == "reset_password":
+                temp_password = _generate_temp_password()
+                staff.set_password(temp_password)
+                staff.save(update_fields=['password'])
+                role = "admin" if staff.is_superuser else "staff"
+                warning = ""
+                try:
+                    _send_staff_credentials_email(
+                        email=staff.email,
+                        role=role,
+                        temp_password=temp_password,
+                        reason="reset",
+                    )
+                    messages.success(request, f"Temporary password reset for {staff.email}.")
+                except Exception as exc:
+                    warning = "Password was reset, but email could not be sent."
+                    logger.warning("staffs reset_password email failed for %s: %s", staff.email, exc)
+                    messages.warning(request, warning)
+
+                _set_staff_credentials_flash(
+                    request,
+                    email=staff.email,
+                    role=role,
+                    temp_password=temp_password,
+                    warning=warning,
+                    reason="reset",
+                )
         
         except User.DoesNotExist:
             messages.error(request, "Staff member not found.")
@@ -515,6 +576,7 @@ def staffs(request):
         "total_staff": total_staff,
         "admin_count": admin_count,
         "staff_count": staff_count,
+        "staff_temp_credentials": _pop_staff_credentials_flash(request),
     }
     
     return render(request, "admin_panel/staffs.html", context)
@@ -534,8 +596,7 @@ def invite_staff(request):
             messages.error(request, "This email is already registered.")
             return redirect("admin-staffs")
         
-        # Generate temporary password
-        temp_password = secrets.token_urlsafe(12)
+        temp_password = _generate_temp_password()
         
         try:
             # Create user with staff access
@@ -547,29 +608,28 @@ def invite_staff(request):
                 is_superuser=(role == "admin")
             )
             
-            # Send invitation email
-            subject = "You've been invited to Escale Cuisine and Grill Staff"
-            message = f"""Hello,
+            warning = ""
+            try:
+                _send_staff_credentials_email(
+                    email=email,
+                    role=role,
+                    temp_password=temp_password,
+                    reason="invite",
+                )
+                messages.success(request, f"Staff member created and invitation sent to {email}")
+            except Exception as exc:
+                warning = "Staff member created, but invitation email could not be sent."
+                logger.warning("invite_staff email failed for %s: %s", email, exc)
+                messages.warning(request, warning)
 
-You've been invited to join the Escale Cuisine and Grill staff as a {role.capitalize()}.
-
-Your login credentials:
-Email: {email}
-Temporary Password: {temp_password}
-
-Please log in and change your password immediately for security.
-
-Best regards,
-Escale Cuisine and Grill Team"""
-            
-            send_mail(
-                subject, 
-                message, 
-                "noreply@escalecuisine.com", 
-                [email],
-                fail_silently=False
+            _set_staff_credentials_flash(
+                request,
+                email=email,
+                role=role,
+                temp_password=temp_password,
+                warning=warning,
+                reason="invite",
             )
-            messages.success(request, f"Staff member created and invitation sent to {email}")
             logger.info(f"Staff invited: {email} as {role}")
             
         except Exception as e:
@@ -1094,6 +1154,7 @@ def mobile_staffs_data(request):
             payload.append(
                 {
                     'id': s.id,
+                    'username': s.username,
                     'name': s.get_full_name() or s.username,
                     'email': s.email,
                     'is_admin': bool(s.is_superuser),
@@ -1127,17 +1188,51 @@ def mobile_staffs_data(request):
         if action == 'make_admin' and not staff.is_superuser:
             staff.is_superuser = True
             staff.save(update_fields=['is_superuser'])
+            return JsonResponse({'ok': True})
         elif action == 'make_staff' and staff.is_superuser:
             staff.is_superuser = False
             staff.save(update_fields=['is_superuser'])
+            return JsonResponse({'ok': True})
         elif action == 'remove_access':
             staff.is_staff = False
             staff.is_superuser = False
             staff.save(update_fields=['is_staff', 'is_superuser'])
+            return JsonResponse({'ok': True})
+        elif action == 'reset_password':
+            temp_password = _generate_temp_password()
+            staff.set_password(temp_password)
+            staff.save(update_fields=['password'])
+            role = 'admin' if staff.is_superuser else 'staff'
+            warning = ''
+            try:
+                _send_staff_credentials_email(
+                    email=staff.email,
+                    role=role,
+                    temp_password=temp_password,
+                    reason='reset',
+                )
+            except Exception as exc:
+                warning = 'Password reset worked, but email could not be sent.'
+                logger.warning("mobile_staffs_data reset_password email failed for %s: %s", staff.email, exc)
+            return JsonResponse({
+                'ok': True,
+                'email': staff.email,
+                'temporary_password': temp_password,
+                'warning': warning,
+            })
+        elif action == 'update_username':
+            new_username = payload.get('username', '').strip()
+            if not new_username:
+                return _json_error('Username cannot be empty', 400)
+            if new_username == staff.username:
+                return JsonResponse({'ok': True, 'username': staff.username})
+            if User.objects.filter(username=new_username).exists():
+                return _json_error('Username already taken', 400)
+            staff.username = new_username
+            staff.save(update_fields=['username'])
+            return JsonResponse({'ok': True, 'username': staff.username})
         else:
             return _json_error('Invalid action', 400)
-
-        return JsonResponse({'ok': True})
 
     return _json_error('Unsupported method', 405)
 
@@ -1161,7 +1256,7 @@ def mobile_invite_staff(request):
     if User.objects.filter(email=email).exists():
         return _json_error('This email is already registered', 400)
 
-    temp_password = secrets.token_urlsafe(12)
+    temp_password = _generate_temp_password()
 
     try:
         User.objects.create_user(
@@ -1171,15 +1266,28 @@ def mobile_invite_staff(request):
             is_staff=True,
             is_superuser=(role == 'admin'),
         )
-
-        subject = "You've been invited to Escale Cuisine and Grill Staff"
-        message = f"""Hello,\n\nYou've been invited to join Escale staff as {role.capitalize()}.\n\nEmail: {email}\nTemporary Password: {temp_password}\n\nPlease log in and change your password immediately.\n"""
-        send_mail(subject, message, 'noreply@escalecuisine.com', [email], fail_silently=False)
-
     except Exception as exc:
         return _json_error(str(exc), 500)
 
-    return JsonResponse({'ok': True})
+    try:
+        _send_staff_credentials_email(
+            email=email,
+            role=role,
+            temp_password=temp_password,
+            reason='invite',
+        )
+    except Exception as exc:
+        logger.warning("mobile_invite_staff email failed for %s: %s", email, exc)
+        return JsonResponse(
+            {
+                'ok': True,
+                'warning': 'Staff account created, but invite email could not be sent.',
+                'email': email,
+                'temporary_password': temp_password,
+            }
+        )
+
+    return JsonResponse({'ok': True, 'email': email, 'temporary_password': temp_password})
 
 
 @csrf_exempt

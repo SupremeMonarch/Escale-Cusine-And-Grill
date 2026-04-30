@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+import os
 from urllib.parse import quote_plus
 
 import flet as ft
 
 from home.service import fetch_featured_dishes
 from menu.service import resolve_image_payload
+
+
+API_BASE_URL = os.getenv("ECAG_API_BASE_URL", "http://127.0.0.1:8000")
 
 
 class HomeFeature:
@@ -17,9 +21,11 @@ class HomeFeature:
         self,
         page: ft.Page,
         on_navigate: Callable[[str], None] | None = None,
+        base_url: str | None = None,
     ):
         self.page = page
         self.on_navigate = on_navigate
+        self.base_url = (base_url or API_BASE_URL).rstrip("/")
         self.url_launcher = ft.UrlLauncher()
         self.page.services.append(self.url_launcher)
         self.featured_dishes = self._load_featured_dishes()
@@ -170,7 +176,7 @@ class HomeFeature:
 
     def _dish_card(self, dish: dict) -> ft.Control:
         fit_cover = ft.BoxFit.COVER if hasattr(ft, "BoxFit") else "cover"
-        image_payload = resolve_image_payload(dish.get("image_url", ""))
+        image_payload = resolve_image_payload(dish.get("image_url", ""), self.base_url)
         image_control = (
             ft.Image(width=220, height=130, fit=fit_cover, **image_payload)
             if image_payload
@@ -402,7 +408,7 @@ class HomeFeature:
 
     def _load_featured_dishes(self) -> list[dict]:
         try:
-            return fetch_featured_dishes("http://127.0.0.1:8000/mobile/featured-dishes/")[:3]
+            return fetch_featured_dishes(f"{self.base_url}/mobile/featured-dishes/")[:3]
         except Exception:
             return []
 

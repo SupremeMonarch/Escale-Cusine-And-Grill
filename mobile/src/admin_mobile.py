@@ -163,12 +163,18 @@ def api_staffs(search: str = "") -> dict:
     return _request_json("GET", f"{ADMIN_BASE}/staffs/", query={"search": search})
 
 
-def api_staff_action(staff_id: int, action: str) -> None:
-    _request_json("POST", f"{ADMIN_BASE}/staffs/", body={"staff_id": staff_id, "action": action})
+def api_staff_action(staff_id: int, action: str) -> dict:
+    return _request_json("POST", f"{ADMIN_BASE}/staffs/", body={"staff_id": staff_id, "action": action})
 
 
-def api_invite_staff(email: str, role: str) -> None:
-    _request_json("POST", f"{ADMIN_BASE}/staffs/invite/", body={"email": email, "role": role})
+def api_staff_action_with_data(staff_id: int, action: str, data: dict) -> dict:
+    payload = {"staff_id": staff_id, "action": action}
+    payload.update(data)
+    return _request_json("POST", f"{ADMIN_BASE}/staffs/", body=payload)
+
+
+def api_invite_staff(email: str, role: str) -> dict:
+    return _request_json("POST", f"{ADMIN_BASE}/staffs/invite/", body={"email": email, "role": role})
 
 
 def api_reviews(search: str = "", status: str = "all") -> tuple[list[dict], dict]:
@@ -186,6 +192,12 @@ def api_review_action(review_id: int, action: str, subject: str = "", message: s
 
 
 async def main(page: ft.Page):
+    try:
+        page.dialog = None
+        page.overlay.clear()
+    except Exception:
+        pass
+
     page.title = "Escale Admin Mobile"
     page.bgcolor = "#f8fafc"
     page.padding = 0
@@ -228,7 +240,10 @@ async def main(page: ft.Page):
         "menu_search": "",
         "customers_search": "",
         "customers_filter": "all",
+        "staff_search": "",
         "staff_filter": "all",
+        "staff_invite_email": "",
+        "staff_invite_role": "staff",
         "reviews_filter": "all",
         "more_section": "customers",
     }
@@ -250,6 +265,28 @@ async def main(page: ft.Page):
         page.snack_bar = ft.SnackBar(content=ft.Text(message), open=True, bgcolor="#8b1e1e" if danger else "#2a2a2a")
         page.update()
 
+    async def go_back_to_main_app(_=None):
+        page.clean()
+        page.navigation_bar = None
+        page.bottom_appbar = None
+        page.floating_action_button = None
+        page.update()
+        from main import main as main_app_shell
+
+        main_app_shell(page)
+
+    async def logout_to_main_app(_=None):
+        try:
+            page.session.store.set("token", "")
+        except Exception:
+            pass
+        try:
+            page.client_storage.remove("auth.token")
+            page.client_storage.remove("auth.user")
+        except Exception:
+            pass
+        await go_back_to_main_app()
+
     def card(child: ft.Control, padding: int = 14) -> ft.Control:
         return ft.Container(
             bgcolor=card_bg,
@@ -267,18 +304,28 @@ async def main(page: ft.Page):
 
     def header_bar() -> ft.Control:
         return ft.Container(
-            bgcolor="#ffffff",
-            padding=pad_sym(horizontal=16, vertical=10),
-            border=ft.Border(bottom=ft.BorderSide(1, line_color)),
+            height=56,
+            bgcolor="#f8f8f8",
+            padding=pad_sym(horizontal=12, vertical=0),
+            border=ft.Border.only(bottom=ft.BorderSide(1, "#e3e3e3")),
             content=ft.Row(
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 controls=[
-                    ft.Text("Admin Panel", size=34 if (page.width or 390) > 600 else 30, weight=ft.FontWeight.BOLD, color=accent),
                     ft.Row(
-                        spacing=8,
+                        spacing=6,
                         controls=[
-                            ft.Icon(ft.Icons.NOTIFICATIONS_NONE_OUTLINED, color=text_muted),
-                            ft.Text("MANAGE", size=14, color=text_muted, visible=(page.width or 390) > 650),
+                            ft.IconButton(icon=ft.Icons.MENU, icon_color="#FF5C00", on_click=lambda e: page.run_task(go_back_to_main_app, e)),
+                            ft.Text("ESCALE CUISINE", size=16, weight=ft.FontWeight.BOLD, color="#FF5C00"),
+                        ],
+                    ),
+                    ft.PopupMenuButton(
+                        icon=ft.Icons.PERSON,
+                        icon_color="#8a7765",
+                        tooltip="Account",
+                        items=[
+                            ft.PopupMenuItem("Back to Main App", on_click=lambda e: page.run_task(go_back_to_main_app, e)),
+                            ft.PopupMenuItem("Logout", on_click=lambda e: page.run_task(logout_to_main_app, e)),
                         ],
                     ),
                 ],
@@ -533,6 +580,31 @@ async def main(page: ft.Page):
         dlg.open = False
         page.update()
 
+    def open_temp_password_dialog(title: str, email: str, temporary_password: str, warning: str = ""):
+        controls: list[ft.Control] = [
+            ft.Text(f"Email: {email}", size=13, color=text_dark),
+            ft.Text("Temporary Password", size=12, color=text_muted, weight=ft.FontWeight.W_600),
+            ft.Container(
+                padding=pad_sym(horizontal=12, vertical=10),
+                border_radius=12,
+                bgcolor=chip_bg,
+                content=ft.Text(temporary_password, size=16, weight=ft.FontWeight.BOLD, color=text_dark),
+            ),
+            ft.Text("Share this securely and ask the staff member to change it after login.", size=12, color=text_muted),
+        ]
+        if warning:
+            controls.append(ft.Text(warning, size=12, color="#b45309"))
+
+        dlg = ft.AlertDialog(
+            modal=True,
+            title=ft.Text(title, weight=ft.FontWeight.BOLD, color=text_dark),
+            content=ft.Container(width=440, content=ft.Column(tight=True, spacing=10, controls=controls)),
+            actions=[ft.TextButton("Close", style=ft.ButtonStyle(color=text_dark), on_click=lambda e: _close_dialog(dlg))],
+        )
+        page.overlay.append(dlg)
+        dlg.open = True
+        page.update()
+
     async def connect_backend() -> bool:
         global ACTIVE_BASE_URL
         for base in _get_base_candidates():
@@ -685,21 +757,110 @@ async def main(page: ft.Page):
 
     async def handle_staff_action(staff_id: int, action: str):
         try:
-            await asyncio.to_thread(api_staff_action, staff_id, action)
+            result = await asyncio.to_thread(api_staff_action, staff_id, action)
+            if action == "reset_password" and isinstance(result, dict):
+                email = str(result.get("email") or "").strip()
+                temporary_password = str(result.get("temporary_password") or "").strip()
+                warning = str(result.get("warning") or "").strip()
+                if temporary_password:
+                    open_temp_password_dialog("Temporary Password Reset", email, temporary_password, warning)
+                else:
+                    show_toast("Password reset completed.")
             await refresh_tab(5)
         except Exception as exc:
             show_toast(str(exc), danger=True)
 
     async def handle_invite_staff(email: str, role: str):
+        email = (email or "").strip()
+        role = (role or "staff").strip().lower()
         if not email:
             show_toast("Enter an email first.", danger=True)
             return
+        if "@" not in email:
+            show_toast("Enter a valid email address.", danger=True)
+            return
         try:
-            await asyncio.to_thread(api_invite_staff, email, role)
-            show_toast(f"Invite sent to {email}.")
+            result = await asyncio.to_thread(api_invite_staff, email, role)
+            temporary_password = str((result or {}).get("temporary_password") or "").strip()
+            warning = str((result or {}).get("warning") or "").strip()
+            if temporary_password:
+                open_temp_password_dialog("Temporary Password Created", email, temporary_password, warning)
+            else:
+                show_toast(f"Invite sent to {email}.")
+            ui["staff_invite_email"] = ""
+            ui["staff_invite_role"] = "staff"
             await refresh_tab(5)
         except Exception as exc:
             show_toast(str(exc), danger=True)
+
+    def open_staff_edit_dialog(staff: dict):
+        staff_id = int(staff.get("id"))
+        current_role = "admin" if bool(staff.get("is_admin")) else "staff"
+        current_username = str(staff.get("username") or "").strip()
+        
+        role_field = ft.Dropdown(
+            label="Role",
+            value=current_role,
+            options=[ft.dropdown.Option("staff"), ft.dropdown.Option("admin")],
+        )
+        username_field = ft.TextField(
+            label="Username",
+            value=current_username,
+        )
+
+        async def _save(_):
+            new_role = str(role_field.value or current_role).strip().lower()
+            new_username = str(username_field.value or "").strip()
+            role_changed = new_role != current_role
+            username_changed = new_username != current_username
+            
+            if not role_changed and not username_changed:
+                show_toast("No changes to save.")
+                _close_dialog(dlg)
+                return
+
+            try:
+                if username_changed:
+                    if not new_username:
+                        show_toast("Username cannot be empty.", danger=True)
+                        return
+                    await asyncio.to_thread(api_staff_action_with_data, staff_id, "update_username", {"username": new_username})
+                    show_toast(f"Username updated to {new_username}.")
+                
+                if role_changed:
+                    action = "make_admin" if new_role == "admin" else "make_staff"
+                    await asyncio.to_thread(api_staff_action, staff_id, action)
+                    show_toast(f"Role updated to {new_role}.")
+                
+                _close_dialog(dlg)
+                await refresh_tab(5)
+            except Exception as exc:
+                show_toast(str(exc), danger=True)
+
+        dlg = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Edit Staff", weight=ft.FontWeight.BOLD, color=text_dark),
+            content=ft.Container(
+                width=420,
+                content=ft.Column(
+                    tight=True,
+                    spacing=10,
+                    controls=[
+                        ft.Text(str(staff.get("name") or "Staff"), size=16, weight=ft.FontWeight.W_600, color=text_dark),
+                        ft.Text(str(staff.get("email") or ""), size=12, color=text_muted),
+                        username_field,
+                        role_field,
+                    ],
+                ),
+            ),
+            actions=[
+                ft.TextButton("Cancel", style=ft.ButtonStyle(color=text_dark), on_click=lambda e: _close_dialog(dlg)),
+                elevated_btn("Save", style=ft.ButtonStyle(bgcolor=primary_btn, color="#ffffff"), on_click=lambda e: page.run_task(_save, e)),
+            ],
+        )
+        page.overlay.append(dlg)
+        dlg.open = True
+        page.update()
 
     async def handle_review_action(review_id: int, action: str):
         try:
@@ -1334,13 +1495,29 @@ async def main(page: ft.Page):
     def build_staff(in_more: bool = False) -> ft.Control:
         selected = ui["staff_filter"]
         staff = state["staff"]
+        search_query = str(ui.get("staff_search") or "").strip().lower()
+        if search_query:
+            staff = [
+                s for s in staff
+                if search_query in str(s.get("name") or "").lower()
+                or search_query in str(s.get("email") or "").lower()
+            ]
         if selected == "admins":
             staff = [s for s in staff if bool(s.get("is_admin"))]
         elif selected == "chefs":
             staff = [s for s in staff if "chef" in str(s.get("name", "")).lower() or "chef" in str(s.get("email", "")).lower()]
 
-        invite_email = ft.TextField(label="Staff email", width=260)
-        invite_role = ft.Dropdown(width=120, value="staff", options=[ft.dropdown.Option("staff"), ft.dropdown.Option("admin")])
+        invite_email = ft.TextField(
+            label="Staff email",
+            width=260,
+            value=ui.get("staff_invite_email", ""),
+            on_change=lambda e: _set_ui("staff_invite_email", e.control.value),
+        )
+        invite_role = ft.Dropdown(
+            width=120,
+            value=ui.get("staff_invite_role", "staff"),
+            options=[ft.dropdown.Option("staff"), ft.dropdown.Option("admin")],
+        )
 
         cards: list[ft.Control] = []
         for s in staff:
@@ -1354,7 +1531,7 @@ async def main(page: ft.Page):
                         ft.Column(spacing=1, controls=[ft.Text(name, size=17, weight=ft.FontWeight.W_600, color=text_dark), ft.Text("ADMINISTRATOR" if s.get("is_admin") else "STAFF", color=text_muted)]),
                     ]),
                     ft.Row(spacing=4, controls=[
-                        ft.IconButton(icon=ft.Icons.EDIT_OUTLINED, icon_size=16, icon_color=text_muted),
+                        ft.IconButton(icon=ft.Icons.EDIT_OUTLINED, icon_size=16, icon_color=text_muted, on_click=lambda e, staff_item=s: open_staff_edit_dialog(staff_item)),
                         ft.IconButton(icon=ft.Icons.DELETE_OUTLINE, icon_size=16, icon_color="#c03b2f", on_click=lambda e, id_=sid: page.run_task(handle_staff_action, id_, "remove_access")),
                     ]),
                 ]),
@@ -1364,6 +1541,7 @@ async def main(page: ft.Page):
                 ft.Row(controls=[
                     ft.OutlinedButton("Make Admin", on_click=lambda e, id_=sid: page.run_task(handle_staff_action, id_, "make_admin")),
                     ft.OutlinedButton("Make Staff", on_click=lambda e, id_=sid: page.run_task(handle_staff_action, id_, "make_staff")),
+                    ft.OutlinedButton("Reset Password", on_click=lambda e, id_=sid: page.run_task(handle_staff_action, id_, "reset_password")),
                 ], wrap=True),
             ])))
 
@@ -1373,9 +1551,10 @@ async def main(page: ft.Page):
                 *([more_tabs_bar()] if in_more else []),
                 section_header("Staff Management", "OPERATIONS", 5),
                 card(ft.Column(spacing=10, controls=[
-                    elevated_btn("Invite Staff", icon=ft.Icons.PERSON_ADD_ALT_1_OUTLINED, style=ft.ButtonStyle(bgcolor=primary_btn, color="#ffffff", shape=ft.RoundedRectangleBorder(radius=12)), on_click=lambda e: page.run_task(handle_invite_staff, invite_email.value, invite_role.value)),
                     ft.Row(controls=[invite_email, invite_role], wrap=True),
+                    elevated_btn("Invite Staff", icon=ft.Icons.PERSON_ADD_ALT_1_OUTLINED, style=ft.ButtonStyle(bgcolor=primary_btn, color="#ffffff", shape=ft.RoundedRectangleBorder(radius=12)), on_click=lambda e: page.run_task(handle_invite_staff, invite_email.value, invite_role.value)),
                 ])),
+                ft.TextField(prefix_icon=ft.Icons.SEARCH, hint_text="Search by name or email...", value=ui["staff_search"], on_change=lambda e: _set_ui("staff_search", e.control.value), border_radius=14, bgcolor=input_bg, border_color=input_bg),
                 ft.Row(scroll=ft.ScrollMode.AUTO, controls=[
                     chip_button("All Staff", selected == "all", lambda e: _set_ui("staff_filter", "all")),
                     chip_button("Admins", selected == "admins", lambda e: _set_ui("staff_filter", "admins")),
@@ -1493,5 +1672,6 @@ async def main(page: ft.Page):
     page.run_task(live_orders_poll)
 
 
-ft.run(main)
+if __name__ == "__main__":
+    ft.run(main)
 

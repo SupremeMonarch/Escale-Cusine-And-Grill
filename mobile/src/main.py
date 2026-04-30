@@ -1,6 +1,9 @@
 import flet as ft
 import asyncio
 import os
+import json
+from urllib.parse import urlparse
+from urllib import request, error
 from home import HomeFeature
 from menu import MenuFeature
 from notifications import fetch_notification_events
@@ -22,6 +25,8 @@ def main(page: ft.Page):
     content_host = ft.Container(expand=True, clip_behavior=ft.ClipBehavior.HARD_EDGE)
     sidebar_scrim = ft.Container(expand=True, visible=False, bgcolor=ft.Colors.with_opacity(0.18, ft.Colors.BLACK))
     sidebar_panel_host = ft.Container(visible=False)
+    login_scrim = ft.Container(expand=True, visible=False, bgcolor=ft.Colors.with_opacity(0.26, ft.Colors.BLACK))
+    login_panel_host = ft.Container(expand=True, visible=False)
     menu_feature: MenuFeature | None = None
     menu_view_cache: ft.Control | None = None
     home_feature: HomeFeature | None = None
@@ -38,7 +43,271 @@ def main(page: ft.Page):
     route_history: list[str] = []
     current_route = "/"
 
-    api_base_url = os.getenv("ECAG_API_BASE_URL", "http://127.0.0.1:8000")
+    def _infer_api_base_url() -> str:
+        explicit = (os.getenv("ECAG_API_BASE_URL") or "").strip()
+        if explicit:
+            return explicit.rstrip("/")
+
+        try:
+            parsed = urlparse(str(page.url or ""))
+            host = (parsed.hostname or "").strip()
+            if host and host not in {"127.0.0.1", "localhost", "0.0.0.0"}:
+                return f"http://{host}:8000"
+        except Exception:
+            pass
+
+        return "http://127.0.0.1:8000"
+
+    api_base_url = _infer_api_base_url().rstrip("/")
+    auth_token: str | None = None
+    auth_user: dict | None = None
+    login_username_field = ft.TextField(label="Username", autofocus=True)
+    login_password_field = ft.TextField(label="Password", password=True, can_reveal_password=True)
+    login_status_text = ft.Text("", color="#8a3b00", size=12)
+
+    def _api_json(method: str, path: str, body: dict | None = None, token: str | None = None) -> dict:
+        url = f"{api_base_url}{path}"
+        headers = {"Accept": "application/json"}
+        payload = None
+        if body is not None:
+            headers["Content-Type"] = "application/json"
+            payload = json.dumps(body).encode("utf-8")
+        if token:
+            headers["Authorization"] = f"Token {token}"
+
+        req = request.Request(url=url, headers=headers, data=payload, method=method)
+        try:
+            with request.urlopen(req, timeout=12) as response:
+                raw = response.read().decode("utf-8")
+                return json.loads(raw) if raw else {}
+        except error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="ignore")
+            raise RuntimeError(f"HTTP {exc.code}: {detail or exc.reason}") from exc
+        except error.URLError as exc:
+            raise RuntimeError(f"Cannot reach backend: {exc.reason}") from exc
+
+    def _resolve_account_type(user: dict) -> str:
+        account_type = str(user.get("account_type") or "").lower().strip()
+        if account_type in {"admin", "staff", "customer"}:
+            return account_type
+        if bool(user.get("is_superuser")):
+            return "admin"
+        if bool(user.get("is_staff")):
+            return "staff"
+        return "customer"
+
+    async def _open_mobile_dashboard(account_type: str) -> None:
+        if auth_token:
+            page.session.store.set("token", auth_token)
+
+        # Force-dismiss any modal that might still be active before switching shell.
+        try:
+            for control in list(page.overlay):
+                if isinstance(control, ft.AlertDialog):
+                    control.open = False
+            page.overlay.clear()
+        except Exception:
+            pass
+        try:
+            page.dialog = None
+        except Exception:
+            pass
+
+        # Replace the current shell with the role-specific mobile dashboard app.
+        page.clean()
+        page.bottom_appbar = None
+        page.navigation_bar = None
+        page.floating_action_button = None
+        page.update()
+
+        if account_type == "admin":
+            from admin_mobile import main as admin_mobile_main
+
+            await admin_mobile_main(page)
+            return
+
+        if account_type == "staff":
+            from staff_dash import main as staff_dashboard_main
+
+            await staff_dashboard_main(page)
+            return
+
+        from customer_dash import main as customer_dashboard_main
+
+        await customer_dashboard_main(page)
+
+    async def route_for_account(user: dict) -> None:
+        account_type = _resolve_account_type(user)
+        await _open_mobile_dashboard(account_type)
+
+    async def open_dashboard(e=None) -> None:
+        nonlocal auth_user
+        if auth_token:
+            try:
+                refreshed = await asyncio.to_thread(_api_json, "GET", "/api/auth/me/", None, auth_token)
+                if isinstance(refreshed, dict) and refreshed:
+                    auth_user = refreshed
+                    try:
+                        page.client_storage.set("auth.user", json.dumps(auth_user))
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+        await route_for_account(auth_user or {})
+
+    def logout_account(e=None) -> None:
+        nonlocal auth_token, auth_user
+        token = auth_token
+        auth_token = None
+        auth_user = None
+        try:
+            page.client_storage.remove("auth.token")
+            page.client_storage.remove("auth.user")
+        except Exception:
+            pass
+        if token:
+            try:
+                _api_json("POST", "/api/auth/logout/", token=token)
+            except Exception:
+                pass
+        top_bar_host.content = build_top_bar()
+        page.snack_bar = ft.SnackBar(content=ft.Text("Logged out."), open=True, bgcolor="#2f2a24")
+        page.update()
+
+    def close_login_overlay(e=None):
+        login_scrim.visible = False
+        login_panel_host.visible = False
+        login_status_text.value = ""
+        page.update()
+
+    async def submit_login(e=None):
+        nonlocal auth_token, auth_user
+        username = (login_username_field.value or "").strip()
+        password = login_password_field.value or ""
+        if not username or not password:
+            login_status_text.value = "Enter username and password."
+            page.update()
+            return
+
+        try:
+            token_payload = await asyncio.to_thread(
+                _api_json,
+                "POST",
+                "/api/auth/login/",
+                {"username": username, "password": password},
+                None,
+            )
+            token = token_payload.get("token")
+            if not token:
+                raise RuntimeError("Login failed: token not returned.")
+
+            me_payload = await asyncio.to_thread(_api_json, "GET", "/api/auth/me/", None, token)
+            auth_token = token
+            auth_user = me_payload
+            try:
+                page.client_storage.set("auth.token", auth_token)
+                page.client_storage.set("auth.user", json.dumps(auth_user))
+            except Exception:
+                pass
+
+            close_login_overlay()
+            login_password_field.value = ""
+            await asyncio.sleep(0)
+            top_bar_host.content = build_top_bar()
+            await route_for_account(auth_user)
+            page.snack_bar = ft.SnackBar(content=ft.Text("Login successful."), open=True, bgcolor="#2f2a24")
+            page.update()
+        except Exception as exc:
+            login_status_text.value = str(exc)
+            page.update()
+
+    def refresh_login_panel() -> None:
+        login_panel_host.content = ft.Container(
+            expand=True,
+            alignment=ft.Alignment(0, 0),
+            content=ft.Container(
+                width=360,
+                bgcolor="#f8f8f8",
+                border_radius=18,
+                padding=ft.Padding.only(left=20, right=20, top=18, bottom=14),
+                content=ft.Column(
+                    tight=True,
+                    spacing=10,
+                    controls=[
+                        ft.Text("Login", size=34, weight=ft.FontWeight.W_700, color="#2f2a24"),
+                        login_username_field,
+                        login_password_field,
+                        login_status_text,
+                        ft.Row(
+                            alignment=ft.MainAxisAlignment.END,
+                            controls=[
+                                ft.TextButton("Cancel", on_click=close_login_overlay),
+                                ft.TextButton("Login", on_click=lambda e: page.run_task(submit_login, e)),
+                            ],
+                        ),
+                    ],
+                ),
+            ),
+        )
+
+    def open_account_dialog(e=None) -> None:
+        nonlocal auth_token, auth_user
+        if auth_token and auth_user:
+            page.run_task(open_dashboard)
+            return
+
+        login_status_text.value = ""
+        login_password_field.value = ""
+        refresh_login_panel()
+        login_scrim.visible = True
+        login_panel_host.visible = True
+        page.update()
+
+    def try_restore_session() -> None:
+        nonlocal auth_token, auth_user
+        restored_token: str | None = None
+        restored_user: dict | None = None
+
+        try:
+            token = page.client_storage.get("auth.token")
+            if token:
+                restored_token = str(token)
+        except Exception:
+            pass
+
+        if not restored_token:
+            try:
+                session_token = page.session.store.get("token")
+                if session_token:
+                    restored_token = str(session_token)
+            except Exception:
+                pass
+
+        try:
+            raw_user = page.client_storage.get("auth.user")
+            if raw_user:
+                if isinstance(raw_user, str):
+                    restored_user = json.loads(raw_user)
+                elif isinstance(raw_user, dict):
+                    restored_user = raw_user
+        except Exception:
+            pass
+
+        if restored_token and not restored_user:
+            try:
+                me_payload = _api_json("GET", "/api/auth/me/", None, restored_token)
+                if isinstance(me_payload, dict) and me_payload:
+                    restored_user = me_payload
+                    try:
+                        page.client_storage.set("auth.token", restored_token)
+                        page.client_storage.set("auth.user", json.dumps(restored_user))
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+
+        auth_token = restored_token
+        auth_user = restored_user
 
     def read_bool_setting(key: str, default: bool) -> bool:
         try:
@@ -61,6 +330,9 @@ def main(page: ft.Page):
         nonlocal notifications_enabled
         notifications_enabled = bool(value)
         set_bool_setting("settings.notifications_enabled", notifications_enabled)
+
+    def set_location_enabled(value: bool) -> None:
+        set_bool_setting("settings.location_enabled", bool(value))
 
     async def notification_poller():
         nonlocal last_notification_cursor
@@ -118,6 +390,7 @@ def main(page: ft.Page):
         page.update()
 
     sidebar_scrim.on_click = close_sidebar
+    login_scrim.on_click = close_login_overlay
 
     def toggle_about(e=None) -> None:
         nonlocal sidebar_about_expanded
@@ -139,7 +412,7 @@ def main(page: ft.Page):
 
     def sidebar_expandable_row(title: str, expanded: bool, on_click) -> ft.Control:
         return ft.Container(
-            padding=ft.padding.symmetric(vertical=10),
+            padding=ft.Padding.symmetric(vertical=10),
             on_click=on_click,
             content=ft.Row(
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -156,13 +429,13 @@ def main(page: ft.Page):
 
     def sidebar_child_text(value: str) -> ft.Control:
         return ft.Container(
-            padding=ft.padding.only(left=10, right=8, top=2, bottom=8),
+            padding=ft.Padding.only(left=10, right=8, top=2, bottom=8),
             content=ft.Text(value, size=13, color="#6f665b"),
         )
 
     def sidebar_nav_row(title: str, route: str) -> ft.Control:
         return ft.Container(
-            padding=ft.padding.symmetric(vertical=10),
+            padding=ft.Padding.symmetric(vertical=10),
             on_click=lambda e: (close_sidebar(), navigate(route)),
             content=ft.Row(
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -190,7 +463,7 @@ def main(page: ft.Page):
 
         controls: list[ft.Control] = [
             ft.Container(
-                padding=ft.padding.only(bottom=14),
+                padding=ft.Padding.only(bottom=14),
                 content=ft.IconButton(icon=ft.Icons.CLOSE, icon_color="#FF5C00", on_click=close_sidebar),
             ),
             sidebar_expandable_row("About Us", sidebar_about_expanded, toggle_about),
@@ -214,15 +487,34 @@ def main(page: ft.Page):
             width=min(int(page.width * 0.82), 330) if page.width else 300,
             expand=True,
             bgcolor="#ececec",
-            padding=ft.padding.only(left=12, right=12, top=8, bottom=20),
+            padding=ft.Padding.only(left=12, right=12, top=8, bottom=20),
             content=ft.Column(scroll=ft.ScrollMode.AUTO, spacing=0, controls=controls),
         )
 
     def build_top_bar() -> ft.Control:
+        person_icon_color = "#8a7765" if (auth_user or auth_token) else "#a39a92"
+        account_control: ft.Control
+        if auth_user or auth_token:
+            account_control = ft.PopupMenuButton(
+                icon=ft.Icons.PERSON,
+                icon_color=person_icon_color,
+                tooltip="Account",
+                items=[
+                    ft.PopupMenuItem("Dashboard", on_click=lambda e: page.run_task(open_dashboard, e)),
+                    ft.PopupMenuItem("Logout", on_click=logout_account),
+                ],
+            )
+        else:
+            account_control = ft.IconButton(
+                icon=ft.Icons.PERSON,
+                icon_color=person_icon_color,
+                tooltip="Account",
+                on_click=open_account_dialog,
+            )
         return ft.Container(
             height=56,
             bgcolor="#f8f8f8",
-            border=ft.border.only(bottom=ft.BorderSide(1, "#e3e3e3")),
+            border=ft.Border.only(bottom=ft.BorderSide(1, "#e3e3e3")),
             content=ft.Row(
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 vertical_alignment=ft.CrossAxisAlignment.CENTER,
@@ -234,15 +526,7 @@ def main(page: ft.Page):
                         weight=ft.FontWeight.BOLD,
                         color="#FF5C00",
                     ),
-                    ft.Container(
-                        width=32,
-                        height=32,
-                        border_radius=16,
-                        bgcolor="#e8dcc8",
-                        alignment=ft.Alignment.CENTER,
-                        margin=ft.margin.only(right=10),
-                        content=ft.Icon(ft.Icons.PERSON, size=18, color="#8a7765"),
-                    ),
+                    account_control,
                 ],
             ),
         )
@@ -252,7 +536,7 @@ def main(page: ft.Page):
         return ft.Container(
             width=68,
             border_radius=10,
-            padding=ft.padding.symmetric(vertical=4),
+            padding=ft.Padding.symmetric(vertical=4),
             on_click=lambda e: navigate(route),
             content=ft.Column(
                 spacing=1,
@@ -271,8 +555,8 @@ def main(page: ft.Page):
             height=72,
             padding=0,
             content=ft.Container(
-                border=ft.border.only(top=ft.BorderSide(1, "#e3e3e3")),
-                padding=ft.padding.symmetric(horizontal=8, vertical=4),
+                border=ft.Border.only(top=ft.BorderSide(1, "#e3e3e3")),
+                padding=ft.Padding.symmetric(horizontal=8, vertical=4),
                 content=ft.Row(
                     alignment=ft.MainAxisAlignment.SPACE_AROUND,
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
@@ -290,7 +574,7 @@ def main(page: ft.Page):
         nonlocal home_feature, home_view_cache
         page.floating_action_button = None
         if home_feature is None:
-            home_feature = HomeFeature(page, on_navigate=navigate)
+            home_feature = HomeFeature(page, on_navigate=navigate, base_url=api_base_url)
         if home_view_cache is None:
             home_view_cache = home_feature.build_view()
         return home_view_cache
@@ -335,7 +619,12 @@ def main(page: ft.Page):
         elif route == "/menu":
             page.floating_action_button = None
             if menu_feature is None:
-                menu_feature = MenuFeature(page, on_back=go_back)
+                menu_feature = MenuFeature(
+                    page,
+                    on_back=go_back,
+                    base_url=api_base_url,
+                    data_url=f"{api_base_url}/menu/mobile/data/",
+                )
             if menu_view_cache is None:
                 menu_view_cache = menu_feature.build_view()
             content_host.content = ft.Container(expand=True, content=menu_view_cache)
@@ -351,6 +640,8 @@ def main(page: ft.Page):
                     page,
                     notifications_enabled=notifications_enabled,
                     on_notifications_change=set_notifications_enabled,
+                    location_enabled=read_bool_setting("settings.location_enabled", False),
+                    on_location_change=set_location_enabled,
                 )
             content_host.content = ft.Container(expand=True, content=settings_feature.build_view())
         else:
@@ -373,6 +664,7 @@ def main(page: ft.Page):
     registration_feature.setup()
     login_feature = LoginFeature(page, on_navigate=navigate)
     notifications_enabled = read_bool_setting("settings.notifications_enabled", True)
+    try_restore_session()
 
     if not notifications_task_started:
         notifications_task_started = True
@@ -387,7 +679,7 @@ def main(page: ft.Page):
             content=ft.Stack(
                 expand=True,
                 controls=[
-                    ft.Container(expand=True, padding=ft.padding.only(top=56), content=content_host),
+                    ft.Container(expand=True, padding=ft.Padding.only(top=56), content=content_host),
                     ft.Container(top=0, left=0, right=0, content=top_bar_host),
                     sidebar_scrim,
                     ft.Container(
@@ -396,11 +688,13 @@ def main(page: ft.Page):
                         bottom=0,
                         content=sidebar_panel_host,
                     ),
+                    login_scrim,
+                    login_panel_host,
                 ],
             ),
         )
     )
     navigate("/")
 
-
-ft.run(main)
+if __name__ == "__main__":
+    ft.run(main)

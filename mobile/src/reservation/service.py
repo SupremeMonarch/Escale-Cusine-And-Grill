@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Callable
 from urllib import error, request
 
 from .models import ReservationDraft, ReservationItem, TableItem
@@ -18,11 +19,26 @@ class ReservationApiClient:
         self,
         base_url: str | None = None,
         auth_token: str | None = None,
+        token_provider: Callable[[], str | None] | None = None,
         timeout_seconds: int = 8,
     ):
         self.base_url = (base_url or os.getenv("ECAG_API_BASE_URL", "http://127.0.0.1:8000")).rstrip("/")
         self.auth_token = auth_token or os.getenv("ECAG_API_TOKEN")
+        self.token_provider = token_provider
         self.timeout_seconds = timeout_seconds
+
+    def _resolve_auth_token(self) -> str | None:
+        token = self.auth_token
+        if self.token_provider:
+            try:
+                provided = self.token_provider()
+                if provided:
+                    token = str(provided)
+            except Exception:
+                pass
+        if not token:
+            token = os.getenv("ECAG_API_TOKEN")
+        return token
 
     def list_tables(self) -> list[TableItem]:
         payload = self._request_json("GET", "/api/reservations/tables/")
@@ -46,11 +62,12 @@ class ReservationApiClient:
             headers["Content-Type"] = "application/json"
             data = json.dumps(body).encode("utf-8")
 
-        if self.auth_token:
-            if self.auth_token.lower().startswith(("token ", "bearer ")):
-                headers["Authorization"] = self.auth_token
+        token = self._resolve_auth_token()
+        if token:
+            if token.lower().startswith(("token ", "bearer ")):
+                headers["Authorization"] = token
             else:
-                headers["Authorization"] = f"Token {self.auth_token}"
+                headers["Authorization"] = f"Token {token}"
 
         req = request.Request(
             url=f"{self.base_url}{path}",

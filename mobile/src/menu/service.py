@@ -94,8 +94,8 @@ def resolve_image_payload(raw_url: str, base_url: str = "http://127.0.0.1:8000")
             image_url = urllib.parse.urljoin(base_url, raw_url)
             parsed = urllib.parse.urlparse(image_url)
 
-        # Prefer local bytes for localhost media for reliable desktop rendering.
-        if parsed.hostname in {"127.0.0.1", "localhost"} and parsed.path.startswith("/media/"):
+        # Prefer local bytes for local media for reliable desktop rendering.
+        if parsed.hostname in {"127.0.0.1", "localhost", "0.0.0.0"} and parsed.path.startswith("/media/"):
             project_root = Path(__file__).resolve().parents[3]
             local_path = project_root / parsed.path.lstrip("/")
             if local_path.exists():
@@ -103,6 +103,23 @@ def resolve_image_payload(raw_url: str, base_url: str = "http://127.0.0.1:8000")
                     return {"src": local_path.read_bytes()}
                 except Exception:
                     return {"src": local_path.as_uri()}
+
+            # If local file is not available, rewrite localhost URL to configured API host.
+            try:
+                base_parsed = urllib.parse.urlparse(base_url)
+                if base_parsed.scheme and base_parsed.netloc:
+                    image_url = urllib.parse.urlunparse(
+                        (
+                            base_parsed.scheme,
+                            base_parsed.netloc,
+                            parsed.path,
+                            parsed.params,
+                            parsed.query,
+                            parsed.fragment,
+                        )
+                    )
+            except Exception:
+                pass
 
         return {"src": image_url}
     except Exception:

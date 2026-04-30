@@ -10,8 +10,18 @@ from customer.customer_profile import get_profile_view
 load_dotenv()
 
 async def main(page: ft.Page):
-    DEV_TOKEN = os.environ.get("CUSTOMER_TOKEN", "")
-    page.session.store.set("token", DEV_TOKEN)
+    try:
+        page.dialog = None
+        page.overlay.clear()
+    except Exception:
+        pass
+
+    existing_token = page.session.store.get("token")
+    if existing_token:
+        page.session.store.set("token", existing_token)
+    else:
+        dev_token = os.environ.get("CUSTOMER_TOKEN", "")
+        page.session.store.set("token", dev_token)
 
     page.title      = "Escale Cuisine and Grill"
     page.bgcolor    = COLORS["background"]
@@ -20,19 +30,52 @@ async def main(page: ft.Page):
     page.fonts      = {FONT_FAMILY: FONT_URL}
     page.theme      = build_theme()
 
+    async def go_back_to_main_app(_=None):
+        page.clean()
+        page.navigation_bar = None
+        page.bottom_appbar = None
+        page.floating_action_button = None
+        page.update()
+        from main import main as main_app_shell
+
+        main_app_shell(page)
+
+    async def logout_to_main_app(_=None):
+        try:
+            page.session.store.set("token", "")
+        except Exception:
+            pass
+        try:
+            page.client_storage.remove("auth.token")
+            page.client_storage.remove("auth.user")
+        except Exception:
+            pass
+        await go_back_to_main_app()
+
     header = ft.Container(
+        height=56,
+        bgcolor="#f8f8f8",
+        border=ft.Border.only(bottom=ft.BorderSide(1, "#e3e3e3")),
         content=ft.Row(
             [
                 ft.Row([
-                    ft.IconButton(ft.Icons.MENU, icon_color=COLORS["primary"]),
-                    ft.Text("Escale", size=24, weight=ft.FontWeight.BOLD, color=COLORS["on_surface"]),
+                    ft.IconButton(ft.Icons.MENU, icon_color="#FF5C00", on_click=lambda e: page.run_task(go_back_to_main_app, e)),
+                    ft.Text("ESCALE CUISINE", size=16, weight=ft.FontWeight.BOLD, color="#FF5C00"),
                 ]),
-                ft.CircleAvatar(content=ft.Icon(ft.Icons.PERSON), radius=20),
+                ft.PopupMenuButton(
+                    icon=ft.Icons.PERSON,
+                    icon_color="#8a7765",
+                    tooltip="Account",
+                    items=[
+                        ft.PopupMenuItem("Back to Main App", on_click=lambda e: page.run_task(go_back_to_main_app, e)),
+                        ft.PopupMenuItem("Logout", on_click=lambda e: page.run_task(logout_to_main_app, e)),
+                    ],
+                ),
             ],
-            alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
         ),
-        padding=ft.Padding.only(left=24, right=24, top=10, bottom=8),
-        bgcolor=COLORS["background"]
+        padding=ft.Padding.only(left=12, right=12, top=0, bottom=0),
     )
 
     content_area = ft.Container(expand=True)
@@ -94,4 +137,5 @@ async def main(page: ft.Page):
         )
     )
 
-ft.run(main)
+if __name__ == "__main__":
+    ft.run(main)

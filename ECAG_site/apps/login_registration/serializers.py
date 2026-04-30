@@ -12,11 +12,21 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(source="userprofile", required=False)
+    is_staff = serializers.BooleanField(read_only=True)
+    is_superuser = serializers.BooleanField(read_only=True)
+    account_type = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["id", "username", "first_name", "last_name", "email", "profile"]
+        fields = ["id", "username", "first_name", "last_name", "email", "is_staff", "is_superuser", "account_type", "profile"]
         read_only_fields = ["id", "username"]
+
+    def get_account_type(self, obj):
+        if obj.is_superuser:
+            return "admin"
+        if obj.is_staff:
+            return "staff"
+        return "customer"
 
     def update(self, instance, validated_data):
         profile_data = validated_data.pop("userprofile", {})
