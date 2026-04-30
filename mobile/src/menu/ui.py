@@ -145,14 +145,6 @@ def build_menu_page(
         page.window_height = 820
         page.window_resizable = True
         page.scroll = ft.ScrollMode.ADAPTIVE
-    else:
-        if hasattr(page, "window_resizable"):
-            page.window_resizable = True
-        if hasattr(page, "window_min_width"):
-            page.window_min_width = 360
-        if hasattr(page, "window_min_height"):
-            page.window_min_height = 640
-        page.scroll = ft.ScrollMode.ADAPTIVE
 
     status = ft.Text("Loading menu...", color=ft.Colors.GREY_700)
     menu_content = ft.Column(spacing=10)

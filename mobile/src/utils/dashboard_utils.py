@@ -266,17 +266,3 @@ def format_res_time(time_str: str) -> str:
         except Exception:
             continue
     return time_str
-
-def is_today(dt_str: str) -> bool:
-    try:
-        dt = datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
-        return dt.date() == date.today()
-    except Exception:
-        return True
-
-def is_today_or_future_date(date_str: str) -> bool:
-    try:
-        dt = datetime.strptime(date_str, "%Y-%m-%d")
-        return dt.date() >= date.today()
-    except Exception:
-        return True

@@ -1,0 +1,48 @@
+import requests
+
+
+class AuthService:
+    BASE_URL = "http://127.0.0.1:8000/api/auth"
+
+    def __init__(self):
+        self.token = None
+
+    # ---------------- REGISTER ----------------
+    def register(self, data):
+        try:
+            response = requests.post(
+                                        f"{self.BASE_URL}/register/",
+                                        json=data
+                                    )
+            response.raise_for_status()
+            return response.json(), None
+
+        except requests.RequestException as e:
+            return None, str(e)
+
+    # ---------------- LOGIN ----------------
+    def login(self, data):
+        try:
+            response = requests.post(
+                                        f"{self.BASE_URL}/login/",
+                                        json=data
+                                    )
+            response.raise_for_status()
+
+            result = response.json()
+
+            # store token if backend returns it
+            self.token = result.get("token")
+
+            return result, None
+
+        except requests.RequestException as e:
+            return None, str(e)
+
+    # ---------------- AUTH HEADER ----------------
+    def get_headers(self):
+        if not self.token:
+            return {}
+        return  {
+                    "Authorization": f"Bearer {self.token}"
+                }
