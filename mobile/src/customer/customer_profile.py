@@ -1,3 +1,4 @@
+import json
 import flet as ft
 from utils.dashboard_api import fetch_profile, save_profile
 from utils.dashboard_utils import (
@@ -116,6 +117,21 @@ def get_profile_view(page: ft.Page, navigate_to=None):
         )
         page.update()
 
+    def _sync_profile_address(address: str | None) -> None:
+        try:
+            if address:
+                page.client_storage.set("ecag_mobile_profile_address", json.dumps(address))
+            else:
+                page.client_storage.remove("ecag_mobile_profile_address")
+        except Exception:
+            pass
+
+    def _sync_auth_user() -> None:
+        try:
+            page.client_storage.set("auth.user", json.dumps(user_data[0]))
+        except Exception:
+            pass
+
     # --- Section ---
     def section(title: str, fields: list) -> ft.Column:
         return ft.Column([
@@ -226,6 +242,8 @@ def get_profile_view(page: ft.Page, navigate_to=None):
             u.setdefault("profile", {}).update(
                 {k: v for k, v in profile_payload.items() if v}
             )
+            _sync_profile_address(profile_payload.get("address"))
+            _sync_auth_user()
             is_editing[0] = False
             render_view()
             show_feedback("Profile updated successfully.")
@@ -268,6 +286,8 @@ def get_profile_view(page: ft.Page, navigate_to=None):
             return
 
         user_data[0] = data
+        _sync_profile_address((data.get("profile") or {}).get("address", ""))
+        _sync_auth_user()
         main_content.controls[2] = content_col
         render_view()
 

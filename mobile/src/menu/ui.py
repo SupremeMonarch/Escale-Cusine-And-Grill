@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Callable
+import json
 import os
 
 import flet as ft
@@ -16,6 +17,7 @@ from .service import (
     start_checkout,
     write_storage_json,
 )
+from utils.dashboard_api import fetch_profile
 
 ORDER_TYPE_NORMALIZATION = {
     "dine_in": "dine_in",
@@ -436,12 +438,55 @@ def build_menu_page(
     selected_address = {"value": ""}  # Will hold the selected address string
     address_error = ft.Text("", color=ft.Colors.RED_600, size=12)
 
+    def get_profile_address_from_auth() -> str:
+        try:
+            raw_user = page.client_storage.get("auth.user")
+            if isinstance(raw_user, str):
+                raw_user = json.loads(raw_user)
+            if isinstance(raw_user, dict):
+                profile = raw_user.get("profile") or raw_user.get("userprofile") or {}
+                return str((profile or {}).get("address") or "")
+        except Exception:
+            pass
+        return ""
+
     def load_default_address():
         profile_address = read_storage_json(page, "ecag_mobile_profile_address", "")
+        if not profile_address:
+            profile_address = get_profile_address_from_auth()
         if profile_address:
             selected_address["value"] = profile_address
         elif stored_addresses:
             selected_address["value"] = stored_addresses[0]
+
+    async def load_profile_address_from_server() -> str:
+        token = page.session.store.get("token") or ""
+        if not token:
+            return ""
+        data = await fetch_profile(token)
+        if not data:
+            return ""
+        address = str((data.get("profile") or {}).get("address") or "")
+        if address:
+            write_storage_json(page, "ecag_mobile_profile_address", address)
+            try:
+                raw_user = page.client_storage.get("auth.user")
+                if isinstance(raw_user, str):
+                    raw_user = json.loads(raw_user)
+                if isinstance(raw_user, dict):
+                    raw_user.setdefault("profile", {})["address"] = address
+                    page.client_storage.set("auth.user", json.dumps(raw_user))
+            except Exception:
+                pass
+        return address
+
+    async def select_profile_address():
+        profile_address = read_storage_json(page, "ecag_mobile_profile_address", "")
+        if not profile_address:
+            profile_address = get_profile_address_from_auth()
+        if not profile_address:
+            profile_address = await load_profile_address_from_server()
+        select_address(profile_address)
 
     load_default_address()
 
@@ -484,7 +529,7 @@ def build_menu_page(
         controls.extend([
             ft.ElevatedButton(
                 "Use Profile Address",
-                on_click=lambda e: select_address(read_storage_json(page, "ecag_mobile_profile_address", "")),
+                on_click=lambda e: page.run_task(select_profile_address),
                 style=ft.ButtonStyle(bgcolor=ft.Colors.GREEN_500, color=ft.Colors.WHITE),
             ),
             ft.ElevatedButton(
@@ -509,6 +554,7 @@ def build_menu_page(
             refresh_address_options()
         else:
             address_error.value = "No profile address found."
+            page.update()
 
     async def fetch_location():
         try:
