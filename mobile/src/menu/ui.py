@@ -5,6 +5,7 @@ from collections.abc import Callable
 import os
 
 import flet as ft
+import flet_geolocator as geolocator
 
 from .models import EXTRA_TOPPINGS, MEAT_TOPPINGS, TOPPING_PRICES, is_topping_eligible, normalize_cart
 from .service import (
@@ -15,6 +16,22 @@ from .service import (
     start_checkout,
     write_storage_json,
 )
+
+ORDER_TYPE_NORMALIZATION = {
+    "dine_in": "dine_in",
+    "dine in": "dine_in",
+    "pick_up": "pick_up",
+    "pick up": "pick_up",
+    "pickup": "pick_up",
+    "takeout": "pick_up",
+    "delivery": "delivery",
+}
+
+
+def normalize_order_type(value: str | None) -> str:
+    if not isinstance(value, str):
+        return "dine_in"
+    return ORDER_TYPE_NORMALIZATION.get(value.strip().lower(), "dine_in")
 
 
 def build_menu_card(item: dict, on_add, base_url: str = "http://127.0.0.1:8000") -> ft.Control:
@@ -105,6 +122,9 @@ class MenuFeature:
         self.cart_items: list[dict] | None = None
         self.order_type_value: str | None = None
 
+    def _set_order_type(self, value: str) -> None:
+        self.order_type_value = normalize_order_type(value)
+
     def build_view(self, active_view: str = "menu") -> ft.Control:
         if self.cart_items is None:
             stored_cart = read_storage_json(self.page, "ecag_mobile_cart", [])
@@ -112,7 +132,7 @@ class MenuFeature:
 
         if self.order_type_value is None:
             stored_order_type = read_storage_json(self.page, "ecag_mobile_order_type", "dine_in")
-            self.order_type_value = stored_order_type if stored_order_type in ["dine_in", "pick_up", "delivery"] else "dine_in"
+            self.order_type_value = normalize_order_type(stored_order_type)
 
         return build_menu_page(
             self.page,
@@ -123,6 +143,7 @@ class MenuFeature:
             active_view=active_view,
             cart_items=self.cart_items,
             order_type_value=self.order_type_value,
+            on_order_type_change=self._set_order_type,
         )
 
 
@@ -135,6 +156,7 @@ def build_menu_page(
     active_view: str = "menu",
     cart_items: list[dict] | None = None,
     order_type_value: str | None = None,
+    on_order_type_change: Callable[[str], None] | None = None,
 ) -> ft.Control:
     if standalone:
         page.title = "Escale Mobile Menu"
@@ -152,13 +174,18 @@ def build_menu_page(
     menu_content = ft.Column(spacing=10)
     cart_list = ft.Column(spacing=8)
 
+    geolocator_service = geolocator.Geolocator()
+    if geolocator_service not in page.services:
+        page.services.append(geolocator_service)
+
     if cart_items is None:
         stored_cart = read_storage_json(page, "ecag_mobile_cart", [])
         cart_items = normalize_cart(stored_cart)
 
     if order_type_value is None:
-        stored_order_type = read_storage_json(page, "ecag_mobile_order_type", "dine_in")
-        order_type_value = stored_order_type if stored_order_type in ["dine_in", "pick_up", "delivery"] else "dine_in"
+        order_type_value = "dine_in"
+    else:
+        order_type_value = normalize_order_type(order_type_value)
 
     order_type_state = {"value": order_type_value}
     order_type_btns: list[tuple[ft.Button, str]] = []
@@ -187,7 +214,12 @@ def build_menu_page(
             count += qty
             subtotal += qty * cart_item_unit_price(item)
         order_type = order_type_state["value"]
-        fee = 100.0 if order_type == "delivery" else (50.0 if order_type == "pick_up" else 0.0)
+        if order_type == "delivery":
+            fee = 100.0
+        elif order_type == "pick_up":
+            fee = 50.0
+        else:
+            fee = 0.0
         total = subtotal + fee
         cart_count.value = f"{count} items"
         cart_total.value = f"Rs {total:.2f}"
@@ -205,14 +237,16 @@ def build_menu_page(
             )
 
     def on_select_order_type(value: str):
-        order_type_state["value"] = value
+        normalized_value = normalize_order_type(value)
+        order_type_state["value"] = normalized_value
+        if on_order_type_change is not None:
+            on_order_type_change(normalized_value)
         save_cart_state()
         recalc_totals()
         refresh_order_type_buttons()
-        if checkout_view.visible:
-            address_section.visible = value == "delivery"
-            if value == "delivery":
-                refresh_address_options()
+        render_cart()
+        render_checkout_items()
+        address_section.visible = normalized_value == "delivery"
         page.update()
 
     def set_meat(index: int, meat: str):
@@ -478,9 +512,16 @@ def build_menu_page(
 
     async def fetch_location():
         try:
-            # Request location permission
-            await page.window.request_location_permission()
-            location = await page.window.get_location_async()
+            permission_status = await geolocator_service.get_permission_status()
+            permission_text = str(permission_status).upper()
+            if "DENIED" in permission_text or "UNABLE" in permission_text:
+                permission_status = await geolocator_service.request_permission()
+                permission_text = str(permission_status).upper()
+
+            if "DENIED" in permission_text:
+                raise RuntimeError("Location permission denied")
+
+            location = await geolocator_service.get_current_position()
             if location:
                 # Reverse geocoding using Nominatim (OpenStreetMap)
                 import urllib.request
@@ -635,6 +676,7 @@ def build_menu_page(
         page.update()
 
     def show_checkout_view():
+        recalc_totals()
         render_checkout_items()
         checkout_status.value = ""
         address_error.value = ""
@@ -712,10 +754,15 @@ def build_menu_page(
             page.update()
 
     order_type_row = ft.Row(spacing=8, wrap=False, scroll=ft.ScrollMode.ALWAYS)
+    def make_order_handler(v):
+        return lambda e: on_select_order_type(v)
+
+    order_type_row = ft.Row(spacing=8, wrap=False, scroll=ft.ScrollMode.ALWAYS)
+
     for value, label in [("dine_in", "Dine In"), ("pick_up", "Pick Up"), ("delivery", "Delivery")]:
         btn = ft.Button(
             content=label,
-            on_click=lambda e, v=value: on_select_order_type(v),
+            on_click=make_order_handler(value),
             height=36,
             bgcolor="#F8FAFC",
             color="#9A3412",
