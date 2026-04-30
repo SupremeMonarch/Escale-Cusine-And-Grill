@@ -99,9 +99,9 @@ class MenuFeature:
     ):
         self.page = page
         self.on_back = on_back
-<<<<<<< Updated upstream
-        self.data_url = data_url
-        self.base_url = base_url
+        resolved_base = (base_url or os.getenv("ECAG_API_BASE_URL", "http://127.0.0.1:8000")).rstrip("/")
+        self.base_url = resolved_base
+        self.data_url = data_url or f"{resolved_base}/menu/mobile/data/"
         self.cart_items: list[dict] | None = None
         self.order_type_value: str | None = None
 
@@ -113,11 +113,6 @@ class MenuFeature:
         if self.order_type_value is None:
             stored_order_type = read_storage_json(self.page, "ecag_mobile_order_type", "dine_in")
             self.order_type_value = stored_order_type if stored_order_type in ["dine_in", "pick_up", "delivery"] else "dine_in"
-=======
-        resolved_base = (base_url or os.getenv("ECAG_API_BASE_URL", "http://127.0.0.1:8000")).rstrip("/")
-        self.base_url = resolved_base
-        self.data_url = data_url or f"{resolved_base}/menu/mobile/data/"
->>>>>>> Stashed changes
 
         return build_menu_page(
             self.page,
