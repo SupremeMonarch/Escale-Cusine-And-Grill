@@ -187,6 +187,10 @@ def build_menu_page(
         save_cart_state()
         recalc_totals()
         refresh_order_type_buttons()
+        if checkout_view.visible:
+            address_section.visible = value == "delivery"
+            if value == "delivery":
+                refresh_address_options()
         page.update()
 
     def set_meat(index: int, meat: str):
@@ -266,10 +270,14 @@ def build_menu_page(
                         wrap=True,
                         spacing=6,
                         controls=[
-                            ft.FilterChip(
-                                label=f"{meat} (+Rs {TOPPING_PRICES[meat]})" if TOPPING_PRICES[meat] else meat,
-                                selected=(item.get("meat_topping") == meat),
-                                on_select=lambda e, i=idx, m=meat: set_meat(i, m),
+                            ft.ElevatedButton(
+                                content=ft.Text(f"{meat} (+Rs {TOPPING_PRICES[meat]})" if TOPPING_PRICES[meat] else meat),
+                                on_click=lambda e, i=idx, m=meat: set_meat(i, m),
+                                style=ft.ButtonStyle(
+                                    bgcolor=ft.Colors.ORANGE_500 if item.get("meat_topping") == meat else ft.Colors.GREY_300,
+                                    color=ft.Colors.WHITE if item.get("meat_topping") == meat else ft.Colors.BLACK,
+                                ),
+                                height=32,
                             )
                             for meat in MEAT_TOPPINGS
                         ],
@@ -281,10 +289,14 @@ def build_menu_page(
                         wrap=True,
                         spacing=6,
                         controls=[
-                            ft.FilterChip(
-                                label=f"{top} (+Rs {TOPPING_PRICES[top]})",
-                                selected=(top in item.get("extra_toppings", [])),
-                                on_select=lambda e, i=idx, t=top: toggle_extra(i, t),
+                            ft.ElevatedButton(
+                                content=ft.Text(f"{top} (+Rs {TOPPING_PRICES[top]})"),
+                                on_click=lambda e, i=idx, t=top: toggle_extra(i, t),
+                                style=ft.ButtonStyle(
+                                    bgcolor=ft.Colors.GREEN_500 if top in item.get("extra_toppings", []) else ft.Colors.GREY_300,
+                                    color=ft.Colors.WHITE if top in item.get("extra_toppings", []) else ft.Colors.BLACK,
+                                ),
+                                height=32,
                             )
                             for top in EXTRA_TOPPINGS
                         ],
@@ -360,6 +372,142 @@ def build_menu_page(
             }
             for it in cart_items
         ]
+
+    # Address selection for delivery
+    stored_addresses = read_storage_json(page, "ecag_mobile_addresses", [])
+    if not isinstance(stored_addresses, list):
+        stored_addresses = []
+    selected_address = {"value": ""}  # Will hold the selected address string
+    address_error = ft.Text("", color=ft.Colors.RED_600, size=12)
+
+    def load_default_address():
+        profile_address = read_storage_json(page, "ecag_mobile_profile_address", "")
+        if profile_address:
+            selected_address["value"] = profile_address
+        elif stored_addresses:
+            selected_address["value"] = stored_addresses[0]
+
+    load_default_address()
+
+    address_options = ft.Column(spacing=8)
+    address_input_fields = ft.Column(spacing=8, visible=False)
+    new_address_street = ft.TextField(label="Street Address", dense=True, border_radius=10)
+    new_address_city = ft.TextField(label="City", dense=True, border_radius=10)
+    new_address_postal = ft.TextField(label="Postal Code", dense=True, border_radius=10)
+    save_new_address_checkbox = ft.Checkbox(label="Save to profile", value=True)
+
+    address_section = ft.Container(
+        padding=12,
+        border_radius=14,
+        bgcolor=ft.Colors.WHITE,
+        border=ft.Border.all(1, ft.Colors.with_opacity(0.1, ft.Colors.BLACK)),
+        visible=order_type_state["value"] == "delivery",
+        content=ft.Column(
+            spacing=10,
+            controls=[
+                ft.Text("Delivery Address", size=16, weight=ft.FontWeight.W_700),
+                address_options,
+                address_input_fields,
+                address_error,
+            ],
+        ),
+    )
+
+    def refresh_address_options():
+        controls = []
+        if selected_address["value"]:
+            controls.append(
+                ft.Container(
+                    padding=10,
+                    border_radius=10,
+                    bgcolor=ft.Colors.BLUE_50,
+                    border=ft.Border.all(2, ft.Colors.BLUE_400),
+                    content=ft.Text(f"Selected: {selected_address['value']}", size=14, color=ft.Colors.BLUE_900),
+                )
+            )
+        controls.extend([
+            ft.ElevatedButton(
+                "Use Profile Address",
+                on_click=lambda e: select_address(read_storage_json(page, "ecag_mobile_profile_address", "")),
+                style=ft.ButtonStyle(bgcolor=ft.Colors.GREEN_500, color=ft.Colors.WHITE),
+            ),
+            ft.ElevatedButton(
+                "Use Current Location",
+                on_click=on_fetch_location,
+                style=ft.ButtonStyle(bgcolor=ft.Colors.ORANGE_500, color=ft.Colors.WHITE),
+            ),
+            ft.ElevatedButton(
+                "Enter New Address",
+                on_click=lambda e: show_address_form(),
+                style=ft.ButtonStyle(bgcolor=ft.Colors.PURPLE_500, color=ft.Colors.WHITE),
+            ),
+        ])
+        address_options.controls = controls
+        page.update()
+
+    def select_address(addr: str):
+        if addr:
+            selected_address["value"] = addr
+            address_error.value = ""
+            address_input_fields.visible = False
+            refresh_address_options()
+        else:
+            address_error.value = "No profile address found."
+
+    async def fetch_location():
+        try:
+            # Request location permission
+            await page.window.request_location_permission()
+            location = await page.window.get_location_async()
+            if location:
+                # Reverse geocoding using Nominatim (OpenStreetMap)
+                import urllib.request
+                import json
+                url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={location.latitude}&lon={location.longitude}&zoom=18&addressdetails=1"
+                req = urllib.request.Request(url, headers={"User-Agent": "ECAG-Mobile-App"})
+                with urllib.request.urlopen(req, timeout=10) as response:
+                    data = json.loads(response.read().decode("utf-8"))
+                    address = data.get("display_name", f"{location.latitude}, {location.longitude}")
+                selected_address["value"] = address
+                address_error.value = ""
+                address_input_fields.visible = False
+                refresh_address_options()
+            else:
+                address_error.value = "Unable to get location."
+        except Exception as e:
+            address_error.value = f"Location error: {e}"
+
+    async def on_fetch_location(e):
+        await fetch_location()
+
+    def show_address_form():
+        address_input_fields.visible = True
+        page.update()
+
+    def save_new_address():
+        street = new_address_street.value or ""
+        city = new_address_city.value or ""
+        postal = new_address_postal.value or ""
+        if not street or not city:
+            address_error.value = "Street and City are required."
+            return
+        addr = f"{street}, {city}, {postal}".strip(", ")
+        selected_address["value"] = addr
+        if save_new_address_checkbox.value:
+            write_storage_json(page, "ecag_mobile_profile_address", addr)
+        address_error.value = ""
+        address_input_fields.visible = False
+        refresh_address_options()
+
+    address_input_fields.controls = [
+        new_address_street,
+        new_address_city,
+        new_address_postal,
+        save_new_address_checkbox,
+        ft.ElevatedButton("Save Address", on_click=lambda e: save_new_address()),
+    ]
+
+    refresh_address_options()
 
     checkout_status = ft.Text("", color=ft.Colors.GREY_700)
     checkout_items_column = ft.Column(spacing=8, height=280, scroll=ft.ScrollMode.ADAPTIVE)
@@ -467,6 +615,10 @@ def build_menu_page(
     def show_checkout_view():
         render_checkout_items()
         checkout_status.value = ""
+        address_error.value = ""
+        address_section.visible = order_type_state["value"] == "delivery"
+        if order_type_state["value"] == "delivery":
+            refresh_address_options()
         menu_view.visible = False
         checkout_view.visible = True
         success_view.visible = False
@@ -493,6 +645,11 @@ def build_menu_page(
             page.update()
             return
 
+        if order_type_state["value"] == "delivery" and not selected_address["value"]:
+            checkout_status.value = "Please select a delivery address."
+            page.update()
+            return
+
         if payment_method_group.value == "card":
             if not card_name_input.value or not card_number_input.value or not cvv_input.value:
                 checkout_status.value = "Please fill card details."
@@ -504,7 +661,8 @@ def build_menu_page(
 
         try:
             payload = build_checkout_payload()
-            started = start_checkout(base_url, payload, order_type_state["value"])
+            address = selected_address["value"] if order_type_state["value"] == "delivery" else ""
+            started = start_checkout(base_url, payload, order_type_state["value"], address)
             order_id = started.get("order_id")
             if not order_id:
                 raise RuntimeError("Unable to start checkout")
@@ -518,6 +676,15 @@ def build_menu_page(
                 exp_date=exp_date_input.value or "",
                 cvv=cvv_input.value or "",
             )
+
+            cart_items.clear()
+            save_cart_state()
+            recalc_totals()
+            render_cart()
+            show_success_view(completed.get("order_code", ""), completed.get("total", "0.00"))
+        except Exception as exc:
+            checkout_status.value = f"Checkout failed: {exc}"
+            page.update()
 
             cart_items.clear()
             save_cart_state()
@@ -620,6 +787,7 @@ def build_menu_page(
             ),
         ),
         checkout_status,
+        address_section,
         ft.Container(
             padding=12,
             border_radius=14,

@@ -93,7 +93,7 @@
             <td class="px-6 py-4 font-semibold">Rs {{ order.total }}</td>
             <td class="px-6 py-4 text-sm text-gray-500">{{ order.order_date|date:"d M Y - H:i" }}</td>
             <td class="px-6 py-4 text-right">
-              <a href="{% url 'admin-order-detail' order.id %}" class="text-blue-600 hover:underline mr-4">View</a>
+              <button type="button" onclick="openOrderModal('{{ order.id }}')" class="text-blue-600 hover:underline mr-4">View</button>
 
               {% if order.status != 'completed' and order.status != 'cancelled' %}
                 <form action="{% url 'admin-order-next-status' order.id %}" method="post" class="inline">
@@ -152,7 +152,7 @@
           </div>
 
           <div class="mt-3 flex gap-3">
-            <a href="{% url 'admin-order-detail' order.id %}" class="text-sm text-amber-600 font-medium">View</a>
+            <button type="button" onclick="openOrderModal('{{ order.id }}')" class="text-sm text-amber-600 font-medium">View</button>
             {% if order.status != 'completed' and order.status != 'cancelled' %}
               <form action="{% url 'admin-order-next-status' order.id %}" method="post" class="inline">
                 {% csrf_token %}
@@ -167,5 +167,105 @@
     </div>
   </div>
 
+  <div id="orderDetailModal" class="fixed inset-0 z-50 hidden bg-black/50 p-4">
+    <div class="mx-auto mt-6 max-w-2xl rounded-xl bg-white shadow-xl">
+      <div class="flex items-center justify-between border-b px-5 py-4">
+        <h2 class="text-lg font-bold text-gray-900">Order Details</h2>
+        <button type="button" onclick="closeOrderModal()" class="text-gray-500 hover:text-gray-800">X</button>
+      </div>
+      <div id="orderDetailBody" class="max-h-[70vh] overflow-y-auto px-5 py-4"></div>
+      <div class="flex justify-end border-t px-5 py-3">
+        <button type="button" onclick="closeOrderModal()" class="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hidden">
+    {% for order in orders %}
+      <div id="order-detail-template-{{ order.id }}">
+        <div class="space-y-4">
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <p class="text-xs uppercase tracking-wide text-gray-500">Order</p>
+              <p class="font-semibold text-gray-900">{{ order.order_id_str|default:order.id }}</p>
+            </div>
+            <div>
+              <p class="text-xs uppercase tracking-wide text-gray-500">Date / Time</p>
+              <p class="font-semibold text-gray-900">{{ order.order_date|date:"d M Y - H:i" }}</p>
+            </div>
+            <div>
+              <p class="text-xs uppercase tracking-wide text-gray-500">Customer</p>
+              <p class="font-semibold text-gray-900">{% if order.user %}{{ order.user.first_name }} {{ order.user.last_name }}{% else %}Guest Order{% endif %}</p>
+            </div>
+            <div>
+              <p class="text-xs uppercase tracking-wide text-gray-500">Phone</p>
+              <p class="font-semibold text-gray-900">{% if order.user %}{{ order.user.phone|default:"N/A" }}{% else %}N/A{% endif %}</p>
+            </div>
+            <div>
+              <p class="text-xs uppercase tracking-wide text-gray-500">Type</p>
+              <p class="font-semibold text-gray-900 capitalize">{{ order.order_type }}</p>
+            </div>
+            <div>
+              <p class="text-xs uppercase tracking-wide text-gray-500">Status</p>
+              <p class="font-semibold text-gray-900">{{ order.status|title }}</p>
+            </div>
+          </div>
+
+          <div class="rounded-lg border border-gray-200">
+            <div class="border-b bg-gray-50 px-4 py-2 text-sm font-semibold text-gray-700">Items</div>
+            <div class="divide-y">
+              {% for item in order.items.all %}
+                <div class="px-4 py-3">
+                  <div class="flex items-start justify-between gap-4">
+                    <div>
+                      <p class="font-medium text-gray-900">{{ item.quantity }}x {{ item.item.name }}</p>
+                      {% if item.meat_topping %}
+                        <p class="text-xs text-gray-500">Meat: {{ item.meat_topping }}</p>
+                      {% endif %}
+                      {% if item.extra_toppings %}
+                        <p class="text-xs text-gray-500">Extras: {{ item.extra_toppings }}</p>
+                      {% endif %}
+                    </div>
+                    <p class="whitespace-nowrap font-semibold text-gray-900">Rs {{ item.subtotal }}</p>
+                  </div>
+                </div>
+              {% empty %}
+                <div class="px-4 py-3 text-sm text-gray-500">No items found.</div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end">
+            <p class="text-lg font-bold text-amber-600">Total: Rs {{ order.total }}</p>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
 </div>
+
+<script>
+  function openOrderModal(orderId) {
+    const modal = document.getElementById('orderDetailModal');
+    const body = document.getElementById('orderDetailBody');
+    const template = document.getElementById(`order-detail-template-${orderId}`);
+    if (!modal || !body || !template) return;
+
+    body.innerHTML = template.innerHTML;
+    modal.classList.remove('hidden');
+  }
+
+  function closeOrderModal() {
+    const modal = document.getElementById('orderDetailModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+  }
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+      closeOrderModal();
+    }
+  });
+</script>
 {% endblock %}

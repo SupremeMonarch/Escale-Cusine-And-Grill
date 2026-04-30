@@ -11,12 +11,12 @@
       <div class="flex justify-start items-center">
         <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Menu Management</h1>
       </div>
-      <a href="#" class="flex justify-center items-center w-full sm:w-auto px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 transition gap-2">
+      <button type="button" onclick="openMenuCreateModal()" class="flex justify-center items-center w-full sm:w-auto px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 transition gap-2">
         <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4">
           <path d="M7.70169 7.36217L7.71676 3.36219L9.0505 3.36722L9.03543 7.36719L13.0367 7.38226L13.0316 8.71558L9.03041 8.70051L9.01535 12.7005L7.68161 12.6955L7.69667 8.69549L3.69545 8.68042L3.70047 7.34709L7.70169 7.36217Z" fill="white"></path>
         </svg>
         <span class="text-base font-medium text-white">Add New Item</span>
-      </a>
+      </button>
     </div>
 
     <!-- Search & Filter Section -->
@@ -81,7 +81,18 @@
 
               <!-- Edit Button -->
               <div class="absolute right-2 top-2">
-                <button class="flex justify-center items-center w-10 h-10 p-2 rounded-full bg-white/90 hover:bg-white transition shadow-sm" title="Edit item">
+                <button
+                  type="button"
+                  class="flex justify-center items-center w-10 h-10 p-2 rounded-full bg-white/90 hover:bg-white transition shadow-sm"
+                  title="Edit item"
+                  data-item-id="{{ item.item_id }}"
+                  data-item-name="{{ item.name|escape }}"
+                  data-item-desc="{{ item.desc|escapejs }}"
+                  data-item-price="{{ item.price }}"
+                  data-item-category-id="{{ item.subcategory_id_id }}"
+                  data-item-available="{% if item.is_available %}true{% else %}false{% endif %}"
+                  onclick="openMenuEditModal(this)"
+                >
                   <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4">
                     <path d="M4.05696 9.33683L9.99842 3.44417L9.17262 2.61272L3.23111 8.51705L3.22804 9.33371L4.05696 9.33683ZM4.53123 10.5053L2.05615 10.496L2.06547 8.02265L8.76866 1.37452C8.87803 1.26604 9.01444 1.21211 9.17789 1.21273C9.34134 1.21334 9.47735 1.2683 9.5859 1.3776L11.2375 3.0405C11.3538 3.14983 11.4117 3.28616 11.4111 3.44949C11.4105 3.61282 11.3516 3.7526 11.2344 3.86883L4.53123 10.5053ZM2.05176 11.6626L12.5592 11.7022L12.5548 12.8689L2.04736 12.8293L2.05176 11.6626Z" fill="#4B5563"></path>
                   </svg>
@@ -145,5 +156,171 @@
 
   </div>
 </div>
+
+<div id="menuCreateModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4">
+  <div class="w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl">
+    <div class="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900">Add Menu Item</h2>
+        <p class="mt-1 text-sm text-gray-500">Create a new item with its image, pricing, category, and availability.</p>
+      </div>
+      <button type="button" onclick="closeMenuCreateModal()" class="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">&times;</button>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="mt-5 space-y-4">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="create">
+
+      <div>
+        <label for="menuCreateName" class="mb-1 block text-sm font-medium text-gray-700">Item Name</label>
+        <input id="menuCreateName" name="name" type="text" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100">
+      </div>
+
+      <div>
+        <label for="menuCreateDesc" class="mb-1 block text-sm font-medium text-gray-700">Description</label>
+        <textarea id="menuCreateDesc" name="desc" rows="4" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100"></textarea>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label for="menuCreatePrice" class="mb-1 block text-sm font-medium text-gray-700">Price (Rs)</label>
+          <input id="menuCreatePrice" name="price" type="number" min="0" step="0.01" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100">
+        </div>
+        <div>
+          <label for="menuCreateCategory" class="mb-1 block text-sm font-medium text-gray-700">Category</label>
+          <select id="menuCreateCategory" name="subcategory_id" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100">
+            {% for category in categories %}
+              <option value="{{ category.id }}">{{ category.subcategory }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label for="menuCreateImage" class="mb-1 block text-sm font-medium text-gray-700">Menu Image</label>
+        <input id="menuCreateImage" name="menu_img" type="file" accept="image/*" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-amber-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-amber-800 hover:file:bg-amber-200">
+      </div>
+
+      <label class="flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-700">
+        <input id="menuCreateAvailable" name="is_available" type="checkbox" checked class="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500">
+        Available for ordering
+      </label>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" onclick="closeMenuCreateModal()" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+        <button type="submit" class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700">Add Item</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="menuEditModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4">
+  <div class="w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl">
+    <div class="flex items-start justify-between gap-4 border-b border-gray-200 pb-4">
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900">Edit Menu Item</h2>
+        <p class="mt-1 text-sm text-gray-500">Update the menu item details and save your changes.</p>
+      </div>
+      <button type="button" onclick="closeMenuEditModal()" class="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">&times;</button>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="mt-5 space-y-4">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="edit">
+      <input type="hidden" name="item_id" id="menuEditItemId">
+
+      <div>
+        <label for="menuEditName" class="mb-1 block text-sm font-medium text-gray-700">Item Name</label>
+        <input id="menuEditName" name="name" type="text" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100">
+      </div>
+
+      <div>
+        <label for="menuEditDesc" class="mb-1 block text-sm font-medium text-gray-700">Description</label>
+        <textarea id="menuEditDesc" name="desc" rows="4" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100"></textarea>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label for="menuEditPrice" class="mb-1 block text-sm font-medium text-gray-700">Price (Rs)</label>
+          <input id="menuEditPrice" name="price" type="number" min="0" step="0.01" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100">
+        </div>
+        <div>
+          <label for="menuEditCategory" class="mb-1 block text-sm font-medium text-gray-700">Category</label>
+          <select id="menuEditCategory" name="subcategory_id" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100">
+            {% for category in categories %}
+              <option value="{{ category.id }}">{{ category.subcategory }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label for="menuEditImage" class="mb-1 block text-sm font-medium text-gray-700">Replace Image</label>
+        <input id="menuEditImage" name="menu_img" type="file" accept="image/*" class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-amber-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-amber-800 hover:file:bg-amber-200">
+      </div>
+
+      <label class="flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-700">
+        <input id="menuEditAvailable" name="is_available" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500">
+        Available for ordering
+      </label>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" onclick="closeMenuEditModal()" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+        <button type="submit" class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const menuCreateModal = document.getElementById('menuCreateModal');
+  const menuEditModal = document.getElementById('menuEditModal');
+  const menuEditItemId = document.getElementById('menuEditItemId');
+  const menuEditName = document.getElementById('menuEditName');
+  const menuEditDesc = document.getElementById('menuEditDesc');
+  const menuEditPrice = document.getElementById('menuEditPrice');
+  const menuEditCategory = document.getElementById('menuEditCategory');
+  const menuEditAvailable = document.getElementById('menuEditAvailable');
+  const menuEditImage = document.getElementById('menuEditImage');
+
+  function openMenuCreateModal() {
+    menuCreateModal.classList.remove('hidden');
+    menuCreateModal.classList.add('flex');
+  }
+
+  function closeMenuCreateModal() {
+    menuCreateModal.classList.add('hidden');
+    menuCreateModal.classList.remove('flex');
+  }
+
+  function openMenuEditModal(button) {
+    menuEditItemId.value = button.dataset.itemId || '';
+    menuEditName.value = button.dataset.itemName || '';
+    menuEditDesc.value = button.dataset.itemDesc || '';
+    menuEditPrice.value = button.dataset.itemPrice || '';
+    menuEditCategory.value = button.dataset.itemCategoryId || '';
+    menuEditAvailable.checked = (button.dataset.itemAvailable || '').toLowerCase() === 'true';
+    menuEditImage.value = '';
+    menuEditModal.classList.remove('hidden');
+    menuEditModal.classList.add('flex');
+  }
+
+  function closeMenuEditModal() {
+    menuEditModal.classList.add('hidden');
+    menuEditModal.classList.remove('flex');
+  }
+
+  menuEditModal.addEventListener('click', function (event) {
+    if (event.target === menuEditModal) {
+      closeMenuEditModal();
+    }
+  });
+
+  menuCreateModal.addEventListener('click', function (event) {
+    if (event.target === menuCreateModal) {
+      closeMenuCreateModal();
+    }
+  });
+</script>
 
 {% endblock %}
