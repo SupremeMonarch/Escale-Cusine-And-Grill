@@ -100,14 +100,27 @@ class MenuFeature:
         self.on_back = on_back
         self.data_url = data_url
         self.base_url = base_url
+        self.cart_items: list[dict] | None = None
+        self.order_type_value: str | None = None
 
-    def build_view(self) -> ft.Control:
+    def build_view(self, active_view: str = "menu") -> ft.Control:
+        if self.cart_items is None:
+            stored_cart = read_storage_json(self.page, "ecag_mobile_cart", [])
+            self.cart_items = normalize_cart(stored_cart)
+
+        if self.order_type_value is None:
+            stored_order_type = read_storage_json(self.page, "ecag_mobile_order_type", "dine_in")
+            self.order_type_value = stored_order_type if stored_order_type in ["dine_in", "pick_up", "delivery"] else "dine_in"
+
         return build_menu_page(
             self.page,
             data_url=self.data_url,
             base_url=self.base_url,
             on_back=self.on_back,
             standalone=False,
+            active_view=active_view,
+            cart_items=self.cart_items,
+            order_type_value=self.order_type_value,
         )
 
 
@@ -117,9 +130,14 @@ def build_menu_page(
     base_url: str = "http://127.0.0.1:8000",
     on_back=None,
     standalone: bool = False,
+    active_view: str = "menu",
+    cart_items: list[dict] | None = None,
+    order_type_value: str | None = None,
 ) -> ft.Control:
     if standalone:
         page.title = "Escale Mobile Menu"
+        if active_view == "cart":
+            page.title = "Escale Mobile Cart"
         page.theme_mode = ft.ThemeMode.LIGHT
         page.bgcolor = "#FFF8F3"
         page.padding = 12
@@ -140,11 +158,13 @@ def build_menu_page(
     menu_content = ft.Column(spacing=10)
     cart_list = ft.Column(spacing=8)
 
-    stored_cart = read_storage_json(page, "ecag_mobile_cart", [])
-    cart_items = normalize_cart(stored_cart)
+    if cart_items is None:
+        stored_cart = read_storage_json(page, "ecag_mobile_cart", [])
+        cart_items = normalize_cart(stored_cart)
 
-    stored_order_type = read_storage_json(page, "ecag_mobile_order_type", "dine_in")
-    order_type_value = stored_order_type if stored_order_type in ["dine_in", "pick_up", "delivery"] else "dine_in"
+    if order_type_value is None:
+        stored_order_type = read_storage_json(page, "ecag_mobile_order_type", "dine_in")
+        order_type_value = stored_order_type if stored_order_type in ["dine_in", "pick_up", "delivery"] else "dine_in"
 
     order_type_state = {"value": order_type_value}
     order_type_btns: list[tuple[ft.Button, str]] = []
@@ -519,10 +539,10 @@ def build_menu_page(
 
     checkout_status = ft.Text("", color=ft.Colors.GREY_700)
     checkout_items_column = ft.Column(spacing=8, height=280, scroll=ft.ScrollMode.ADAPTIVE)
-    checkout_type_text = ft.Text("Dine In", size=12, color=ft.Colors.GREY_700)
-    checkout_items_count_text = ft.Text("0", size=12, color=ft.Colors.GREY_700)
-    checkout_fee_text = ft.Text("Rs 0.00", size=12, color=ft.Colors.GREY_700)
-    checkout_subtotal_text = ft.Text("Rs 0.00", size=12, color=ft.Colors.GREY_700)
+    checkout_type_text = ft.Text("Dine In", size=12, color=ft.Colors.WHITE)
+    checkout_items_count_text = ft.Text("0", size=12, color=ft.Colors.WHITE)
+    checkout_fee_text = ft.Text("Rs 0.00", size=12, color=ft.Colors.WHITE)
+    checkout_subtotal_text = ft.Text("Rs 0.00", size=12, color=ft.Colors.WHITE)
     checkout_total_text = ft.Text("Rs 0.00", size=22, weight=ft.FontWeight.W_700, color=ft.Colors.WHITE)
 
     payment_method_group = ft.RadioGroup(content=ft.Column(), value="card")
@@ -534,8 +554,8 @@ def build_menu_page(
     success_order_text = ft.Text("Order Confirmed", size=24, weight=ft.FontWeight.W_700, color=ft.Colors.WHITE)
     success_total_text = ft.Text("Rs 0.00", size=16, color="#FDBA74", weight=ft.FontWeight.W_600)
 
-    menu_view = ft.Column(spacing=8)
-    checkout_view = ft.Column(spacing=10, visible=False)
+    menu_view = ft.Column(spacing=8, expand=True, horizontal_alignment=ft.CrossAxisAlignment.STRETCH)
+    checkout_view = ft.Column(spacing=10, visible=False, horizontal_alignment=ft.CrossAxisAlignment.STRETCH)
     success_view = ft.Column(spacing=10, visible=False)
 
     def refresh_card_fields():
@@ -658,12 +678,6 @@ def build_menu_page(
             page.update()
             return
 
-        if payment_method_group.value == "card":
-            if not card_name_input.value or not card_number_input.value or not cvv_input.value:
-                checkout_status.value = "Please fill card details."
-                page.update()
-                return
-
         checkout_status.value = "Processing payment..."
         page.update()
 
@@ -703,7 +717,7 @@ def build_menu_page(
             checkout_status.value = f"Checkout failed: {exc}"
             page.update()
 
-    order_type_row = ft.Row(spacing=8, wrap=True)
+    order_type_row = ft.Row(spacing=8, wrap=False, scroll=ft.ScrollMode.ALWAYS)
     for value, label in [("dine_in", "Dine In"), ("pick_up", "Pick Up"), ("delivery", "Delivery")]:
         btn = ft.Button(
             content=label,
@@ -711,9 +725,12 @@ def build_menu_page(
             height=36,
             bgcolor="#F8FAFC",
             color="#9A3412",
+            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=999)),
         )
         order_type_btns.append((btn, value))
         order_type_row.controls.append(btn)
+
+    order_type_container = ft.Container(expand=True, alignment=ft.Alignment.CENTER, content=order_type_row)
 
     refresh_order_type_buttons()
 
@@ -726,48 +743,56 @@ def build_menu_page(
 
     menu_header_controls = [
         ft.Container(
-            border_radius=18,
-            padding=14,
+            expand=True,
+            border_radius=0,
+            padding=20,
             gradient=ft.LinearGradient(colors=["#FFB17A", "#EA580C", "#DC2626"]),
             content=ft.Column(
-                spacing=2,
+                spacing=6,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                alignment=ft.MainAxisAlignment.CENTER,
                 controls=[
-                    ft.Text("Escale Mobile Menu", size=22, weight=ft.FontWeight.W_700, color=ft.Colors.WHITE),
-                    ft.Text("Fast ordering layout for phones", color=ft.Colors.WHITE, size=13),
+                    ft.Text("Escale Mobile Menu", size=24, weight=ft.FontWeight.W_700, color=ft.Colors.WHITE),
+                    ft.Text("Fast ordering layout for phones", color=ft.Colors.WHITE, size=14),
                 ],
             ),
         ),
     ]
-    if on_back:
-        menu_header_controls.append(ft.TextButton("Back", on_click=lambda e: on_back()))
+
+    cart_section = ft.Container(
+        margin=ft.Margin.only(top=8),
+        padding=12,
+        border_radius=14,
+        bgcolor=ft.Colors.WHITE,
+        border=ft.Border.all(1, ft.Colors.with_opacity(0.1, ft.Colors.BLACK)),
+        content=ft.Column(
+            spacing=8,
+            controls=[
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    controls=[
+                        ft.Column(spacing=2, controls=[cart_count, cart_total]),
+                        checkout_btn,
+                    ],
+                ),
+                ft.Text("Cart details", size=12, weight=ft.FontWeight.W_700, color=ft.Colors.GREY_700),
+                cart_list,
+            ],
+        ),
+    )
 
     menu_view.controls = menu_header_controls + [
-        status,
-        order_type_row,
+        order_type_container,
         menu_content,
-        ft.Container(
-            margin=ft.Margin.only(top=8),
-            padding=12,
-            border_radius=14,
-            bgcolor=ft.Colors.WHITE,
-            border=ft.Border.all(1, ft.Colors.with_opacity(0.1, ft.Colors.BLACK)),
-            content=ft.Column(
-                spacing=8,
-                controls=[
-                    ft.Row(
-                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                        controls=[
-                            ft.Column(spacing=2, controls=[cart_count, cart_total]),
-                            checkout_btn,
-                        ],
-                    ),
-                    ft.Text("Cart details", size=12, weight=ft.FontWeight.W_700, color=ft.Colors.GREY_700),
-                    cart_list,
-                ],
-            ),
-        ),
     ]
+    menu_view.visible = active_view == "menu"
+
+    cart_view = ft.Column(
+        spacing=8,
+        visible=active_view == "cart",
+        controls=[cart_section],
+    )
 
     payment_method_group.content = ft.Column(
         spacing=6,
@@ -786,8 +811,10 @@ def build_menu_page(
             border_radius=18,
             padding=14,
             gradient=ft.LinearGradient(colors=["#FFB17A", "#EA580C", "#DC2626"]),
+            alignment=ft.Alignment.CENTER,
             content=ft.Column(
                 spacing=2,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 controls=[
                     ft.Text("Checkout", size=24, weight=ft.FontWeight.W_700, color=ft.Colors.WHITE),
                     ft.Text("Review your order and pay", color=ft.Colors.WHITE, size=13),
@@ -869,8 +896,9 @@ def build_menu_page(
         content=ft.Column(
             spacing=8,
             expand=True,
+            horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
             scroll=ft.ScrollMode.ADAPTIVE,
-            controls=[menu_view, checkout_view, success_view],
+            controls=[menu_view, cart_view, checkout_view, success_view],
         ),
     )
 
@@ -895,6 +923,7 @@ def build_menu_page(
     selected_category = {"index": 0}
     category_btns: list[tuple[ft.Button, int]] = []
     category_tabs_row = ft.Row(spacing=8, wrap=False, scroll=ft.ScrollMode.ALWAYS)
+    category_tabs_container = ft.Container(expand=True, alignment=ft.Alignment.CENTER, content=category_tabs_row)
     sections_column = ft.Column(spacing=8)
 
     def refresh_category_buttons():
@@ -943,7 +972,7 @@ def build_menu_page(
 
     refresh_category_buttons()
     render_selected_category()
-    menu_content.controls = [category_tabs_row, sections_column]
+    menu_content.controls = [category_tabs_container, sections_column]
     recalc_totals()
     render_cart()
     page.update()

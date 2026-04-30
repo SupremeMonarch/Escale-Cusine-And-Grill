@@ -279,7 +279,7 @@ def main(page: ft.Page):
                         nav_item("HOME", ft.Icons.HOME, active_route == "/", "/"),
                         nav_item("MENU", ft.Icons.RESTAURANT_MENU, active_route.startswith("/menu"), "/menu"),
                         nav_item("BOOK", ft.Icons.CALENDAR_MONTH, active_route.startswith("/reservation"), "/reservation"),
-                        nav_item("CART", ft.Icons.SHOPPING_BAG_OUTLINED, False, "/menu"),
+                        nav_item("CART", ft.Icons.SHOPPING_BAG_OUTLINED, active_route.startswith("/cart"), "/cart"),
                     ],
                 ),
             ),
@@ -295,7 +295,7 @@ def main(page: ft.Page):
         return home_view_cache
 
     def navigate(route: str, add_history: bool = True) -> None:
-        nonlocal current_route, menu_view_cache, settings_feature
+        nonlocal current_route, menu_view_cache, settings_feature, menu_feature
         if add_history and route != current_route:
             route_history.append(current_route)
 
@@ -318,13 +318,17 @@ def main(page: ft.Page):
             page.floating_action_button = None
             content_host.content = ft.Container(expand=True, content=reservation_feature.build_confirmation_view())
         elif route == "/menu":
-            nonlocal menu_feature
             page.floating_action_button = None
             if menu_feature is None:
                 menu_feature = MenuFeature(page, on_back=go_back)
             if menu_view_cache is None:
                 menu_view_cache = menu_feature.build_view()
             content_host.content = ft.Container(expand=True, content=menu_view_cache)
+        elif route == "/cart":
+            page.floating_action_button = None
+            if menu_feature is None:
+                menu_feature = MenuFeature(page, on_back=go_back)
+            content_host.content = ft.Container(expand=True, content=menu_feature.build_view(active_view="cart"))
         elif route == "/settings":
             page.floating_action_button = None
             if settings_feature is None:
