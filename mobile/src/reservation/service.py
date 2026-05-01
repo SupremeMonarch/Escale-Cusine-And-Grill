@@ -22,7 +22,7 @@ class ReservationApiClient:
         token_provider: Callable[[], str | None] | None = None,
         timeout_seconds: int = 8,
     ):
-        self.base_url = (base_url or os.getenv("ECAG_API_BASE_URL", "http://127.0.0.1:8000")).rstrip("/")
+        self.base_url = (base_url or os.getenv("ECAG_API_BASE_URL", "http://192.168.100.12:8000")).rstrip("/")
         self.auth_token = auth_token or os.getenv("ECAG_API_TOKEN")
         self.token_provider = token_provider
         self.timeout_seconds = timeout_seconds
