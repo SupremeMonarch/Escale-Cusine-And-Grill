@@ -1,4 +1,3 @@
-import json
 import flet as ft
 from utils.dashboard_api import fetch_profile, save_profile
 from utils.dashboard_utils import (
@@ -32,6 +31,7 @@ class ProfileInfoField(ft.Container):
                 ),
             ],
         )
+
 
 class ProfileEditField(ft.Container):
     def __init__(self, label: str, value: str, expand=False, keyboard_type=ft.KeyboardType.TEXT, password=False):
@@ -117,23 +117,8 @@ def get_profile_view(page: ft.Page, navigate_to=None):
         )
         page.update()
 
-    def _sync_profile_address(address: str | None) -> None:
-        try:
-            if address:
-                page.client_storage.set("ecag_mobile_profile_address", json.dumps(address))
-            else:
-                page.client_storage.remove("ecag_mobile_profile_address")
-        except Exception:
-            pass
-
-    def _sync_auth_user() -> None:
-        try:
-            page.client_storage.set("auth.user", json.dumps(user_data[0]))
-        except Exception:
-            pass
-
-    # --- Section ---
-    def section(title: str, fields: list) -> ft.Column:
+    # --- Section builders ---
+    def _section(title: str, fields: list) -> ft.Column:
         return ft.Column([
             ft.Text(title, size=18, weight=ft.FontWeight.BOLD, color=COLORS["on_surface"]),
             ft.Column(fields, spacing=12),
@@ -143,13 +128,13 @@ def get_profile_view(page: ft.Page, navigate_to=None):
         p         = u.get("profile") or {}
         full_name = f"{u.get('first_name', '')} {u.get('last_name', '')}".strip() or "—"
         return [
-            section("Basic Information", [
+            _section("Basic Information", [
                 ProfileInfoField("Full Name",     full_name),
                 ProfileInfoField("Username",      u.get("username", "—")),
                 ProfileInfoField("Email Address", u.get("email", "—")),
                 ProfileInfoField("Phone Number",  p.get("phone_number") or "----------"),
             ]),
-            section("Address & Details", [
+            _section("Address & Details", [
                 ProfileInfoField("Address",       p.get("address") or "----------"),
                 ProfileInfoField("Date of Birth", p.get("date_of_birth") or "----------"),
             ]),
@@ -165,7 +150,7 @@ def get_profile_view(page: ft.Page, navigate_to=None):
             return f
 
         return [
-            section("Basic Information", [
+            _section("Basic Information", [
                 ft.Row([
                     editfield("first_name", "First Name", u.get("first_name", ""), expand=True),
                     editfield("last_name",  "Last Name",  u.get("last_name",  ""), expand=True),
@@ -175,7 +160,7 @@ def get_profile_view(page: ft.Page, navigate_to=None):
                 editfield("phone_number", "Phone Number", p.get("phone_number") or "",
                    keyboard_type=ft.KeyboardType.PHONE),
             ]),
-            section("Address & Details", [
+            _section("Address & Details", [
                 editfield("address",       "Address",                  p.get("address") or ""),
                 editfield("date_of_birth", "Date of Birth (YYYY-MM-DD)", p.get("date_of_birth") or ""),
             ]),
@@ -242,8 +227,6 @@ def get_profile_view(page: ft.Page, navigate_to=None):
             u.setdefault("profile", {}).update(
                 {k: v for k, v in profile_payload.items() if v}
             )
-            _sync_profile_address(profile_payload.get("address"))
-            _sync_auth_user()
             is_editing[0] = False
             render_view()
             show_feedback("Profile updated successfully.")
@@ -286,8 +269,6 @@ def get_profile_view(page: ft.Page, navigate_to=None):
             return
 
         user_data[0] = data
-        _sync_profile_address((data.get("profile") or {}).get("address", ""))
-        _sync_auth_user()
         main_content.controls[2] = content_col
         render_view()
 
@@ -308,6 +289,7 @@ if __name__ == "__main__":
         page.padding = 0
         page.fonts   = {FONT_FAMILY: FONT_URL}
         page.theme   = build_theme()
+        page.session.set("token", "your-dev-token-here")
 
         header = ft.Container(
             content=ft.Row([
@@ -321,6 +303,9 @@ if __name__ == "__main__":
             padding=ft.Padding.only(left=24, right=24, top=10, bottom=10),
             bgcolor=COLORS["background"],
         )
+
+
+
         page.add(ft.Column([header, get_profile_view(page)], spacing=0, expand=True))
 
     ft.app(main)

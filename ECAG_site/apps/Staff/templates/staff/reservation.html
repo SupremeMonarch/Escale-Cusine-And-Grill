@@ -363,7 +363,7 @@
             }
 
             $.ajax({
-                url: "/api/reservations/bookings/" + resId + "/",
+                url: "/api/reservations/bookings/" + resId + "/?view=staff",
                 method: "PATCH",
                 contentType: "application/json",
                 headers: { "X-CSRFToken": $("[name=csrfmiddlewaretoken]").val() },

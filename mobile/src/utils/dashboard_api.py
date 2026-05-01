@@ -1,37 +1,27 @@
-import asyncio
-import json
+import httpx
 import os
-import urllib.error
-import urllib.request
 
-BASE_URL = os.getenv("ECAG_API_BASE_URL", "http://192.168.100.12:8000").rstrip("/")
+
+BASE_URL = os.getenv("ECAG_API_BASE_URL", "http://127.0.0.1:8000/").rstrip("/")
 TIMEOUT = 5
+
 
 def get_headers(token: str) -> dict:
     return {"Authorization": f"Token {token}"}
 
-def _sync_request(method: str, url: str, headers: dict, body: dict | None = None):
-    data = json.dumps(body).encode("utf-8") if body is not None else None
-    all_headers = {**headers}
-    if data is not None:
-        all_headers["Content-Type"] = "application/json"
-    req = urllib.request.Request(url, data=data, headers=all_headers, method=method)
-    try:
-        with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
-            raw = resp.read().decode()
-            return resp.status, json.loads(raw) if raw else {}
-    except urllib.error.HTTPError as e:
-        return e.code, {}
-    except Exception:
-        return 0, {}
+client = httpx.AsyncClient(base_url=BASE_URL, timeout=TIMEOUT)
 
 async def fetch_orders(token: str, staff: bool = False) -> list[dict] | None:
     try:
-        path = "/api/menu/orders/" + ("?view=staff" if staff else "")
-        status, data = await asyncio.to_thread(_sync_request, "GET", BASE_URL + path, get_headers(token))
-        if status and status < 400:
-            return data.get("results", [])
-        print(f"fetch_orders HTTP error: {status}")
+        url = "/api/menu/orders/"
+        if staff:
+            url += "?view=staff"
+        r = await client.get(url, headers=get_headers(token))
+        r.raise_for_status()
+        data = r.json()
+        return data.get("results", []) if isinstance(data, dict) else data
+    except httpx.HTTPStatusError as e:
+        print(f"fetch_orders HTTP error: {e.response.status_code}")
         return None
     except Exception as e:
         print(f"fetch_orders error: {e}")
@@ -39,11 +29,15 @@ async def fetch_orders(token: str, staff: bool = False) -> list[dict] | None:
 
 async def fetch_reservations(token: str, staff: bool = False) -> list[dict] | None:
     try:
-        path = "/api/reservations/bookings/" + ("?view=staff" if staff else "")
-        status, data = await asyncio.to_thread(_sync_request, "GET", BASE_URL + path, get_headers(token))
-        if status and status < 400:
-            return data.get("results", [])
-        print(f"fetch_reservations HTTP error: {status}")
+        url = "/api/reservations/bookings/"
+        if staff:
+            url += "?view=staff"
+        r = await client.get(url, headers=get_headers(token))
+        r.raise_for_status()
+        data = r.json()
+        return data.get("results", []) if isinstance(data, dict) else data
+    except httpx.HTTPStatusError as e:
+        print(f"fetch_reservations HTTP error: {e.response.status_code}")
         return None
     except Exception as e:
         print(f"fetch_reservations error: {e}")
@@ -51,106 +45,129 @@ async def fetch_reservations(token: str, staff: bool = False) -> list[dict] | No
 
 async def cancel_reservation(token: str, res_id: int) -> bool:
     try:
-        status, _ = await asyncio.to_thread(
-            _sync_request, "PATCH",
-            f"{BASE_URL}/api/reservations/bookings/{res_id}/",
-            get_headers(token),
-            {"status": "cancelled"},
+        r = await client.patch(
+            f"/api/reservations/bookings/{res_id}/",
+            headers=get_headers(token),
+            json={"status": "cancelled"},
         )
-        return bool(status and status < 400)
+        return r.is_success
     except Exception as e:
         print(f"cancel_reservation error: {e}")
         return False
 
 async def fetch_profile(token: str) -> dict | None:
     try:
-        status, data = await asyncio.to_thread(_sync_request, "GET", BASE_URL + "/api/auth/users/me/", get_headers(token))
-        return data if status and status < 400 else None
+        r = await client.get(
+            "/api/auth/users/me/",
+            headers=get_headers(token),
+        )
+        r.raise_for_status()
+        return r.json()
     except Exception as e:
         print(f"fetch_profile error: {e}")
+        return None
+
+async def fetch_users(token: str) -> list[dict] | None:
+    try:
+        r = await client.get(
+            "/api/auth/users/",
+            headers=get_headers(token),
+        )
+        r.raise_for_status()
+        data = r.json()
+        return data.get("results", data) if isinstance(data, dict) else data
+    except Exception as e:
+        print(f"fetch_users error: {e}")
         return None
 
 async def save_profile(token: str, user_id: int, user_data: dict, profile_data: dict) -> tuple[bool, str]:
     try:
         payload = {**user_data, "profile": profile_data}
-        status, data = await asyncio.to_thread(
-            _sync_request, "PATCH", BASE_URL + "/api/auth/users/me/", get_headers(token), payload
+        r = await client.patch(
+            "/api/auth/users/me/",
+            headers=get_headers(token),
+            json=payload,
         )
-        if status and status < 400:
+        if r.is_success:
             return True, ""
         try:
+            errors = r.json()
             msg = "; ".join(
                 f"{k}: {v[0] if isinstance(v, list) else v}"
-                for k, v in data.items()
+                for k, v in errors.items()
             )
         except Exception:
-            msg = f"Error {status}"
+            msg = f"Error {r.status_code}"
         return False, msg
     except Exception as e:
         return False, str(e)
 
 
-async def update_order_status(token: str, order_id: int, status_value: str, staff: bool = False) -> bool:
+
+async def update_order_status(token: str, order_id: int, status: str, staff: bool = False) -> bool:
+
     try:
-        query = "?view=staff" if staff else ""
-        status, _ = await asyncio.to_thread(
-            _sync_request,
-            "PATCH",
-            f"{BASE_URL}/api/menu/orders/{order_id}/{query}",
-            get_headers(token),
-            {"status": status_value},
+        url = f"/api/menu/orders/{order_id}/"
+        if staff:
+            url += "?view=staff"
+
+        r = await client.patch(
+            url,
+            headers=get_headers(token),
+            json={"status": status},
         )
-        return bool(status and status < 400)
+        if not r.is_success:
+            print(f"update_order_status failed: {r.status_code} {r.text}")
+        return r.is_success
     except Exception as e:
         print(f"update_order_status error: {e}")
         return False
 
+async def update_delivery_status(token: str, delivery_id: int, delivery_status: str) -> bool:
 
-async def update_delivery_status(token: str, delivery_id: int | None, status_value: str) -> bool:
-    if not delivery_id:
-        return False
     try:
-        status, _ = await asyncio.to_thread(
-            _sync_request,
-            "PATCH",
-            f"{BASE_URL}/api/menu/deliveries/{delivery_id}/",
-            get_headers(token),
-            {"delivery_status": status_value},
+        r = await client.patch(
+            f"/api/menu/deliveries/{delivery_id}/",
+            headers=get_headers(token),
+            json={"delivery_status": delivery_status},
         )
-        return bool(status and status < 400)
+        if not r.is_success:
+            print(f"update_delivery_status failed: {r.status_code} {r.text}")
+        return r.is_success
     except Exception as e:
         print(f"update_delivery_status error: {e}")
         return False
 
+async def update_takeout_status(token: str, takeout_id: int, pickup_status: str) -> bool:
 
-async def update_takeout_status(token: str, takeout_id: int | None, status_value: str) -> bool:
-    if not takeout_id:
-        return False
     try:
-        status, _ = await asyncio.to_thread(
-            _sync_request,
-            "PATCH",
-            f"{BASE_URL}/api/menu/takeouts/{takeout_id}/",
-            get_headers(token),
-            {"pickup_status": status_value},
+        r = await client.patch(
+            f"/api/menu/takeouts/{takeout_id}/",
+            headers=get_headers(token),
+            json={"pickup_status": pickup_status},
         )
-        return bool(status and status < 400)
+        if not r.is_success:
+            print(f"update_takeout_status failed: {r.status_code} {r.text}")
+        return r.is_success
     except Exception as e:
         print(f"update_takeout_status error: {e}")
         return False
 
+async def update_reservation_status(token: str, res_id: int, new_status: str, staff: bool = False) -> bool:
 
-async def update_reservation_status(token: str, reservation_id: int, status_value: str, staff: bool = False) -> bool:
     try:
-        query = "?view=staff" if staff else ""
-        status, _ = await asyncio.to_thread(
-            _sync_request,
-            "PATCH",
-            f"{BASE_URL}/api/reservations/bookings/{reservation_id}/{query}",
-            get_headers(token),
-            {"status": status_value},
+        url = f"/api/reservations/bookings/{res_id}/"
+        if staff:
+            url += "?view=staff"
+
+        r = await client.patch(
+            url,
+            headers=get_headers(token),
+            json={"status": new_status},
         )
-        return bool(status and status < 400)
+        if not r.is_success:
+            print(f"update_reservation_status failed: {r.status_code} {r.text}")
+        return r.is_success
     except Exception as e:
         print(f"update_reservation_status error: {e}")
         return False

@@ -44,7 +44,7 @@ def main(page: ft.Page):
     current_route = "/"
 
     def _infer_api_base_url() -> str:
-        explicit = (os.getenv("ECAG_API_BASE_URL") or "").strip()
+        explicit = (os.getenv("ECAG_API_BASE_URL", "http://127.0.0.1:8000/") or "").strip()
         if explicit:
             return explicit.rstrip("/")
 
@@ -629,27 +629,27 @@ def main(page: ft.Page):
         if route == "/review":
             page.floating_action_button = None
             content_host.content = review_feature.build_list_view()
-        
+
         elif route == "/review/write":
             page.floating_action_button = None
             content_host.content = review_feature.build_write_view()
-        
+
         elif route == "/reservation":
             page.floating_action_button = None
             content_host.content = reservation_feature.build_start_view()
-        
+
         elif route == "/reservation/tables":
             page.floating_action_button = None
             content_host.content = reservation_feature.build_table_view()
-        
+
         elif route == "/reservation/details":
             page.floating_action_button = None
             content_host.content = reservation_feature.build_details_view()
-        
+
         elif route == "/reservation/confirmed":
             page.floating_action_button = None
             content_host.content = reservation_feature.build_confirmation_view()
-        
+
         elif route == "/signup":
             page.floating_action_button = None
             content_host.content = registration_feature.build_signup_view()
