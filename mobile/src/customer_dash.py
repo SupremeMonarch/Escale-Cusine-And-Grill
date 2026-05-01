@@ -1,4 +1,3 @@
-from dotenv import load_dotenv
 import os
 import flet as ft
 from utils.dashboard_utils import COLORS, FONT_FAMILY, FONT_URL, build_theme
@@ -6,8 +5,6 @@ from customer.customer_overview import get_overview_view
 from customer.customer_orders import get_orders_view
 from customer.customer_res import get_res_view
 from customer.customer_profile import get_profile_view
-
-load_dotenv()
 
 async def main(page: ft.Page):
     try:

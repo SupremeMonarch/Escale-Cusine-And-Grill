@@ -83,7 +83,7 @@ def write_storage_json(page: ft.Page, key: str, value) -> None:
         pass
 
 
-def resolve_image_payload(raw_url: str, base_url: str = "http://127.0.0.1:8000") -> dict:
+def resolve_image_payload(raw_url: str, base_url: str = "http://192.168.100.12:8000") -> dict:
     if not raw_url:
         return {}
 

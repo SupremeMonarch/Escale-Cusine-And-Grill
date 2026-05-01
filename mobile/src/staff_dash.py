@@ -1,14 +1,12 @@
 import os
-from dotenv import load_dotenv
 import flet as ft
 from utils.dashboard_utils import COLORS, FONT_FAMILY, FONT_URL, build_theme
 from staff.staff_overview import get_staff_overview_view
 from staff.staff_orders import get_staff_orders_view
 from staff.staff_res import get_staff_res_view
 
-load_dotenv()
-
 async def main(page: ft.Page):
+    import traceback
     try:
         page.dialog = None
         page.overlay.clear()
@@ -54,7 +52,7 @@ async def main(page: ft.Page):
     header = ft.Container(
         height=56,
         bgcolor="#f8f8f8",
-        border=ft.Border.only(bottom=ft.BorderSide(1, "#e3e3e3")),
+        border=ft.border.only(bottom=ft.BorderSide(1, "#e3e3e3")),
         content=ft.Row(
             [
                 ft.Row([
@@ -74,7 +72,7 @@ async def main(page: ft.Page):
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
         ),
-        padding=ft.Padding.only(left=12, right=12, top=0, bottom=0),
+        padding=ft.padding.only(left=12, right=12, top=0, bottom=0),
     )
 
     content_area = ft.Container(expand=True)
@@ -119,7 +117,22 @@ async def main(page: ft.Page):
         on_change=on_nav_change
     )
 
-    content_area.content = get_staff_overview_view(page, navigate_to)
+    try:
+        content_area.content = get_staff_overview_view(page, navigate_to)
+    except Exception as exc:
+        content_area.content = ft.Container(
+            expand=True,
+            alignment=ft.alignment.center,
+            padding=20,
+            content=ft.Column(
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                tight=True,
+                controls=[
+                    ft.Text("Staff overview load error", size=18, weight=ft.FontWeight.BOLD, color="#8a3b00"),
+                    ft.Text(traceback.format_exc(), size=10, color="#2f2a24", selectable=True),
+                ],
+            ),
+        )
 
     page.add(
         ft.Column(

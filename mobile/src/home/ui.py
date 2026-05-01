@@ -10,7 +10,7 @@ from home.service import fetch_featured_dishes
 from menu.service import resolve_image_payload
 
 
-API_BASE_URL = os.getenv("ECAG_API_BASE_URL", "http://127.0.0.1:8000")
+API_BASE_URL = os.getenv("ECAG_API_BASE_URL", "http://192.168.100.12:8000")
 
 
 class HomeFeature:

@@ -36,7 +36,7 @@ def normalize_order_type(value: str | None) -> str:
     return ORDER_TYPE_NORMALIZATION.get(value.strip().lower(), "dine_in")
 
 
-def build_menu_card(item: dict, on_add, base_url: str = "http://127.0.0.1:8000") -> ft.Control:
+def build_menu_card(item: dict, on_add, base_url: str = "http://192.168.100.12:8000") -> ft.Control:
     image_payload = resolve_image_payload(item.get("image_url", ""), base_url)
     fit_cover = ft.BoxFit.COVER if hasattr(ft, "BoxFit") else ft.ImageFit.COVER
     image_control = (
@@ -118,7 +118,7 @@ class MenuFeature:
     ):
         self.page = page
         self.on_back = on_back
-        resolved_base = (base_url or os.getenv("ECAG_API_BASE_URL", "http://127.0.0.1:8000")).rstrip("/")
+        resolved_base = (base_url or os.getenv("ECAG_API_BASE_URL", "http://192.168.100.12:8000")).rstrip("/")
         self.base_url = resolved_base
         self.data_url = data_url or f"{resolved_base}/menu/mobile/data/"
         self.cart_items: list[dict] | None = None
@@ -151,8 +151,8 @@ class MenuFeature:
 
 def build_menu_page(
     page: ft.Page,
-    data_url: str = "http://127.0.0.1:8000/menu/mobile/data/",
-    base_url: str = "http://127.0.0.1:8000",
+    data_url: str = "http://192.168.100.12:8000/menu/mobile/data/",
+    base_url: str = "http://192.168.100.12:8000",
     on_back=None,
     standalone: bool = False,
     active_view: str = "menu",
@@ -1069,8 +1069,8 @@ def build_menu_page(
 
 def main(page: ft.Page):
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument("--data-url", default="http://127.0.0.1:8000/menu/mobile/data/")
-    parser.add_argument("--base-url", default="http://127.0.0.1:8000")
+    parser.add_argument("--data-url", default="http://192.168.100.12:8000/menu/mobile/data/")
+    parser.add_argument("--base-url", default="http://192.168.100.12:8000")
     args, _ = parser.parse_known_args()
 
     page.add(

@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import asyncio
 import json
@@ -6,10 +6,10 @@ import os
 from urllib import error, parse, request
 
 import flet as ft
-import requests
+import uuid
 
 
-BASE_URL = os.getenv("ECAG_API_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
+BASE_URL = os.getenv("ECAG_API_BASE_URL", "http://192.168.100.12:8000").rstrip("/")
 ADMIN_BASE = "/admin_panel/mobile"
 ACTIVE_BASE_URL = BASE_URL
 
@@ -50,12 +50,34 @@ def _request_multipart(method: str, path: str, data: dict, files: dict[str, str]
     try:
         for field_name, file_path in files.items():
             upload_files[field_name] = open(file_path, "rb")
-        response = requests.request(method, url, data=data, files=upload_files, headers={"Accept": "application/json"}, timeout=20)
-        if response.status_code >= 400:
-            raise ApiError(f"HTTP {response.status_code}: {response.text or response.reason}")
-        return response.json() if response.text else {}
-    except requests.RequestException as exc:
-        raise ApiError(f"Cannot reach backend: {exc}") from exc
+        boundary = uuid.uuid4().hex
+        body_parts = []
+        for key, val in data.items():
+            body_parts.append(
+                f'--{boundary}\r\nContent-Disposition: form-data; name="{key}"\r\n\r\n{val}\r\n'.encode()
+            )
+        for field_name, fh in upload_files.items():
+            filename = os.path.basename(files[field_name])
+            body_parts.append(
+                f'--{boundary}\r\nContent-Disposition: form-data; name="{field_name}"; filename="{filename}"\r\nContent-Type: application/octet-stream\r\n\r\n'.encode()
+                + fh.read() + b'\r\n'
+            )
+        body_parts.append(f'--{boundary}--\r\n'.encode())
+        body = b''.join(body_parts)
+        req = request.Request(
+            url, data=body,
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}", "Accept": "application/json"},
+            method=method,
+        )
+        try:
+            with request.urlopen(req, timeout=20) as resp:
+                raw = resp.read().decode("utf-8")
+                return json.loads(raw) if raw else {}
+        except error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="ignore")
+            raise ApiError(f"HTTP {exc.code}: {detail or exc.reason}") from exc
+        except error.URLError as exc:
+            raise ApiError(f"Cannot reach backend: {exc.reason}") from exc
     finally:
         for handle in upload_files.values():
             handle.close()
@@ -66,7 +88,7 @@ def _get_base_candidates() -> list[str]:
         os.getenv("ECAG_API_BASE_URL", "").strip(),
         os.getenv("WEBSITE_BASE_URL", "").strip(),
         os.getenv("DJANGO_BASE_URL", "").strip(),
-        "http://127.0.0.1:8000",
+        "http://192.168.100.12:8000",
         "http://localhost:8000",
     ]
     cleaned: list[str] = []
@@ -432,7 +454,7 @@ async def main(page: ft.Page):
                         ft.Row(
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                             controls=[
-                                ft.Text(f"{qty}× {name}", size=13, weight=ft.FontWeight.W_600, color=text_dark, expand=True),
+                                ft.Text(f"{qty}� {name}", size=13, weight=ft.FontWeight.W_600, color=text_dark, expand=True),
                                 ft.Text(f"Rs {subtotal}", size=13, weight=ft.FontWeight.BOLD, color=text_dark),
                             ],
                         ),
@@ -451,11 +473,11 @@ async def main(page: ft.Page):
                 ft.Text("DELIVERY INFO", size=11, color=text_muted, weight=ft.FontWeight.W_600),
                 ft.Row(spacing=6, controls=[
                     ft.Icon(ft.Icons.LOCATION_ON_OUTLINED, size=14, color=accent),
-                    ft.Text(delivery.get("address") or "—", size=13, color=text_dark, expand=True),
+                    ft.Text(delivery.get("address") or "�", size=13, color=text_dark, expand=True),
                 ]),
                 ft.Row(spacing=6, controls=[
                     ft.Icon(ft.Icons.ACCESS_TIME_OUTLINED, size=14, color=accent),
-                    ft.Text(f"ETA: {delivery.get('arrival_time') or '—'}", size=13, color=text_dark),
+                    ft.Text(f"ETA: {delivery.get('arrival_time') or '�'}", size=13, color=text_dark),
                 ]),
                 ft.Row(spacing=6, controls=[
                     ft.Icon(ft.Icons.LOCAL_SHIPPING_OUTLINED, size=14, color=accent),
@@ -465,7 +487,7 @@ async def main(page: ft.Page):
 
         # --- Date formatting ---
         raw_date = order.get("order_date") or ""
-        date_display = raw_date.replace("T", "  ")[:19] if raw_date else "—"
+        date_display = raw_date.replace("T", "  ")[:19] if raw_date else "�"
 
         dlg = ft.AlertDialog(
             modal=True,
@@ -489,8 +511,8 @@ async def main(page: ft.Page):
                             content=ft.Column(spacing=4, controls=[
                                 ft.Text("CUSTOMER", size=11, color=text_muted, weight=ft.FontWeight.W_600),
                                 ft.Text(user.get("name") or "Guest", size=15, weight=ft.FontWeight.W_600, color=text_dark),
-                                *([ ft.Row(spacing=4, controls=[ft.Icon(ft.Icons.EMAIL_OUTLINED, size=13, color=text_muted), ft.Text(user.get("email") or "—", size=12, color=text_muted)]) ] if user.get("email") else []),
-                                *([ ft.Row(spacing=4, controls=[ft.Icon(ft.Icons.PHONE_OUTLINED, size=13, color=text_muted), ft.Text(user.get("phone") or "—", size=12, color=text_muted)]) ] if user.get("phone") else []),
+                                *([ ft.Row(spacing=4, controls=[ft.Icon(ft.Icons.EMAIL_OUTLINED, size=13, color=text_muted), ft.Text(user.get("email") or "�", size=12, color=text_muted)]) ] if user.get("email") else []),
+                                *([ ft.Row(spacing=4, controls=[ft.Icon(ft.Icons.PHONE_OUTLINED, size=13, color=text_muted), ft.Text(user.get("phone") or "�", size=12, color=text_muted)]) ] if user.get("phone") else []),
                             ]),
                         ),
                         # Meta row
@@ -552,7 +574,7 @@ async def main(page: ft.Page):
                                 spacing=4,
                                 controls=[
                                     ft.Text(customer.get("name") or "Customer", size=16, weight=ft.FontWeight.W_600, color=text_dark),
-                                    ft.Row(spacing=4, controls=[ft.Icon(ft.Icons.EMAIL_OUTLINED, size=13, color=text_muted), ft.Text(customer.get("email") or "—", size=12, color=text_muted)]),
+                                    ft.Row(spacing=4, controls=[ft.Icon(ft.Icons.EMAIL_OUTLINED, size=13, color=text_muted), ft.Text(customer.get("email") or "�", size=12, color=text_muted)]),
                                 ],
                             ),
                         ),
@@ -1667,9 +1689,25 @@ async def main(page: ft.Page):
     )
 
     page.add(content)
-    await load_all()
-    render(0)
-    page.run_task(live_orders_poll)
+    try:
+        await load_all()
+        render(0)
+        page.run_task(live_orders_poll)
+    except Exception as exc:
+        content.content = ft.Container(
+            expand=True,
+            alignment=ft.alignment.center,
+            padding=20,
+            content=ft.Column(
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                tight=True,
+                controls=[
+                    ft.Text("Admin dashboard error", size=22, weight=ft.FontWeight.BOLD, color="#2f2a24"),
+                    ft.Text(str(exc), size=13, color="#8b1e1e", text_align=ft.TextAlign.CENTER),
+                ],
+            ),
+        )
+        page.update()
 
 
 if __name__ == "__main__":

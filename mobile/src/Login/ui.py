@@ -1,5 +1,8 @@
 import flet as ft
-import requests
+import json
+import os
+import urllib.request
+import urllib.error
 
 
 class LoginFeature:
@@ -107,7 +110,8 @@ class LoginFeature:
 
     # ---------- LOGIN ----------
     def login_user(self, e):
-        url = "http://127.0.0.1:8000/api/auth/login/"  # Replace this with actual API endpoint
+        base_url = os.getenv("ECAG_API_BASE_URL", "http://192.168.100.12:8000").rstrip("/")
+        url = f"{base_url}/api/auth/login/"
 
         data = {
             "username": self.username.value,
@@ -115,21 +119,21 @@ class LoginFeature:
         }
 
         try:
-            response = requests.post(url, json=data)
-
-            if response.status_code == 200:
-                result = response.json()
+            payload = json.dumps(data).encode("utf-8")
+            req = urllib.request.Request(
+                url,
+                data=payload,
+                headers={"Content-Type": "application/json", "Accept": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                result = json.loads(resp.read().decode())
                 token = result.get("token")
-
-                
                 self.token_storage["token"] = token
-
-                self.on_navigate("/")  
-
-            else:
-                self._error("Invalid credentials")
-
-        except requests.exceptions.RequestException as ex:
+                self.on_navigate("/")
+        except urllib.error.HTTPError:
+            self._error("Invalid credentials")
+        except Exception as ex:
             self._error(f"Request failed: {str(ex)}")
 
     

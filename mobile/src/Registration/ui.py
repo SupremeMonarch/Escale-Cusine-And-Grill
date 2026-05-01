@@ -1,6 +1,9 @@
 import flet as ft
 import datetime
-import requests
+import json
+import os
+import urllib.request
+import urllib.error
 
 
 class RegistrationFeature:
@@ -100,18 +103,23 @@ class RegistrationFeature:
             "dob": self.date_of_birth.value
         }
 
+        base_url = os.getenv("ECAG_API_BASE_URL", "http://192.168.100.12:8000").rstrip("/")
         try:
-            response = requests.post(
-                "http://127.0.0.1:8000/api/auth/register/",
-                json=data
+            payload = json.dumps(data).encode("utf-8")
+            req = urllib.request.Request(
+                f"{base_url}/api/auth/register/",
+                data=payload,
+                headers={"Content-Type": "application/json", "Accept": "application/json"},
+                method="POST",
             )
-
-            if response.status_code == 201:
-                self._success("Account created successfully")
-                self.on_navigate("/login")
-            else:
-                self._error(response.text)
-
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                if resp.status == 201:
+                    self._success("Account created successfully")
+                    self.on_navigate("/login")
+                else:
+                    self._error("Registration failed")
+        except urllib.error.HTTPError as e:
+            self._error(e.read().decode("utf-8", errors="ignore") or str(e))
         except Exception as e:
             self._error(str(e))
 

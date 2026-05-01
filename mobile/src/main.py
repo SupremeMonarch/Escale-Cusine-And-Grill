@@ -56,7 +56,7 @@ def main(page: ft.Page):
         except Exception:
             pass
 
-        return "http://127.0.0.1:8000"
+        return "http://192.168.100.12:8000"
 
     api_base_url = _infer_api_base_url().rstrip("/")
     auth_token: str | None = None
@@ -119,22 +119,42 @@ def main(page: ft.Page):
         page.navigation_bar = None
         page.floating_action_button = None
         page.update()
+        try:
+            if account_type == "admin":
+                from admin_mobile import main as admin_mobile_main
 
-        if account_type == "admin":
-            from admin_mobile import main as admin_mobile_main
+                await admin_mobile_main(page)
+                return
 
-            await admin_mobile_main(page)
-            return
+            if account_type == "staff":
+                from staff_dash import main as staff_dashboard_main
 
-        if account_type == "staff":
-            from staff_dash import main as staff_dashboard_main
+                await staff_dashboard_main(page)
+                return
 
-            await staff_dashboard_main(page)
-            return
+            from customer_dash import main as customer_dashboard_main
 
-        from customer_dash import main as customer_dashboard_main
-
-        await customer_dashboard_main(page)
+            await customer_dashboard_main(page)
+        except Exception as exc:
+            # Show a visible error instead of leaving a blank screen if a role dashboard crashes.
+            page.clean()
+            page.add(
+                ft.Container(
+                    expand=True,
+                    alignment=ft.alignment.center,
+                    padding=20,
+                    content=ft.Column(
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        tight=True,
+                        controls=[
+                            ft.Text("Dashboard failed to open", size=22, weight=ft.FontWeight.BOLD, color="#2f2a24"),
+                            ft.Text(f"{account_type.title()} dashboard error: {exc}", size=13, color="#8a3b00", text_align=ft.TextAlign.CENTER),
+                            ft.ElevatedButton("Return to Main App", on_click=lambda e: main(page)),
+                        ],
+                    ),
+                )
+            )
+            page.update()
 
     async def route_for_account(user: dict) -> None:
         account_type = _resolve_account_type(user)
