@@ -200,6 +200,21 @@ def main(page: ft.Page):
         login_status_text.value = ""
         page.update()
 
+    def open_signup_from_overlay(e=None) -> None:
+        close_login_overlay()
+        navigate("/signup")
+
+    def forgot_password_from_overlay(e=None) -> None:
+        # There is no dedicated mobile reset screen yet; direct users to web flow.
+        close_login_overlay()
+        page.snack_bar = ft.SnackBar(
+            content=ft.Text("Password reset is available on the web login page."),
+            open=True,
+            bgcolor="#2f2a24",
+        )
+        page.launch_url(f"{api_base_url}/login/", web_window_name="_blank")
+        page.update()
+
     async def submit_login(e=None):
         nonlocal auth_token, auth_user
         username = (login_username_field.value or "").strip()
@@ -257,6 +272,13 @@ def main(page: ft.Page):
                         ft.Text("Login", size=34, weight=ft.FontWeight.W_700, color="#2f2a24"),
                         login_username_field,
                         login_password_field,
+                        ft.Row(
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            controls=[
+                                ft.TextButton("Forgot Password?", on_click=forgot_password_from_overlay),
+                                ft.TextButton("Sign Up", on_click=open_signup_from_overlay),
+                            ],
+                        ),
                         login_status_text,
                         ft.Row(
                             alignment=ft.MainAxisAlignment.END,
