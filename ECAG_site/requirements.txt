@@ -1,7 +1,12 @@
-django
-django-tailwind[reload]
-Pillow
+# Django website
+Django
 djangorestframework
-flet[all]==0.84.0
+django-tailwind[reload]
+django-browser-reload
 django-cors-headers
-requests
+Pillow
+
+# Flet mobile app
+flet[all]
+flet-geolocator
+flet-permission-handler
