@@ -4,7 +4,7 @@ import re
 import os
 from collections.abc import Callable
 from datetime import date, datetime, timedelta
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 import flet as ft
 
@@ -738,7 +738,7 @@ class ReservationFeature:
                         ft.Text("Add to Calendar", size=19, weight=ft.FontWeight.BOLD, color="white"),
                     ],
                 ),
-                url=self._calendar_url(draft),
+                on_click=lambda e: self.page.run_task(self._add_to_calendar, e),
                 style=ft.ButtonStyle(
                     bgcolor="#c84a08",
                     color="white",
@@ -960,13 +960,15 @@ class ReservationFeature:
             special_requests=self.confirmed_reservation.special_requests,
         )
 
-    def _calendar_url(self, draft: ReservationDraft) -> str:
+    def _calendar_event_times(self, draft: ReservationDraft) -> tuple[datetime, datetime] | None:
         try:
             start_dt = datetime.combine(draft.date, datetime.strptime(draft.time, "%H:%M").time())
         except ValueError:
-            return "https://calendar.google.com/calendar/render"
+            return None
 
-        end_dt = start_dt + timedelta(hours=2)
+        return start_dt, start_dt + timedelta(hours=2)
+
+    def _calendar_event_details(self, draft: ReservationDraft) -> str:
         confirmation = self.confirmed_reservation_label(draft)
         details = [
             f"Confirmation: {confirmation}",
@@ -982,24 +984,77 @@ class ReservationFeature:
         if draft.special_requests:
             details.append(f"Special requests: {draft.special_requests}")
 
+        return "\n".join(details)
+
+    def _calendar_url(self, draft: ReservationDraft) -> str:
+        event_times = self._calendar_event_times(draft)
+        if event_times is None:
+            return "https://calendar.google.com/calendar/render"
+
+        start_dt, end_dt = event_times
         params = {
             "action": "TEMPLATE",
             "text": "Escale Table Reservation",
             "dates": f"{start_dt:%Y%m%dT%H%M%S}/{end_dt:%Y%m%dT%H%M%S}",
-            "details": "\n".join(details),
+            "details": self._calendar_event_details(draft),
             "location": "Escale Cuisine & Grill",
             "ctz": "Indian/Mauritius",
         }
         return f"https://calendar.google.com/calendar/render?{urlencode(params)}"
 
+    def _android_calendar_intent_url(self, draft: ReservationDraft, package: str | None = None) -> str | None:
+        event_times = self._calendar_event_times(draft)
+        if event_times is None:
+            return None
+
+        start_dt, end_dt = event_times
+        extras = {
+            "S.title": "Escale Table Reservation",
+            "S.description": self._calendar_event_details(draft),
+            "S.eventLocation": "Escale Cuisine & Grill",
+            "l.beginTime": str(int(start_dt.timestamp() * 1000)),
+            "l.endTime": str(int(end_dt.timestamp() * 1000)),
+        }
+        intent_parts = [
+            "intent:#Intent",
+            "action=android.intent.action.INSERT",
+            "type=vnd.android.cursor.item/event",
+        ]
+        if package:
+            intent_parts.append(f"package={package}")
+        for key, value in extras.items():
+            intent_parts.append(f"{key}={quote(value, safe='')}")
+        intent_parts.append("end")
+        return ";".join(intent_parts)
+
+    def _is_android(self) -> bool:
+        platform_value = str(getattr(self.page, "platform", "") or "").lower()
+        return "android" in platform_value
+
     async def _add_to_calendar(self, e: ft.ControlEvent | None = None) -> None:
-        url = self._calendar_url(self._confirmed_draft())
-        print(f"CALENDAR_URL {url}", flush=True)
-        try:
-            await self.url_launcher.launch_url(url, mode=ft.LaunchMode.EXTERNAL_APPLICATION)
-            self._show_message("Opening calendar event.")
-        except Exception as exc:
-            print(f"CALENDAR_ERROR {exc}", flush=True)
+        draft = self._confirmed_draft()
+        urls: list[str] = []
+        if self._is_android():
+            for package in ("com.google.android.calendar", None):
+                android_intent = self._android_calendar_intent_url(draft, package)
+                if android_intent:
+                    urls.append(android_intent)
+        urls.append(self._calendar_url(draft))
+
+        last_error: Exception | None = None
+        for url in urls:
+            print(f"CALENDAR_URL {url}", flush=True)
+            try:
+                opened = await self.url_launcher.launch_url(url, mode=ft.LaunchMode.EXTERNAL_APPLICATION)
+                if opened is False:
+                    continue
+                self._show_message("Opening calendar event.")
+                return
+            except Exception as exc:
+                last_error = exc
+                print(f"CALENDAR_ERROR {exc}", flush=True)
+
+        if last_error:
             self._show_message("Unable to open calendar from this device.", is_error=True)
 
     def _go_start(self, e: ft.ControlEvent | None = None) -> None:
