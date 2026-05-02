@@ -41,8 +41,16 @@ class RegistrationFeature:
         )
 
         self.DOB_row = ft.Row(
-            controls=[self.date_of_birth, self.picker_button]
-        )
+                                alignment=ft.MainAxisAlignment.CENTER,
+                                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                                controls=[
+                                    ft.Container(
+                                        content=self.date_of_birth,
+                                        width=250,
+                                    ),
+                                    self.picker_button
+                                ]
+                            )
 
         self.confirm_button = ft.ElevatedButton(
             "Confirm",
@@ -51,7 +59,8 @@ class RegistrationFeature:
 
         self.login_button = ft.ElevatedButton(
             "Login",
-            on_click=lambda e: self.on_navigate("/login")
+            on_click=lambda e: self.on_navigate("/")                
+            # on_click=lambda e: self.on_navigate("/login")
         )
 
     def build_signup_view(self):
@@ -71,7 +80,7 @@ class RegistrationFeature:
                 self.address,
                 self.DOB_row,
                 self.confirm_button,
-                self.login_button,
+                # self.login_button,
             ]
         )
 
@@ -86,6 +95,35 @@ class RegistrationFeature:
 
     def setup(self):
         self.page.overlay.append(self.picker)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def submit_form(self, e):
         if self.password1.value != self.password2.value:
@@ -103,7 +141,8 @@ class RegistrationFeature:
             "dob": self.date_of_birth.value
         }
 
-        base_url = os.getenv("ECAG_API_BASE_URL", "http://192.168.100.12:8000").rstrip("/")
+        #\\\\\\\\\base_url = os.getenv("ECAG_API_BASE_URL", "http://192.168.100.12:8000").rstrip("/")
+        base_url = os.getenv("ECAG_API_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
         try:
             payload = json.dumps(data).encode("utf-8")
             req = urllib.request.Request(
@@ -115,13 +154,28 @@ class RegistrationFeature:
             with urllib.request.urlopen(req, timeout=15) as resp:
                 if resp.status == 201:
                     self._success("Account created successfully")
-                    self.on_navigate("/login")
+                    # self.on_navigate("/login")
+                    self.on_navigate("/")
+
                 else:
                     self._error("Registration failed")
         except urllib.error.HTTPError as e:
             self._error(e.read().decode("utf-8", errors="ignore") or str(e))
         except Exception as e:
             self._error(str(e))
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def _error(self, msg):
         self.page.snack_bar = ft.SnackBar(ft.Text(msg), bgcolor="red")

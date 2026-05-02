@@ -52,7 +52,7 @@ class LoginFeature:
 
         self.forgot_password = ft.TextButton(
             "Forgot Password?",
-            on_click=self.handle_forgot_password,
+          
         )
 
         self.remember_row = ft.Row(
@@ -65,34 +65,24 @@ class LoginFeature:
 
         # ---------- Buttons ----------
         self.login_button = ft.Container(
-            content=ft.Text("Continue", color="white"),
-            alignment=ft.Alignment.CENTER,
-            padding=20,
-            width=300,
-            bgcolor="#2e6ef7",
-            border_radius=10,
-            on_click=self.login_user
-        )
+                                            content=ft.Text("Continue", color="white"),
+                                            alignment=ft.Alignment.CENTER,
+                                            padding=20,
+                                            width=300,
+                                            bgcolor="#2e6ef7",
+                                            border_radius=10,
+                                            on_click=self.login_user
+                                        )
 
-        self.signup_button = ft.Container(
-            content=ft.Text("Sign Up", color="white"),
-            alignment=ft.Alignment.CENTER,
-            padding=20,
-            width=300,
-            bgcolor="#2e6ef7",
-            border_radius=10,
-            on_click=lambda e: self.on_navigate("/signup")
-        )
-
-    def handle_forgot_password(self, e):
-        base_url = os.getenv("ECAG_API_BASE_URL", "http://192.168.100.12:8000").rstrip("/")
-        self._page.snack_bar = ft.SnackBar(
-            ft.Text("Password reset is available on the web login page."),
-            bgcolor="#2f2a24",
-        )
-        self._page.snack_bar.open = True
-        self._page.launch_url(f"{base_url}/login/")
-        self._page.update()
+        self.signup_button = ft.Container   (
+                                                content=ft.Text("Sign Up", color="white"),
+                                                alignment=ft.Alignment.CENTER,
+                                                padding=20,
+                                                width=300,
+                                                bgcolor="#2e6ef7",
+                                                border_radius=10,
+                                                on_click=lambda e: self.on_navigate("/signup")
+                                            )
 
     # ---------- VIEW ----------
     def build_login_view(self):
@@ -120,7 +110,8 @@ class LoginFeature:
 
     # ---------- LOGIN ----------
     def login_user(self, e):
-        base_url = os.getenv("ECAG_API_BASE_URL", "http://192.168.100.12:8000").rstrip("/")
+        # base_url = os.getenv("ECAG_API_BASE_URL", "http://192.168.100.12:8000").rstrip("/")
+        base_url = os.getenv("ECAG_API_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
         url = f"{base_url}/api/auth/login/"
 
         data = {
@@ -145,10 +136,5 @@ class LoginFeature:
             self._error("Invalid credentials")
         except Exception as ex:
             self._error(f"Request failed: {str(ex)}")
-
-    def _error(self, msg: str):
-        self._page.snack_bar = ft.SnackBar(ft.Text(msg), bgcolor="red")
-        self._page.snack_bar.open = True
-        self._page.update()
 
     
