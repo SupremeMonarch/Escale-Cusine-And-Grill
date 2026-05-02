@@ -96,35 +96,6 @@ class RegistrationFeature:
     def setup(self):
         self.page.overlay.append(self.picker)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def submit_form(self, e):
         if self.password1.value != self.password2.value:
             self._error("Passwords do not match")
@@ -141,8 +112,8 @@ class RegistrationFeature:
             "dob": self.date_of_birth.value
         }
 
-        #\\\\\\\\\base_url = os.getenv("ECAG_API_BASE_URL", "http://192.168.100.12:8000").rstrip("/")
-        base_url = os.getenv("ECAG_API_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
+        base_url = os.getenv("ECAG_API_BASE_URL", "http://192.168.100.12:8000").rstrip("/")
+        
         try:
             payload = json.dumps(data).encode("utf-8")
             req = urllib.request.Request(

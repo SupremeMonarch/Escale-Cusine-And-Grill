@@ -13,20 +13,20 @@ class LoginFeature:
         # Simulating token storage
         self.token_storage = {}
 
-        # Layout settings for the base Column
+        
         self.horizontal_alignment = ft.CrossAxisAlignment.CENTER
         self.alignment = ft.MainAxisAlignment.CENTER
         self.expand = True
         self.spacing = 15
 
-        # ---------- Header ----------
+        
         self.header = ft.Text(
             "Sign In",
             size=28,
             weight=ft.FontWeight.BOLD
         )
 
-        # ---------- Username ----------
+        
         self.username_label = ft.Text("Username")
 
         self.username = ft.TextField(
@@ -34,7 +34,6 @@ class LoginFeature:
             width=300
         )
 
-        # ---------- Password ----------
         self.password_label = ft.Text("Password")
 
         self.password = ft.TextField(
@@ -44,7 +43,6 @@ class LoginFeature:
             width=300
         )
 
-        # ---------- Remember / Forgot ----------
         self.remember_me = ft.Checkbox(
             value=False,
             label="Remember Me"
@@ -63,7 +61,6 @@ class LoginFeature:
             ]
         )
 
-        # ---------- Buttons ----------
         self.login_button = ft.Container(
                                             content=ft.Text("Continue", color="white"),
                                             alignment=ft.Alignment.CENTER,
@@ -84,7 +81,6 @@ class LoginFeature:
                                                 on_click=lambda e: self.on_navigate("/signup")
                                             )
 
-    # ---------- VIEW ----------
     def build_login_view(self):
         return ft.Container(
             expand=True,
@@ -108,10 +104,10 @@ class LoginFeature:
             )
         )
 
-    # ---------- LOGIN ----------
+
     def login_user(self, e):
-        # base_url = os.getenv("ECAG_API_BASE_URL", "http://192.168.100.12:8000").rstrip("/")
-        base_url = os.getenv("ECAG_API_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
+        base_url = os.getenv("ECAG_API_BASE_URL", "http://192.168.100.12:8000").rstrip("/")
+
         url = f"{base_url}/api/auth/login/"
 
         data = {

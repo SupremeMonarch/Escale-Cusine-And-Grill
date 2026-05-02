@@ -56,8 +56,8 @@ def main(page: ft.Page):
         except Exception:
             pass
 
-        # return "http://192.168.100.12:8000"
-        return "http://127.0.0.1:8000"  #debug purposes, switch back to previous asap
+        return "http://192.168.100.12:8000"
+        
 
     api_base_url = _infer_api_base_url().rstrip("/")
 
@@ -231,28 +231,13 @@ def main(page: ft.Page):
 
             token = token_payload.get("token")
 
-
-
-
-
             if not token:
                 raise RuntimeError("Login failed: token not returned.")
 
-
-
-
             me_payload = await asyncio.to_thread(_api_json, "GET", "/api/auth/me/", None, token)
-
-
-
-
 
             auth_token = token
             auth_user = me_payload
-
-
-
-
 
             try:
                 page.client_storage.set("auth.token", auth_token)
@@ -260,17 +245,12 @@ def main(page: ft.Page):
             except Exception:                                               
                 pass                                                          
 
-
-
-
             close_login_overlay()
             login_password_field.value = ""
 
             await asyncio.sleep(0)
 
- 
             top_bar_host.content = build_top_bar()
-
 
             await route_for_account(auth_user)
 
