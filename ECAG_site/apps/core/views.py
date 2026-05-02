@@ -107,3 +107,7 @@ def about(request):
 
 def contact(request):
     return render(request, "core/contact.html")
+
+
+def mobile_api_playground(request):
+    return render(request, "core/mobile_api_playground.html")
