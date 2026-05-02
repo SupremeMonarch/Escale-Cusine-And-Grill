@@ -268,11 +268,9 @@ def format_res_time(time_str: str) -> str:
     return time_str
 
 def is_today(dt_str: str) -> bool:
-    if not dt_str:
-        return False
     try:
         dt = datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
-        return dt.astimezone().date() == date.today()
+        return dt.date() == date.today()
     except Exception:
         return False
 

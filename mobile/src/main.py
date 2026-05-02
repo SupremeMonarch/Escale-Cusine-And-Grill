@@ -44,7 +44,7 @@ def main(page: ft.Page):
     current_route = "/"
 
     def _infer_api_base_url() -> str:
-        explicit = (os.getenv("ECAG_API_BASE_URL", "http://127.0.0.1:8000/") or "").strip()
+        explicit = (os.getenv("ECAG_API_BASE_URL") or "").strip()
         if explicit:
             return explicit.rstrip("/")
 
@@ -57,8 +57,10 @@ def main(page: ft.Page):
             pass
 
         return "http://192.168.100.12:8000"
+        
 
     api_base_url = _infer_api_base_url().rstrip("/")
+
     auth_token: str | None = None
     auth_user: dict | None = None
     login_username_field = ft.TextField(label="Username", autofocus=True)
@@ -200,31 +202,23 @@ def main(page: ft.Page):
         login_status_text.value = ""
         page.update()
 
-    def open_signup_from_overlay(e=None) -> None:
-        close_login_overlay()
-        navigate("/signup")
-
-    def forgot_password_from_overlay(e=None) -> None:
-        # There is no dedicated mobile reset screen yet; direct users to web flow.
-        close_login_overlay()
-        page.snack_bar = ft.SnackBar(
-            content=ft.Text("Password reset is available on the web login page."),
-            open=True,
-            bgcolor="#2f2a24",
-        )
-        page.launch_url(f"{api_base_url}/login/", web_window_name="_blank")
-        page.update()
-
     async def submit_login(e=None):
         nonlocal auth_token, auth_user
+
+
         username = (login_username_field.value or "").strip()
         password = login_password_field.value or ""
+
+        
+        
         if not username or not password:
+
             login_status_text.value = "Enter username and password."
             page.update()
             return
 
         try:
+
             token_payload = await asyncio.to_thread(
                 _api_json,
                 "POST",
@@ -232,27 +226,39 @@ def main(page: ft.Page):
                 {"username": username, "password": password},
                 None,
             )
+
+
+
             token = token_payload.get("token")
+
             if not token:
                 raise RuntimeError("Login failed: token not returned.")
 
             me_payload = await asyncio.to_thread(_api_json, "GET", "/api/auth/me/", None, token)
+
             auth_token = token
             auth_user = me_payload
+
             try:
                 page.client_storage.set("auth.token", auth_token)
                 page.client_storage.set("auth.user", json.dumps(auth_user))
-            except Exception:
-                pass
+            except Exception:                                               
+                pass                                                          
 
             close_login_overlay()
             login_password_field.value = ""
+
             await asyncio.sleep(0)
+
             top_bar_host.content = build_top_bar()
+
             await route_for_account(auth_user)
+
             page.snack_bar = ft.SnackBar(content=ft.Text("Login successful."), open=True, bgcolor="#2f2a24")
             page.update()
+
         except Exception as exc:
+            print(f"[DEBUG ERROR] {exc}")
             login_status_text.value = str(exc)
             page.update()
 
@@ -272,17 +278,11 @@ def main(page: ft.Page):
                         ft.Text("Login", size=34, weight=ft.FontWeight.W_700, color="#2f2a24"),
                         login_username_field,
                         login_password_field,
-                        ft.Row(
-                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                            controls=[
-                                ft.TextButton("Forgot Password?", on_click=forgot_password_from_overlay),
-                                ft.TextButton("Sign Up", on_click=open_signup_from_overlay),
-                            ],
-                        ),
                         login_status_text,
                         ft.Row(
                             alignment=ft.MainAxisAlignment.END,
                             controls=[
+                                ft.TextButton("Register",on_click=lambda e: (close_login_overlay(),navigate("/signup"))),
                                 ft.TextButton("Cancel", on_click=close_login_overlay),
                                 ft.TextButton("Login", on_click=lambda e: page.run_task(submit_login, e)),
                             ],
@@ -543,16 +543,29 @@ def main(page: ft.Page):
                 tooltip="Account",
                 items=[
                     ft.PopupMenuItem("Dashboard", on_click=lambda e: page.run_task(open_dashboard, e)),
+                    
                     ft.PopupMenuItem("Logout", on_click=logout_account),
                 ],
             )
+        # else:
+        #     account_control = ft.IconButton(
+        #         icon=ft.Icons.PERSON,
+        #         icon_color=person_icon_color,
+        #         tooltip="Account",
+        #         on_click=open_account_dialog,
+        #     )
         else:
-            account_control = ft.IconButton(
-                icon=ft.Icons.PERSON,
-                icon_color=person_icon_color,
-                tooltip="Account",
-                on_click=open_account_dialog,
-            )
+            account_control = ft.PopupMenuButton(
+                                                    icon=ft.Icons.PERSON,
+                                                    icon_color=person_icon_color,
+                                                    tooltip="Account",
+                                                    items=  [
+                                                                ft.PopupMenuItem("Login", on_click=open_account_dialog),
+                                                                ft.PopupMenuItem("Register",on_click=lambda e: (close_login_overlay(),navigate("/signup"))),
+                                                            ],
+                                                            
+                                                )
+        
         return ft.Container(
             height=56,
             bgcolor="#f8f8f8",
@@ -629,27 +642,27 @@ def main(page: ft.Page):
         if route == "/review":
             page.floating_action_button = None
             content_host.content = review_feature.build_list_view()
-
+        
         elif route == "/review/write":
             page.floating_action_button = None
             content_host.content = review_feature.build_write_view()
-
+        
         elif route == "/reservation":
             page.floating_action_button = None
             content_host.content = reservation_feature.build_start_view()
-
+        
         elif route == "/reservation/tables":
             page.floating_action_button = None
             content_host.content = reservation_feature.build_table_view()
-
+        
         elif route == "/reservation/details":
             page.floating_action_button = None
             content_host.content = reservation_feature.build_details_view()
-
+        
         elif route == "/reservation/confirmed":
             page.floating_action_button = None
             content_host.content = reservation_feature.build_confirmation_view()
-
+        
         elif route == "/signup":
             page.floating_action_button = None
             content_host.content = registration_feature.build_signup_view()
